@@ -613,8 +613,8 @@ export default function Home(){
             ))}
           </div>
           <div style={{display:'flex',gap:10}}>
-            <Link href="/login" className="btn-outline" style={{padding:'9px 22px',fontSize:13}}>Login</Link>
-            <Link href="/register" className="btn-gold" style={{padding:'9px 22px',fontSize:13}}>🎲 Join Free</Link>
+            <Link href="/auth/login" className="btn-outline" style={{padding:'9px 22px',fontSize:13}}>Login</Link>
+            <Link href="/auth/register" className="btn-gold" style={{padding:'9px 22px',fontSize:13}}>🎲 Join Free</Link>
           </div>
         </div>
       </nav>
@@ -653,8 +653,8 @@ export default function Home(){
           </p>
 
           <div className="fade5 hero-btns" style={{display:'flex',gap:14,justifyContent:'center',flexWrap:'wrap',marginBottom:80}}>
-            <Link href="/register" className="btn-gold" style={{fontSize:16,padding:'17px 52px'}}>🎲 Start Playing — Free</Link>
-            <Link href="/login" className="btn-outline" style={{fontSize:16,padding:'16px 44px'}}>Login to Account</Link>
+            <Link href="/auth/register" className="btn-gold" style={{fontSize:16,padding:'17px 52px'}}>🎲 Start Playing — Free</Link>
+            <Link href="/auth/login" className="btn-outline" style={{fontSize:16,padding:'16px 44px'}}>Login to Account</Link>
           </div>
 
           {/* Stats bar */}
@@ -765,7 +765,7 @@ export default function Home(){
               From classic fish games to modern sweepstakes rooms, our platform is built for authentic immersive arcade entertainment — all managed from one powerful dashboard.
             </p>
             <div style={{display:'flex',gap:16}}>
-              <Link href="/register" className="btn-gold" style={{fontSize:14,padding:'13px 32px'}}>🎲 Get Started</Link>
+              <Link href="/auth/register" className="btn-gold" style={{fontSize:14,padding:'13px 32px'}}>🎲 Get Started</Link>
               <Link href="#games" className="btn-outline" style={{fontSize:14,padding:'12px 28px'}}>Browse Games</Link>
             </div>
           </div>
@@ -790,7 +790,7 @@ export default function Home(){
             To create the ultimate game room experience, we've packed in features that keep every session thrilling and seamless.
           </p>
           <div style={{display:'flex',gap:14,justifyContent:'center',flexWrap:'wrap'}}>
-            <Link href="/register" className="btn-gold" style={{fontSize:16,padding:'17px 52px'}}>🎲 Play Game Now</Link>
+            <Link href="/auth/register" className="btn-gold" style={{fontSize:16,padding:'17px 52px'}}>🎲 Play Game Now</Link>
             <Link href="#games" className="btn-outline" style={{fontSize:16,padding:'16px 44px'}}>Browse Games</Link>
           </div>
         </div>
@@ -844,7 +844,7 @@ export default function Home(){
           Start Your Journey by Creating<br/>Your Free Account Today!
         </h2>
         <p style={{color:'rgba(255,255,255,.4)',fontSize:16,maxWidth:480,margin:'0 auto 36px',lineHeight:1.8}}>Join thousands already winning. One click to register. Instant setup. Auto credits.</p>
-        <Link href="/register" className="btn-gold" style={{fontSize:17,padding:'18px 64px'}}>🎰 Play Game Now</Link>
+        <Link href="/auth/register" className="btn-gold" style={{fontSize:17,padding:'18px 64px'}}>🎰 Play Game Now</Link>
       </section>
 
       {/* ── FOOTER ── */}
