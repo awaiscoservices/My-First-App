@@ -13,9 +13,8 @@ export function middleware(request) {
   const { pathname } = request.nextUrl
 
   // Get token from cookies
-  const token = request.cookies.get('sb-yyxdajtdoblejwnuwzkn-auth-token')?.value
-
-  const isLoggedIn = !!token
+  // Supabase may split the session across cookies (…-auth-token.0, .1), so match by prefix
+  const isLoggedIn = request.cookies.getAll().some(c => /^sb-.+-auth-token/.test(c.name) && c.value)
   const isProtected = PROTECTED_ROUTES.some(r => pathname.startsWith(r))
   const isAdminRoute = ADMIN_ROUTES.some(r => pathname.startsWith(r))
   const isGuestOnly = GUEST_ROUTES.some(r => pathname.startsWith(r))
