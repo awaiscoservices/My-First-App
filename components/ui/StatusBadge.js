@@ -6,7 +6,7 @@
 const STATUS_CONFIG = {
   // Financial statuses
   pending:           { label: 'Pending',        bg: 'rgba(245,158,11,.15)',  color: '#f59e0b', dot: '#f59e0b' },
-  under_review:      { label: 'Under Review',   bg: 'rgba(99,102,241,.15)',  color: '#818cf8', dot: '#818cf8' },
+  under_review:      { label: 'Under Review',   bg: 'rgba(99,102,241,.15)',  color: '#94a3b8', dot: '#94a3b8' },
   processing:        { label: 'Processing',     bg: 'rgba(59,130,246,.15)',  color: '#60a5fa', dot: '#60a5fa' },
   approved:          { label: 'Approved',       bg: 'rgba(16,185,129,.15)', color: '#10b981', dot: '#10b981' },
   completed:         { label: 'Completed',      bg: 'rgba(16,185,129,.15)', color: '#10b981', dot: '#10b981' },
@@ -29,7 +29,7 @@ const STATUS_CONFIG = {
 
   // Support
   open:              { label: 'Open',           bg: 'rgba(59,130,246,.15)', color: '#60a5fa', dot: '#60a5fa' },
-  in_progress:       { label: 'In Progress',    bg: 'rgba(168,85,247,.15)', color: '#a855f7', dot: '#a855f7' },
+  in_progress:       { label: 'In Progress',    bg: 'rgba(251,191,36,.15)', color: '#fbbf24', dot: '#fbbf24' },
   waiting_player:    { label: 'Waiting You',    bg: 'rgba(245,158,11,.15)', color: '#f59e0b', dot: '#f59e0b' },
   resolved:          { label: 'Resolved',       bg: 'rgba(16,185,129,.15)', color: '#10b981', dot: '#10b981' },
   closed:            { label: 'Closed',         bg: 'rgba(107,114,128,.15)',color: '#9ca3af', dot: '#9ca3af' },

@@ -7,7 +7,7 @@ import StatusBadge from '../../components/ui/StatusBadge'
 
 function GameCard({ game, myAccount, onRequest, requesting }) {
   const [hov, setHov] = useState(false)
-  const color = game.accent_color || '#a855f7'
+  const color = game.accent_color || '#fbbf24'
 
   const btnLabel = () => {
     if (!myAccount) return requesting ? '⏳ Requesting…' : '+ Create Account'
@@ -174,7 +174,7 @@ export default function GamesPage() {
 
       {/* Toast */}
       {toast && (
-        <div style={{ position: 'fixed', top: 20, left: '50%', transform: 'translateX(-50%)', zIndex: 9999, background: toast.type === 'error' ? 'rgba(239,68,68,.95)' : toast.type === 'success' ? 'rgba(16,185,129,.95)' : 'rgba(168,85,247,.95)', borderRadius: 12, padding: '12px 24px', color: '#fff', fontSize: 14, fontWeight: 600, fontFamily: "'Outfit',sans-serif", whiteSpace: 'nowrap', boxShadow: '0 8px 32px rgba(0,0,0,.4)' }}>
+        <div style={{ position: 'fixed', top: 20, left: '50%', transform: 'translateX(-50%)', zIndex: 9999, background: toast.type === 'error' ? 'rgba(239,68,68,.95)' : toast.type === 'success' ? 'rgba(16,185,129,.95)' : 'rgba(251,191,36,.95)', borderRadius: 12, padding: '12px 24px', color: '#fff', fontSize: 14, fontWeight: 600, fontFamily: "'Outfit',sans-serif", whiteSpace: 'nowrap', boxShadow: '0 8px 32px rgba(0,0,0,.4)' }}>
           {toast.type === 'error' ? '⚠ ' : '✓ '}{toast.msg}
         </div>
       )}
@@ -188,10 +188,10 @@ export default function GamesPage() {
       {/* Stats bar */}
       <div style={{ display: 'flex', gap: 12, marginBottom: 24, flexWrap: 'wrap' }}>
         {[
-          { label: 'Total Games',   value: games.length,                         color: '#a855f7' },
+          { label: 'Total Games',   value: games.length,                         color: '#fbbf24' },
           { label: 'My Accounts',  value: Object.keys(myAccounts).length,        color: '#10b981' },
           { label: 'Active',       value: Object.values(myAccounts).filter(a => a.status === 'active').length, color: '#f59e0b' },
-          { label: 'Pending',      value: Object.values(myAccounts).filter(a => a.status === 'pending').length, color: '#818cf8' },
+          { label: 'Pending',      value: Object.values(myAccounts).filter(a => a.status === 'pending').length, color: '#94a3b8' },
         ].map(s => (
           <div key={s.label} style={{ padding: '12px 20px', borderRadius: 12, background: 'rgba(255,255,255,.03)', border: '1px solid rgba(255,255,255,.07)', display: 'flex', alignItems: 'center', gap: 10 }}>
             <span style={{ fontFamily: "'Cinzel Decorative',serif", fontSize: 22, fontWeight: 900, color: s.color }}>{s.value}</span>
@@ -203,7 +203,7 @@ export default function GamesPage() {
       {/* Filter tabs */}
       <div style={{ display: 'flex', gap: 4, background: 'rgba(255,255,255,.04)', padding: 4, borderRadius: 12, width: 'fit-content', marginBottom: 24 }}>
         {[['all','All Games'],['hot','🔥 Hot'],['mine','My Accounts']].map(([key, label]) => (
-          <button key={key} onClick={() => setFilter(key)} style={{ padding: '8px 20px', borderRadius: 9, border: 'none', cursor: 'pointer', fontFamily: "'Outfit',sans-serif", fontSize: 13, fontWeight: 700, background: filter === key ? 'linear-gradient(135deg,#7c3aed,#a855f7)' : 'transparent', color: filter === key ? '#fff' : 'rgba(255,255,255,.45)', transition: 'all .2s' }}>
+          <button key={key} onClick={() => setFilter(key)} style={{ padding: '8px 20px', borderRadius: 9, border: 'none', cursor: 'pointer', fontFamily: "'Outfit',sans-serif", fontSize: 13, fontWeight: 700, background: filter === key ? 'linear-gradient(135deg,#f59e0b,#fbbf24)' : 'transparent', color: filter === key ? '#fff' : 'rgba(255,255,255,.45)', transition: 'all .2s' }}>
             {label}
           </button>
         ))}
@@ -217,7 +217,7 @@ export default function GamesPage() {
             {filter === 'mine' ? 'No game accounts yet' : 'No games found'}
           </div>
           {filter === 'mine' && (
-            <button onClick={() => setFilter('all')} style={{ marginTop: 12, padding: '10px 24px', background: 'rgba(168,85,247,.15)', border: '1px solid rgba(168,85,247,.3)', borderRadius: 10, color: '#a855f7', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>
+            <button onClick={() => setFilter('all')} style={{ marginTop: 12, padding: '10px 24px', background: 'rgba(251,191,36,.15)', border: '1px solid rgba(251,191,36,.3)', borderRadius: 10, color: '#fbbf24', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>
               Browse Games
             </button>
           )}

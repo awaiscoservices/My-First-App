@@ -169,8 +169,8 @@ export default function Dashboard() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12 }}>
             <WalletCard label="Cash Balance"   cents={wallet.cash_balance_cents}      color="#10b981" icon="💵" sub="Available to play or withdraw" />
             <WalletCard label="Bonus Balance"  cents={wallet.bonus_balance_cents}      color="#f59e0b" icon="🎁" sub="Bonus credits from promotions" />
-            <WalletCard label="Reserved"       cents={wallet.reserved_cents}           color="#818cf8" icon="🔒" sub="Held for pending requests" />
-            <WalletCard label="Withdrawable"   cents={wallet.withdrawable_cents}       color="#a855f7" icon="💸" sub="Available to withdraw" />
+            <WalletCard label="Reserved"       cents={wallet.reserved_cents}           color="#94a3b8" icon="🔒" sub="Held for pending requests" />
+            <WalletCard label="Withdrawable"   cents={wallet.withdrawable_cents}       color="#fbbf24" icon="💸" sub="Available to withdraw" />
           </div>
         </div>
       )}
@@ -180,7 +180,7 @@ export default function Dashboard() {
         <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,.3)', marginBottom: 12 }}>Quick Actions</div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12 }}>
           <QuickAction href="/dashboard/deposit"      icon="➕" label="Add Money"    desc="Deposit funds to your wallet"      color="#10b981" />
-          <QuickAction href="/dashboard/games"        icon="🎮" label="Load Game"    desc="Send credits to a game room"       color="#a855f7" />
+          <QuickAction href="/dashboard/games"        icon="🎮" label="Load Game"    desc="Send credits to a game room"       color="#fbbf24" />
           <QuickAction href="/dashboard/redeem"       icon="🏆" label="Redeem"       desc="Request a redemption from game"    color="#f59e0b" />
           <QuickAction href="/dashboard/withdraw"     icon="💸" label="Withdraw"     desc="Withdraw funds to your account"    color="#3b82f6" />
         </div>
@@ -190,10 +190,10 @@ export default function Dashboard() {
       {totalPending > 0 && (
         <div style={{ marginBottom: 28 }}>
           <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,.3)', marginBottom: 12 }}>
-            Pending Requests <span style={{ background: '#a855f7', color: '#fff', fontSize: 9, padding: '2px 7px', borderRadius: 99, marginLeft: 6, fontWeight: 800 }}>{totalPending}</span>
+            Pending Requests <span style={{ background: '#fbbf24', color: '#000', fontSize: 9, padding: '2px 7px', borderRadius: 99, marginLeft: 6, fontWeight: 800 }}>{totalPending}</span>
           </div>
           <PendingCard label="Deposits"    count={pending.deposits}    href="/dashboard/deposit"      color="#10b981" />
-          <PendingCard label="Game Loads"  count={pending.loads}       href="/dashboard/game-accounts" color="#a855f7" />
+          <PendingCard label="Game Loads"  count={pending.loads}       href="/dashboard/game-accounts" color="#fbbf24" />
           <PendingCard label="Redemptions" count={pending.redeems}     href="/dashboard/redeem"       color="#f59e0b" />
           <PendingCard label="Withdrawals" count={pending.withdrawals} href="/dashboard/withdraw"     color="#3b82f6" />
         </div>
@@ -206,13 +206,13 @@ export default function Dashboard() {
         <div style={{ background: 'rgba(255,255,255,.02)', border: '1px solid rgba(255,255,255,.07)', borderRadius: 18, overflow: 'hidden' }}>
           <div style={{ padding: '18px 20px', borderBottom: '1px solid rgba(255,255,255,.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <span style={{ fontSize: 14, fontWeight: 700, color: '#fff' }}>Recent Transactions</span>
-            <Link href="/dashboard/transactions" style={{ fontSize: 12, color: '#a855f7', fontWeight: 600, textDecoration: 'none' }}>View All →</Link>
+            <Link href="/dashboard/transactions" style={{ fontSize: 12, color: '#fbbf24', fontWeight: 600, textDecoration: 'none' }}>View All →</Link>
           </div>
           {transactions.length === 0 ? (
             <div style={{ padding: '40px 20px', textAlign: 'center' }}>
               <div style={{ fontSize: 32, marginBottom: 10 }}>📋</div>
               <div style={{ color: 'rgba(255,255,255,.3)', fontSize: 13 }}>No transactions yet</div>
-              <Link href="/dashboard/deposit" style={{ display: 'inline-block', marginTop: 12, color: '#a855f7', fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>Make your first deposit →</Link>
+              <Link href="/dashboard/deposit" style={{ display: 'inline-block', marginTop: 12, color: '#fbbf24', fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>Make your first deposit →</Link>
             </div>
           ) : (
             <div>
@@ -258,7 +258,7 @@ export default function Dashboard() {
               <div style={{ height: 6, background: 'rgba(255,255,255,.08)', borderRadius: 3, overflow: 'hidden' }}>
                 <div style={{ height: '100%', background: level.badge_color, borderRadius: 3, width: `${Math.min(100, ((profile?.total_xp || 0) / level.xp_required) * 100)}%`, transition: 'width .5s' }} />
               </div>
-              <Link href="/dashboard/rewards" style={{ display: 'block', marginTop: 12, fontSize: 12, color: '#a855f7', fontWeight: 600, textDecoration: 'none' }}>View benefits →</Link>
+              <Link href="/dashboard/rewards" style={{ display: 'block', marginTop: 12, fontSize: 12, color: '#fbbf24', fontWeight: 600, textDecoration: 'none' }}>View benefits →</Link>
             </div>
           )}
 
@@ -266,18 +266,18 @@ export default function Dashboard() {
           <div style={{ background: 'rgba(255,255,255,.02)', border: '1px solid rgba(255,255,255,.07)', borderRadius: 18, padding: '18px 20px' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
               <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,.3)' }}>My Game Accounts</span>
-              <Link href="/dashboard/games" style={{ fontSize: 12, color: '#a855f7', fontWeight: 600, textDecoration: 'none' }}>+ Add Game</Link>
+              <Link href="/dashboard/games" style={{ fontSize: 12, color: '#fbbf24', fontWeight: 600, textDecoration: 'none' }}>+ Add Game</Link>
             </div>
             {gameAccounts.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '16px 0' }}>
                 <div style={{ fontSize: 24, marginBottom: 8 }}>🎮</div>
                 <div style={{ color: 'rgba(255,255,255,.3)', fontSize: 12, marginBottom: 10 }}>No game accounts yet</div>
-                <Link href="/dashboard/games" style={{ fontSize: 12, color: '#a855f7', fontWeight: 700, textDecoration: 'none' }}>Browse Games →</Link>
+                <Link href="/dashboard/games" style={{ fontSize: 12, color: '#fbbf24', fontWeight: 700, textDecoration: 'none' }}>Browse Games →</Link>
               </div>
             ) : (
               gameAccounts.slice(0, 4).map(ga => (
                 <div key={ga.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,.04)' }}>
-                  <div style={{ width: 32, height: 32, borderRadius: 8, background: `${ga.game_panels?.accent_color || '#a855f7'}22`, border: `1px solid ${ga.game_panels?.accent_color || '#a855f7'}44`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, flexShrink: 0 }}>🎮</div>
+                  <div style={{ width: 32, height: 32, borderRadius: 8, background: `${ga.game_panels?.accent_color || '#fbbf24'}22`, border: `1px solid ${ga.game_panels?.accent_color || '#fbbf24'}44`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, flexShrink: 0 }}>🎮</div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: 12, fontWeight: 700, color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{ga.game_panels?.name}</div>
                     <div style={{ fontSize: 10, color: 'rgba(255,255,255,.35)' }}>{ga.game_username || 'Pending setup'}</div>
@@ -295,7 +295,7 @@ export default function Dashboard() {
               <StatusBadge status={profile?.kyc_status || 'not_started'} size="xs" />
             </div>
             {profile?.kyc_status !== 'verified' && (
-              <Link href="/dashboard/kyc" style={{ display: 'block', marginTop: 10, fontSize: 12, color: '#a855f7', fontWeight: 600, textDecoration: 'none' }}>
+              <Link href="/dashboard/kyc" style={{ display: 'block', marginTop: 10, fontSize: 12, color: '#fbbf24', fontWeight: 600, textDecoration: 'none' }}>
                 {profile?.kyc_status === 'not_started' ? 'Start verification →' : 'Check status →'}
               </Link>
             )}

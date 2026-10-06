@@ -98,8 +98,8 @@ export default function WalletPage() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12, marginBottom: 12 }}>
             <BucketCard label="Cash"         cents={wallet.cash_balance_cents}    color="#10b981" icon="💵" desc="Available to load or withdraw" />
             <BucketCard label="Bonus"        cents={wallet.bonus_balance_cents}   color="#f59e0b" icon="🎁" desc="Bonus credits" />
-            <BucketCard label="Reserved"     cents={wallet.reserved_cents}        color="#818cf8" icon="🔒" desc="Held for pending requests" />
-            <BucketCard label="Withdrawable" cents={wallet.withdrawable_cents}    color="#a855f7" icon="💸" desc="Ready to withdraw" />
+            <BucketCard label="Reserved"     cents={wallet.reserved_cents}        color="#94a3b8" icon="🔒" desc="Held for pending requests" />
+            <BucketCard label="Withdrawable" cents={wallet.withdrawable_cents}    color="#fbbf24" icon="💸" desc="Ready to withdraw" />
           </div>
 
           {/* Lifetime stats */}
@@ -107,7 +107,7 @@ export default function WalletPage() {
             {[
               { label: 'Total Deposited',  cents: wallet.total_deposited_cents,  color: '#10b981' },
               { label: 'Total Bonus',      cents: wallet.total_bonus_cents,      color: '#f59e0b' },
-              { label: 'Total Loaded',     cents: wallet.total_loaded_cents,     color: '#a855f7' },
+              { label: 'Total Loaded',     cents: wallet.total_loaded_cents,     color: '#fbbf24' },
               { label: 'Total Redeemed',   cents: wallet.total_redeemed_cents,   color: '#3b82f6' },
               { label: 'Total Withdrawn',  cents: wallet.total_withdrawn_cents,  color: '#ec4899' },
             ].map(s => (
@@ -124,8 +124,8 @@ export default function WalletPage() {
       <div style={{ display: 'flex', gap: 10, marginBottom: 28, flexWrap: 'wrap' }}>
         {[
           { href: '/dashboard/deposit',  label: '➕ Add Money',  bg: 'linear-gradient(135deg,#10b981,#059669)', color: '#fff' },
-          { href: '/dashboard/games',    label: '🎮 Load Game',  bg: 'linear-gradient(135deg,#a855f7,#7c3aed)', color: '#fff' },
-          { href: '/dashboard/redeem',   label: '🏆 Redeem',     bg: 'linear-gradient(135deg,#f59e0b,#d97706)', color: '#04000d' },
+          { href: '/dashboard/games',    label: '🎮 Load Game',  bg: 'linear-gradient(135deg,#fbbf24,#f59e0b)', color: '#050505' },
+          { href: '/dashboard/redeem',   label: '🏆 Redeem',     bg: 'linear-gradient(135deg,#f59e0b,#d97706)', color: '#050505' },
           { href: '/dashboard/withdraw', label: '💸 Withdraw',   bg: 'linear-gradient(135deg,#3b82f6,#2563eb)', color: '#fff' },
         ].map(a => (
           <Link key={a.href} href={a.href} style={{ display: 'inline-flex', alignItems: 'center', padding: '10px 20px', borderRadius: 12, background: a.bg, color: a.color, fontSize: 13, fontWeight: 700, textDecoration: 'none', letterSpacing: '.02em' }}>
@@ -142,7 +142,7 @@ export default function WalletPage() {
           {/* Filter tabs */}
           <div style={{ display: 'flex', gap: 4, background: 'rgba(255,255,255,.05)', padding: 4, borderRadius: 10, flexWrap: 'wrap' }}>
             {TX_FILTERS.map(f => (
-              <button key={f.key} onClick={() => setFilter(f.key)} style={{ padding: '6px 14px', borderRadius: 8, border: 'none', cursor: 'pointer', fontFamily: "'Outfit',sans-serif", fontSize: 12, fontWeight: 700, background: filter === f.key ? 'rgba(168,85,247,.8)' : 'transparent', color: filter === f.key ? '#fff' : 'rgba(255,255,255,.4)', transition: 'all .15s' }}>
+              <button key={f.key} onClick={() => setFilter(f.key)} style={{ padding: '6px 14px', borderRadius: 8, border: 'none', cursor: 'pointer', fontFamily: "'Outfit',sans-serif", fontSize: 12, fontWeight: 700, background: filter === f.key ? 'rgba(251,191,36,.8)' : 'transparent', color: filter === f.key ? '#fff' : 'rgba(255,255,255,.4)', transition: 'all .15s' }}>
                 {f.label}
               </button>
             ))}
@@ -170,7 +170,7 @@ export default function WalletPage() {
                     {tx.description && <div style={{ fontSize: 11, color: 'rgba(255,255,255,.35)', marginTop: 2 }}>{tx.description}</div>}
                     <div style={{ fontSize: 11, color: 'rgba(255,255,255,.25)', marginTop: 2 }}>
                       {new Date(tx.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                      {tx.reference_id && <span style={{ marginLeft: 8, color: '#a855f7' }}>#{tx.reference_id}</span>}
+                      {tx.reference_id && <span style={{ marginLeft: 8, color: '#fbbf24' }}>#{tx.reference_id}</span>}
                     </div>
                   </div>
                 </div>
@@ -194,7 +194,7 @@ export default function WalletPage() {
             {/* Load more */}
             {hasMore && (
               <div style={{ padding: '16px', textAlign: 'center' }}>
-                <button onClick={() => loadTransactions(page + 1)} disabled={txLoading} style={{ padding: '10px 28px', background: 'rgba(168,85,247,.15)', border: '1px solid rgba(168,85,247,.3)', borderRadius: 10, color: '#a855f7', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>
+                <button onClick={() => loadTransactions(page + 1)} disabled={txLoading} style={{ padding: '10px 28px', background: 'rgba(251,191,36,.15)', border: '1px solid rgba(251,191,36,.3)', borderRadius: 10, color: '#fbbf24', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>
                   {txLoading ? 'Loading…' : 'Load More'}
                 </button>
               </div>

@@ -9,7 +9,7 @@ import StatusBadge from '../../components/ui/StatusBadge'
 function AccountCard({ account }) {
   const [showPassword, setShowPassword] = useState(false)
   const [hov, setHov] = useState(false)
-  const color = account.game_panels?.accent_color || '#a855f7'
+  const color = account.game_panels?.accent_color || '#fbbf24'
 
   function copyToClipboard(text, label) {
     navigator.clipboard.writeText(text).then(() => {
@@ -50,7 +50,7 @@ function AccountCard({ account }) {
                 <div style={{ fontSize: 15, fontWeight: 700, color: '#fff', fontFamily: 'monospace', letterSpacing: '.05em' }}>{account.game_username}</div>
               </div>
               <button onClick={() => copyToClipboard(account.game_username, 'Username')}
-                style={{ padding: '6px 12px', background: 'rgba(168,85,247,.15)', border: '1px solid rgba(168,85,247,.3)', borderRadius: 8, color: '#a855f7', fontSize: 11, fontWeight: 700, cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>
+                style={{ padding: '6px 12px', background: 'rgba(251,191,36,.15)', border: '1px solid rgba(251,191,36,.3)', borderRadius: 8, color: '#fbbf24', fontSize: 11, fontWeight: 700, cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>
                 📋 Copy
               </button>
             </div>
@@ -70,7 +70,7 @@ function AccountCard({ account }) {
                 </button>
                 {showPassword && (
                   <button onClick={() => copyToClipboard(account.game_password_display || '', 'Password')}
-                    style={{ padding: '6px 12px', background: 'rgba(168,85,247,.15)', border: '1px solid rgba(168,85,247,.3)', borderRadius: 8, color: '#a855f7', fontSize: 11, fontWeight: 700, cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>
+                    style={{ padding: '6px 12px', background: 'rgba(251,191,36,.15)', border: '1px solid rgba(251,191,36,.3)', borderRadius: 8, color: '#fbbf24', fontSize: 11, fontWeight: 700, cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>
                     📋 Copy
                   </button>
                 )}
@@ -100,7 +100,7 @@ function AccountCard({ account }) {
               ➕ Load Credits
             </Link>
           )}
-          <Link href="/dashboard/support" style={{ flex: account.status === 'active' ? 0 : 1, padding: '10px 14px', background: 'rgba(168,85,247,.1)', border: '1px solid rgba(168,85,247,.25)', borderRadius: 10, color: '#a855f7', fontSize: 12, fontWeight: 700, textDecoration: 'none', textAlign: 'center' }}>
+          <Link href="/dashboard/support" style={{ flex: account.status === 'active' ? 0 : 1, padding: '10px 14px', background: 'rgba(251,191,36,.1)', border: '1px solid rgba(251,191,36,.25)', borderRadius: 10, color: '#fbbf24', fontSize: 12, fontWeight: 700, textDecoration: 'none', textAlign: 'center' }}>
             💬 Support
           </Link>
         </div>
@@ -157,7 +157,7 @@ export default function GameAccountsPage() {
           <div style={{ fontSize: 56, marginBottom: 20 }}>🎮</div>
           <h2 style={{ fontFamily: "'Cinzel',serif", fontSize: 22, fontWeight: 700, color: '#fff', marginBottom: 12 }}>No Game Accounts Yet</h2>
           <p style={{ color: 'rgba(255,255,255,.4)', fontSize: 15, marginBottom: 28 }}>Request a game account to start playing. Our team will set it up for you.</p>
-          <Link href="/dashboard/games" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '14px 32px', background: 'linear-gradient(135deg,#a855f7,#7c3aed)', borderRadius: 14, color: '#fff', fontSize: 14, fontWeight: 800, textDecoration: 'none' }}>
+          <Link href="/dashboard/games" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '14px 32px', background: 'linear-gradient(135deg,#fbbf24,#f59e0b)', borderRadius: 14, color: '#050505', fontSize: 14, fontWeight: 800, textDecoration: 'none' }}>
             🎮 Browse Games
           </Link>
         </div>
@@ -166,7 +166,7 @@ export default function GameAccountsPage() {
           {/* Summary */}
           <div style={{ display: 'flex', gap: 12, marginBottom: 24, flexWrap: 'wrap' }}>
             {[
-              { label: 'Total',     value: accounts.length,                                         color: '#a855f7' },
+              { label: 'Total',     value: accounts.length,                                         color: '#fbbf24' },
               { label: 'Active',    value: accounts.filter(a => a.status === 'active').length,      color: '#10b981' },
               { label: 'Pending',   value: accounts.filter(a => a.status === 'pending').length,     color: '#f59e0b' },
               { label: 'Suspended', value: accounts.filter(a => a.status === 'suspended').length,   color: '#ef4444' },
@@ -184,7 +184,7 @@ export default function GameAccountsPage() {
           </div>
 
           <div style={{ textAlign: 'center' }}>
-            <Link href="/dashboard/games" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '12px 28px', background: 'rgba(168,85,247,.12)', border: '1px solid rgba(168,85,247,.3)', borderRadius: 12, color: '#a855f7', fontSize: 14, fontWeight: 700, textDecoration: 'none' }}>
+            <Link href="/dashboard/games" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '12px 28px', background: 'rgba(251,191,36,.12)', border: '1px solid rgba(251,191,36,.3)', borderRadius: 12, color: '#fbbf24', fontSize: 14, fontWeight: 700, textDecoration: 'none' }}>
               + Request Another Game Account
             </Link>
           </div>

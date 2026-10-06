@@ -17,10 +17,10 @@ function Steps({ current }) {
             <div style={{
               width: 32, height: 32, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: 13, fontWeight: 800,
-              background: i < current ? '#10b981' : i === current ? 'linear-gradient(135deg,#a855f7,#7c3aed)' : 'rgba(255,255,255,.08)',
+              background: i < current ? '#10b981' : i === current ? 'linear-gradient(135deg,#fbbf24,#f59e0b)' : 'rgba(255,255,255,.08)',
               color: i <= current ? '#fff' : 'rgba(255,255,255,.3)',
-              border: i === current ? '2px solid rgba(168,85,247,.5)' : '2px solid transparent',
-              boxShadow: i === current ? '0 0 16px rgba(168,85,247,.4)' : 'none',
+              border: i === current ? '2px solid rgba(251,191,36,.5)' : '2px solid transparent',
+              boxShadow: i === current ? '0 0 16px rgba(251,191,36,.4)' : 'none',
               flexShrink: 0,
             }}>{i < current ? '✓' : i + 1}</div>
             <span style={{ fontSize: 10, fontWeight: 700, color: i <= current ? '#fff' : 'rgba(255,255,255,.3)', letterSpacing: '.04em', whiteSpace: 'nowrap' }}>{s}</span>
@@ -40,12 +40,12 @@ function MethodCard({ method, selected, onSelect }) {
   return (
     <div onClick={() => onSelect(method)} style={{
       padding: '18px 20px', borderRadius: 16, cursor: 'pointer',
-      background: selected ? 'linear-gradient(135deg,rgba(168,85,247,.18),rgba(168,85,247,.06))' : 'rgba(255,255,255,.03)',
-      border: `1.5px solid ${selected ? '#a855f7' : 'rgba(255,255,255,.08)'}`,
+      background: selected ? 'linear-gradient(135deg,rgba(251,191,36,.18),rgba(251,191,36,.06))' : 'rgba(255,255,255,.03)',
+      border: `1.5px solid ${selected ? '#fbbf24' : 'rgba(255,255,255,.08)'}`,
       transition: 'all .2s',
-      boxShadow: selected ? '0 0 24px rgba(168,85,247,.2)' : 'none',
+      boxShadow: selected ? '0 0 24px rgba(251,191,36,.2)' : 'none',
     }}
-      onMouseEnter={e => { if (!selected) e.currentTarget.style.borderColor = 'rgba(168,85,247,.35)' }}
+      onMouseEnter={e => { if (!selected) e.currentTarget.style.borderColor = 'rgba(251,191,36,.35)' }}
       onMouseLeave={e => { if (!selected) e.currentTarget.style.borderColor = 'rgba(255,255,255,.08)' }}
     >
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
@@ -66,7 +66,7 @@ function MethodCard({ method, selected, onSelect }) {
         )}
       </div>
       {selected && method.account_details && (
-        <div style={{ marginTop: 12, padding: '12px 14px', background: 'rgba(168,85,247,.1)', borderRadius: 10, border: '1px solid rgba(168,85,247,.2)' }}>
+        <div style={{ marginTop: 12, padding: '12px 14px', background: 'rgba(251,191,36,.1)', borderRadius: 10, border: '1px solid rgba(251,191,36,.2)' }}>
           {Object.entries(method.account_details).map(([k, v]) => (
             <div key={k} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
               <span style={{ fontSize: 11, color: 'rgba(255,255,255,.45)', textTransform: 'capitalize', fontWeight: 600 }}>{k.replace(/_/g, ' ')}</span>
@@ -237,11 +237,11 @@ export default function DepositPage() {
         </div>
         <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
           <button onClick={() => { setResult(null); setStep(0); setSelectedMethod(null); setAmountInput(''); setScreenshot(null); setReference(''); }}
-            style={{ padding: '12px 28px', background: 'rgba(168,85,247,.15)', border: '1px solid rgba(168,85,247,.3)', borderRadius: 12, color: '#a855f7', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>
+            style={{ padding: '12px 28px', background: 'rgba(251,191,36,.15)', border: '1px solid rgba(251,191,36,.3)', borderRadius: 12, color: '#fbbf24', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>
             Make Another Deposit
           </button>
           <button onClick={() => router.push('/dashboard')}
-            style={{ padding: '12px 28px', background: 'linear-gradient(135deg,#f59e0b,#fbbf24)', border: 'none', borderRadius: 12, color: '#04000d', fontSize: 14, fontWeight: 800, cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>
+            style={{ padding: '12px 28px', background: 'linear-gradient(135deg,#f59e0b,#fbbf24)', border: 'none', borderRadius: 12, color: '#050505', fontSize: 14, fontWeight: 800, cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>
             Go to Dashboard
           </button>
         </div>
@@ -304,9 +304,9 @@ export default function DepositPage() {
                     placeholder="0.00"
                     value={amountInput}
                     onChange={e => setAmountInput(e.target.value)}
-                    style={{ width: '100%', padding: '16px 16px 16px 36px', background: 'rgba(255,255,255,.05)', border: '1.5px solid rgba(168,85,247,.3)', borderRadius: 12, color: '#fff', fontSize: 24, fontWeight: 700, fontFamily: "'Outfit',sans-serif", outline: 'none', boxSizing: 'border-box' }}
-                    onFocus={e => e.target.style.borderColor = '#a855f7'}
-                    onBlur={e => e.target.style.borderColor = 'rgba(168,85,247,.3)'}
+                    style={{ width: '100%', padding: '16px 16px 16px 36px', background: 'rgba(255,255,255,.05)', border: '1.5px solid rgba(251,191,36,.3)', borderRadius: 12, color: '#fff', fontSize: 24, fontWeight: 700, fontFamily: "'Outfit',sans-serif", outline: 'none', boxSizing: 'border-box' }}
+                    onFocus={e => e.target.style.borderColor = '#fbbf24'}
+                    onBlur={e => e.target.style.borderColor = 'rgba(251,191,36,.3)'}
                   />
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8 }}>
@@ -323,7 +323,7 @@ export default function DepositPage() {
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 24 }}>
                 {[10, 25, 50, 100, 200, 500].map(amt => (
                   <button key={amt} onClick={() => setAmountInput(amt.toString())}
-                    style={{ padding: '8px 16px', borderRadius: 10, border: `1px solid ${amountInput === amt.toString() ? '#a855f7' : 'rgba(255,255,255,.12)'}`, background: amountInput === amt.toString() ? 'rgba(168,85,247,.2)' : 'rgba(255,255,255,.04)', color: amountInput === amt.toString() ? '#a855f7' : 'rgba(255,255,255,.6)', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>
+                    style={{ padding: '8px 16px', borderRadius: 10, border: `1px solid ${amountInput === amt.toString() ? '#fbbf24' : 'rgba(255,255,255,.12)'}`, background: amountInput === amt.toString() ? 'rgba(251,191,36,.2)' : 'rgba(255,255,255,.04)', color: amountInput === amt.toString() ? '#fbbf24' : 'rgba(255,255,255,.6)', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>
                     ${amt}
                   </button>
                 ))}
@@ -365,9 +365,9 @@ export default function DepositPage() {
               {/* Screenshot upload */}
               <div style={{ marginBottom: 20 }}>
                 <input ref={fileRef} type="file" accept="image/*" onChange={handleFileChange} style={{ display: 'none' }} />
-                <div onClick={() => fileRef.current?.click()} style={{ border: `2px dashed ${screenshot ? '#10b981' : 'rgba(168,85,247,.35)'}`, borderRadius: 16, padding: '32px 20px', textAlign: 'center', cursor: 'pointer', background: screenshot ? 'rgba(16,185,129,.06)' : 'rgba(255,255,255,.02)', transition: 'all .2s' }}
-                  onMouseEnter={e => { if (!screenshot) e.currentTarget.style.borderColor = '#a855f7' }}
-                  onMouseLeave={e => { if (!screenshot) e.currentTarget.style.borderColor = 'rgba(168,85,247,.35)' }}
+                <div onClick={() => fileRef.current?.click()} style={{ border: `2px dashed ${screenshot ? '#10b981' : 'rgba(251,191,36,.35)'}`, borderRadius: 16, padding: '32px 20px', textAlign: 'center', cursor: 'pointer', background: screenshot ? 'rgba(16,185,129,.06)' : 'rgba(255,255,255,.02)', transition: 'all .2s' }}
+                  onMouseEnter={e => { if (!screenshot) e.currentTarget.style.borderColor = '#fbbf24' }}
+                  onMouseLeave={e => { if (!screenshot) e.currentTarget.style.borderColor = 'rgba(251,191,36,.35)' }}
                 >
                   {screenshot ? (
                     <div>
@@ -397,7 +397,7 @@ export default function DepositPage() {
                 <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,.5)', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 8 }}>Transaction Reference / Confirmation #</label>
                 <input type="text" placeholder="e.g. CashApp: #ABC123" value={reference} onChange={e => setReference(e.target.value)}
                   style={{ width: '100%', padding: '13px 16px', background: 'rgba(255,255,255,.05)', border: '1.5px solid rgba(255,255,255,.1)', borderRadius: 12, color: '#fff', fontSize: 14, fontFamily: "'Outfit',sans-serif", outline: 'none', boxSizing: 'border-box' }}
-                  onFocus={e => e.target.style.borderColor = '#a855f7'}
+                  onFocus={e => e.target.style.borderColor = '#fbbf24'}
                   onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,.1)'}
                 />
               </div>
@@ -407,7 +407,7 @@ export default function DepositPage() {
                 <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,.5)', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 8 }}>Notes (Optional)</label>
                 <textarea placeholder="Any additional information for our team…" value={notes} onChange={e => setNotes(e.target.value)} rows={3}
                   style={{ width: '100%', padding: '13px 16px', background: 'rgba(255,255,255,.05)', border: '1.5px solid rgba(255,255,255,.1)', borderRadius: 12, color: '#fff', fontSize: 14, fontFamily: "'Outfit',sans-serif", outline: 'none', resize: 'vertical', boxSizing: 'border-box' }}
-                  onFocus={e => e.target.style.borderColor = '#a855f7'}
+                  onFocus={e => e.target.style.borderColor = '#fbbf24'}
                   onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,.1)'}
                 />
               </div>
@@ -463,12 +463,12 @@ export default function DepositPage() {
 
             {step < 3 ? (
               <button onClick={handleNext}
-                style={{ padding: '12px 32px', background: 'linear-gradient(135deg,#a855f7,#7c3aed)', border: 'none', borderRadius: 12, color: '#fff', fontSize: 14, fontWeight: 800, cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>
+                style={{ padding: '12px 32px', background: 'linear-gradient(135deg,#fbbf24,#f59e0b)', border: 'none', borderRadius: 12, color: '#050505', fontSize: 14, fontWeight: 800, cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>
                 Continue →
               </button>
             ) : (
               <button onClick={handleSubmit} disabled={submitting || uploading}
-                style={{ padding: '12px 32px', background: submitting ? 'rgba(245,158,11,.4)' : 'linear-gradient(135deg,#f59e0b,#fbbf24)', border: 'none', borderRadius: 12, color: '#04000d', fontSize: 14, fontWeight: 800, cursor: submitting ? 'not-allowed' : 'pointer', fontFamily: "'Outfit',sans-serif", display: 'flex', alignItems: 'center', gap: 8 }}>
+                style={{ padding: '12px 32px', background: submitting ? 'rgba(245,158,11,.4)' : 'linear-gradient(135deg,#f59e0b,#fbbf24)', border: 'none', borderRadius: 12, color: '#050505', fontSize: 14, fontWeight: 800, cursor: submitting ? 'not-allowed' : 'pointer', fontFamily: "'Outfit',sans-serif", display: 'flex', alignItems: 'center', gap: 8 }}>
                 {uploading ? '⬆ Uploading…' : submitting ? '⏳ Submitting…' : '✓ Submit Deposit'}
               </button>
             )}

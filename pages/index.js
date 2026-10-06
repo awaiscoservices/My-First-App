@@ -33,9 +33,9 @@ const GAMES = [
     name: 'Milky Way',
     hot: false, bonus: 10,
     bg: 'linear-gradient(135deg,#0a001f,#1a0050)',
-    accent: '#c084fc',
+    accent: '#fcd34d',
     logo: `<svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
-      <defs><linearGradient id="mw1" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#e879f9"/><stop offset="50%" stop-color="#c084fc"/><stop offset="100%" stop-color="#818cf8"/></linearGradient></defs>
+      <defs><linearGradient id="mw1" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#e879f9"/><stop offset="50%" stop-color="#fcd34d"/><stop offset="100%" stop-color="#94a3b8"/></linearGradient></defs>
       <ellipse cx="100" cy="42" rx="80" ry="18" fill="url(#mw1)" opacity="0.15"/>
       <text x="100" y="36" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="19" font-weight="900" fill="url(#mw1)">MILKY</text>
       <text x="100" y="62" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="19" font-weight="900" fill="#ffffff">WAYS</text>
@@ -346,7 +346,7 @@ const GAMES = [
 ]
 
 const STEPS = [
-  { num:'01', icon:'👤', title:'Register Free',  sub:'Create Account', desc:'60-second signup. Your personal wallet and game account created automatically.', color:'#a855f7' },
+  { num:'01', icon:'👤', title:'Register Free',  sub:'Create Account', desc:'60-second signup. Your personal wallet and game account created automatically.', color:'#fbbf24' },
   { num:'02', icon:'💳', title:'Deposit Funds',  sub:'Upload & Approve', desc:'Pick any payment method, upload screenshot. Approved lightning fast.', color:'#f59e0b' },
   { num:'03', icon:'🎮', title:'Credits Go Live', sub:'Enjoy the Game', desc:'Credits appear in your chosen game room automatically. Zero waiting.', color:'#10b981' },
 ]
@@ -417,7 +417,7 @@ function LiveBar(){
   const[wi,setWi]=useState(0)
   useEffect(()=>{const t=setInterval(()=>setWi(p=>(p+1)%wins.length),3000);return()=>clearInterval(t)},[])
   return(
-    <div style={{background:'rgba(0,0,0,.75)',borderBottom:'1px solid rgba(168,85,247,.2)',padding:'9px 0',overflow:'hidden',position:'relative',zIndex:101}}>
+    <div style={{background:'rgba(0,0,0,.75)',borderBottom:'1px solid rgba(251,191,36,.2)',padding:'9px 0',overflow:'hidden',position:'relative',zIndex:101}}>
       <div style={{display:'flex',alignItems:'center',gap:40,animation:'marquee 30s linear infinite',whiteSpace:'nowrap',width:'max-content'}}>
         {[...Array(3)].map((_,rep)=>(
           <span key={rep} style={{display:'inline-flex',alignItems:'center',gap:32}}>
@@ -425,7 +425,7 @@ function LiveBar(){
             <span style={{color:'rgba(255,255,255,.2)',fontSize:12}}>✦</span>
             <span style={{color:'#fbbf24',fontSize:12,fontWeight:800}}>🏆 LATEST WIN: {wins[wi]}</span>
             <span style={{color:'rgba(255,255,255,.2)',fontSize:12}}>✦</span>
-            <span style={{color:'#a855f7',fontSize:12,fontWeight:800}}>💎 150% SIGNUP BONUS — LIMITED OFFER</span>
+            <span style={{color:'#fbbf24',fontSize:12,fontWeight:800}}>💎 150% SIGNUP BONUS — LIMITED OFFER</span>
             <span style={{color:'rgba(255,255,255,.2)',fontSize:12}}>✦</span>
             <span style={{color:'#ec4899',fontSize:12,fontWeight:800}}>⚡ AUTO CREDITS IN ALL 28 GAME ROOMS</span>
             <span style={{color:'rgba(255,255,255,.2)',fontSize:12}}>✦</span>
@@ -476,18 +476,18 @@ function TestiCard({t}){
   const[hov,setHov]=useState(false)
   return(
     <div onMouseEnter={()=>setHov(true)} onMouseLeave={()=>setHov(false)} style={{
-      background:'rgba(255,255,255,.03)',border:`1px solid rgba(168,85,247,${hov?.5:.15})`,
+      background:'rgba(255,255,255,.03)',border:`1px solid rgba(251,191,36,${hov?.5:.15})`,
       borderRadius:20,padding:'28px 24px',backdropFilter:'blur(10px)',
       transition:'all .3s',transform:hov?'translateY(-4px)':'none',
-      boxShadow:hov?'0 16px 48px rgba(168,85,247,.15)':'none',
+      boxShadow:hov?'0 16px 48px rgba(251,191,36,.15)':'none',
     }}>
       <div style={{color:'#f59e0b',fontSize:14,marginBottom:12}}>{'★'.repeat(t.stars)}</div>
       <p style={{color:'rgba(255,255,255,.6)',fontSize:14,lineHeight:1.8,marginBottom:20,fontStyle:'italic'}}>"{t.text}"</p>
       <div style={{display:'flex',alignItems:'center',gap:12}}>
-        <div style={{width:40,height:40,borderRadius:'50%',background:'linear-gradient(135deg,#7c3aed,#a855f7)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:16,fontWeight:900,color:'#fff'}}>{t.name[0]}</div>
+        <div style={{width:40,height:40,borderRadius:'50%',background:'linear-gradient(135deg,#f59e0b,#fbbf24)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:16,fontWeight:900,color:'#fff'}}>{t.name[0]}</div>
         <div>
           <div style={{fontWeight:700,fontSize:14,color:'#fff'}}>{t.name}</div>
-          <div style={{fontSize:11,color:'#a855f7',fontWeight:600,letterSpacing:'.06em',textTransform:'uppercase'}}>{t.tag}</div>
+          <div style={{fontSize:11,color:'#fbbf24',fontWeight:600,letterSpacing:'.06em',textTransform:'uppercase'}}>{t.tag}</div>
         </div>
       </div>
     </div>
@@ -500,7 +500,7 @@ function FaqItem({q,a}){
     <div style={{borderBottom:'1px solid rgba(255,255,255,.07)'}}>
       <button onClick={()=>setOpen(p=>!p)} style={{width:'100%',display:'flex',justifyContent:'space-between',alignItems:'center',padding:'20px 0',background:'none',border:'none',cursor:'pointer',color:'#fff',textAlign:'left'}}>
         <span style={{fontSize:15,fontWeight:600}}>{q}</span>
-        <span style={{color:'#a855f7',fontSize:22,fontWeight:300,transform:open?'rotate(45deg)':'none',transition:'transform .2s',flexShrink:0,marginLeft:16}}>+</span>
+        <span style={{color:'#fbbf24',fontSize:22,fontWeight:300,transform:open?'rotate(45deg)':'none',transition:'transform .2s',flexShrink:0,marginLeft:16}}>+</span>
       </button>
       {open&&<div style={{color:'rgba(255,255,255,.5)',fontSize:14,lineHeight:1.8,paddingBottom:20}}>{a}</div>}
     </div>
@@ -534,17 +534,17 @@ export default function Home(){
         <style>{`
           *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
           html{scroll-behavior:smooth}
-          body{background:#04000d;color:#fff;font-family:'Outfit',sans-serif;overflow-x:hidden}
+          body{background:#050505;color:#fff;font-family:'Outfit',sans-serif;overflow-x:hidden}
           ::-webkit-scrollbar{width:4px}
-          ::-webkit-scrollbar-track{background:#04000d}
-          ::-webkit-scrollbar-thumb{background:linear-gradient(#7c3aed,#f59e0b);border-radius:2px}
+          ::-webkit-scrollbar-track{background:#050505}
+          ::-webkit-scrollbar-thumb{background:linear-gradient(#f59e0b,#f59e0b);border-radius:2px}
           #cz-cur{position:fixed;width:10px;height:10px;background:#f59e0b;border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);mix-blend-mode:screen}
-          #cz-ring{position:fixed;width:32px;height:32px;border:1.5px solid rgba(168,85,247,.55);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%)}
+          #cz-ring{position:fixed;width:32px;height:32px;border:1.5px solid rgba(251,191,36,.55);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%)}
           @keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-33.333%)}}
           @keyframes floatUp{0%{transform:translateY(110vh) rotate(0deg);opacity:0}5%{opacity:1}95%{opacity:1}100%{transform:translateY(-15vh) rotate(540deg);opacity:0}}
           @keyframes shimmer{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
-          @keyframes glow{0%,100%{box-shadow:0 0 20px rgba(168,85,247,.35),0 0 60px rgba(168,85,247,.1)}50%{box-shadow:0 0 40px rgba(168,85,247,.65),0 0 100px rgba(168,85,247,.25)}}
-          @keyframes logoNeon{0%,100%{text-shadow:0 0 8px #a855f7,0 0 24px #7c3aed}50%{text-shadow:0 0 18px #c084fc,0 0 50px #a855f7,0 0 80px #9333ea}}
+          @keyframes glow{0%,100%{box-shadow:0 0 20px rgba(251,191,36,.35),0 0 60px rgba(251,191,36,.1)}50%{box-shadow:0 0 40px rgba(251,191,36,.65),0 0 100px rgba(251,191,36,.25)}}
+          @keyframes logoNeon{0%,100%{text-shadow:0 0 8px #fbbf24,0 0 24px #f59e0b}50%{text-shadow:0 0 18px #fcd34d,0 0 50px #fbbf24,0 0 80px #d97706}}
           @keyframes fadeUp{from{opacity:0;transform:translateY(36px)}to{opacity:1;transform:translateY(0)}}
           @keyframes pulseDot{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.5);opacity:.5}}
           @keyframes heroFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
@@ -554,12 +554,12 @@ export default function Home(){
           .fade3{animation:fadeUp .8s .4s both}
           .fade4{animation:fadeUp .8s .55s both}
           .fade5{animation:fadeUp .8s .7s both}
-          .btn-gold{display:inline-flex;align-items:center;gap:8px;padding:15px 40px;background:linear-gradient(135deg,#f59e0b,#fbbf24,#fcd34d);color:#04000d;font-family:'Outfit',sans-serif;font-size:15px;font-weight:800;border-radius:14px;text-decoration:none;letter-spacing:.04em;border:none;cursor:pointer;transition:transform .2s,box-shadow .2s;box-shadow:0 0 28px rgba(245,158,11,.4),0 4px 16px rgba(0,0,0,.4);position:relative;overflow:hidden}
+          .btn-gold{display:inline-flex;align-items:center;gap:8px;padding:15px 40px;background:linear-gradient(135deg,#f59e0b,#fbbf24,#fcd34d);color:#050505;font-family:'Outfit',sans-serif;font-size:15px;font-weight:800;border-radius:14px;text-decoration:none;letter-spacing:.04em;border:none;cursor:pointer;transition:transform .2s,box-shadow .2s;box-shadow:0 0 28px rgba(245,158,11,.4),0 4px 16px rgba(0,0,0,.4);position:relative;overflow:hidden}
           .btn-gold::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent);transform:translateX(-100%);transition:transform .45s}
           .btn-gold:hover::after{transform:translateX(100%)}
           .btn-gold:hover{transform:translateY(-3px) scale(1.02);box-shadow:0 0 50px rgba(245,158,11,.6),0 8px 28px rgba(0,0,0,.5)}
-          .btn-outline{display:inline-flex;align-items:center;gap:8px;padding:14px 36px;background:rgba(255,255,255,.04);border:1.5px solid rgba(168,85,247,.45);color:#fff;font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;border-radius:14px;text-decoration:none;letter-spacing:.04em;cursor:pointer;transition:all .2s;backdrop-filter:blur(12px)}
-          .btn-outline:hover{background:rgba(168,85,247,.18);border-color:rgba(168,85,247,.85);transform:translateY(-3px);box-shadow:0 0 28px rgba(168,85,247,.3)}
+          .btn-outline{display:inline-flex;align-items:center;gap:8px;padding:14px 36px;background:rgba(255,255,255,.04);border:1.5px solid rgba(251,191,36,.45);color:#fff;font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;border-radius:14px;text-decoration:none;letter-spacing:.04em;cursor:pointer;transition:all .2s;backdrop-filter:blur(12px)}
+          .btn-outline:hover{background:rgba(251,191,36,.18);border-color:rgba(251,191,36,.85);transform:translateY(-3px);box-shadow:0 0 28px rgba(251,191,36,.3)}
           .section-tag{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;padding:5px 16px;border-radius:99px;margin-bottom:16px}
           .game-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:16px}
           @media(max-width:768px){
@@ -587,7 +587,7 @@ export default function Home(){
 
       {/* Parallax BG orbs */}
       <div style={{position:'fixed',inset:0,pointerEvents:'none',zIndex:0}}>
-        <div style={{position:'absolute',top:`calc(15% + ${py*1.4}px)`,left:`calc(10% + ${px*1.4}px)`,width:600,height:600,borderRadius:'50%',background:'radial-gradient(circle,rgba(124,58,237,.16) 0%,transparent 70%)',filter:'blur(50px)',transition:'top .15s,left .15s'}}/>
+        <div style={{position:'absolute',top:`calc(15% + ${py*1.4}px)`,left:`calc(10% + ${px*1.4}px)`,width:600,height:600,borderRadius:'50%',background:'radial-gradient(circle,rgba(245,158,11,.16) 0%,transparent 70%)',filter:'blur(50px)',transition:'top .15s,left .15s'}}/>
         <div style={{position:'absolute',top:`calc(55% + ${py*-.9}px)`,right:`calc(8% + ${px*-.9}px)`,width:450,height:450,borderRadius:'50%',background:'radial-gradient(circle,rgba(245,158,11,.09) 0%,transparent 70%)',filter:'blur(60px)',transition:'top .15s,right .15s'}}/>
         <div style={{position:'absolute',bottom:'20%',left:'40%',width:350,height:350,borderRadius:'50%',background:'radial-gradient(circle,rgba(236,72,153,.07) 0%,transparent 70%)',filter:'blur(55px)'}}/>
       </div>
@@ -596,9 +596,9 @@ export default function Home(){
       <LiveBar/>
 
       {/* ── NAV ── */}
-      <nav style={{position:'fixed',top:36,left:0,right:0,zIndex:100,display:'flex',alignItems:'center',justifyContent:'space-between',padding:'14px 48px',background:scrollY>40?'rgba(4,0,13,.92)':'transparent',backdropFilter:scrollY>40?'blur(24px)':'none',borderBottom:scrollY>40?'1px solid rgba(168,85,247,.18)':'none',transition:'all .4s'}}>
+      <nav style={{position:'fixed',top:36,left:0,right:0,zIndex:100,display:'flex',alignItems:'center',justifyContent:'space-between',padding:'14px 48px',background:scrollY>40?'rgba(4,0,13,.92)':'transparent',backdropFilter:scrollY>40?'blur(24px)':'none',borderBottom:scrollY>40?'1px solid rgba(251,191,36,.18)':'none',transition:'all .4s'}}>
         <div style={{display:'flex',alignItems:'center',gap:12}}>
-          <div style={{width:46,height:46,borderRadius:14,background:'linear-gradient(135deg,#7c3aed,#f59e0b)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:22,animation:'glow 3s infinite',boxShadow:'0 0 20px rgba(168,85,247,.4)'}}>🎰</div>
+          <div style={{width:46,height:46,borderRadius:14,background:'linear-gradient(135deg,#f59e0b,#f59e0b)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:22,animation:'glow 3s infinite',boxShadow:'0 0 20px rgba(251,191,36,.4)'}}>🎰</div>
           <div>
             <div style={{fontFamily:"'Cinzel Decorative',serif",fontSize:17,fontWeight:900,letterSpacing:'.04em',animation:'logoNeon 4s infinite'}}>
               CASINOZE <span style={{color:'#f59e0b'}}>ROOM</span>
@@ -629,7 +629,7 @@ export default function Home(){
             style={{width:'100%',height:'100%',objectFit:'cover',objectPosition:'center top',opacity:.18,filter:'saturate(1.4) hue-rotate(210deg)'}}
             onError={e=>e.target.style.display='none'}
           />
-          <div style={{position:'absolute',inset:0,background:'linear-gradient(to bottom,rgba(4,0,13,.4) 0%,rgba(4,0,13,.3) 40%,rgba(4,0,13,.9) 80%,#04000d 100%)'}}/>
+          <div style={{position:'absolute',inset:0,background:'linear-gradient(to bottom,rgba(4,0,13,.4) 0%,rgba(4,0,13,.3) 40%,rgba(4,0,13,.9) 80%,#050505 100%)'}}/>
           {/* Teal/purple scanline glow like highrollers */}
           <div style={{position:'absolute',bottom:0,left:0,right:0,height:180,background:'linear-gradient(to top,rgba(0,200,200,.08),transparent)'}}/>
         </div>
@@ -644,7 +644,7 @@ export default function Home(){
           <h1 className="fade2" style={{fontFamily:"'Cinzel Decorative',serif",fontSize:'clamp(34px,7vw,90px)',fontWeight:900,lineHeight:1.05,marginBottom:12,letterSpacing:'-.01em'}}>
             Play Smart.
           </h1>
-          <h1 className="fade3" style={{fontFamily:"'Cinzel Decorative',serif",fontSize:'clamp(34px,7vw,90px)',fontWeight:900,lineHeight:1.05,marginBottom:32,background:'linear-gradient(90deg,#a855f7,#ec4899,#f59e0b,#a855f7)',backgroundSize:'300% auto',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',animation:'shimmer 4s linear infinite'}}>
+          <h1 className="fade3" style={{fontFamily:"'Cinzel Decorative',serif",fontSize:'clamp(34px,7vw,90px)',fontWeight:900,lineHeight:1.05,marginBottom:32,background:'linear-gradient(90deg,#fbbf24,#ec4899,#f59e0b,#fbbf24)',backgroundSize:'300% auto',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',animation:'shimmer 4s linear infinite'}}>
             Win Bigger.
           </h1>
 
@@ -665,7 +665,7 @@ export default function Home(){
       </section>
 
       {/* ── DIVIDER ── */}
-      <div style={{height:1,background:'linear-gradient(90deg,transparent,rgba(0,200,200,.5),rgba(168,85,247,.4),transparent)',margin:'0 8%'}}/>
+      <div style={{height:1,background:'linear-gradient(90deg,transparent,rgba(0,200,200,.5),rgba(251,191,36,.4),transparent)',margin:'0 8%'}}/>
 
       {/* ── TRENDING GAMES STRIP ── */}
       <div style={{padding:'28px 0',overflow:'hidden',background:'rgba(0,0,0,.3)',borderTop:'1px solid rgba(255,255,255,.04)',borderBottom:'1px solid rgba(255,255,255,.04)',position:'relative',zIndex:2}}>
@@ -691,7 +691,7 @@ export default function Home(){
             <p style={{color:'rgba(255,255,255,.4)',fontSize:16,marginBottom:32,fontWeight:400}}>One wallet. Every game. Credits delivered automatically after deposit approval.</p>
             <div style={{display:'inline-flex',gap:0,background:'rgba(255,255,255,.05)',border:'1px solid rgba(255,255,255,.1)',borderRadius:12,padding:4}}>
               {[['all','All Games'],['hot','🔥 Hot Games']].map(([key,label])=>(
-                <button key={key} onClick={()=>setGameFilter(key)} style={{padding:'9px 28px',borderRadius:9,border:'none',cursor:'pointer',fontFamily:"'Outfit',sans-serif",fontSize:13,fontWeight:700,background:gameFilter===key?'linear-gradient(135deg,#7c3aed,#a855f7)':'transparent',color:gameFilter===key?'#fff':'rgba(255,255,255,.5)',transition:'all .2s'}}>{label}</button>
+                <button key={key} onClick={()=>setGameFilter(key)} style={{padding:'9px 28px',borderRadius:9,border:'none',cursor:'pointer',fontFamily:"'Outfit',sans-serif",fontSize:13,fontWeight:700,background:gameFilter===key?'linear-gradient(135deg,#f59e0b,#fbbf24)':'transparent',color:gameFilter===key?'#fff':'rgba(255,255,255,.5)',transition:'all .2s'}}>{label}</button>
               ))}
             </div>
           </div>
@@ -702,18 +702,18 @@ export default function Home(){
       </section>
 
       {/* ── DIVIDER ── */}
-      <div style={{height:1,background:'linear-gradient(90deg,transparent,rgba(245,158,11,.3),rgba(168,85,247,.5),transparent)',margin:'0 8%'}}/>
+      <div style={{height:1,background:'linear-gradient(90deg,transparent,rgba(245,158,11,.3),rgba(251,191,36,.5),transparent)',margin:'0 8%'}}/>
 
       {/* ── HOW IT WORKS ── */}
-      <section id="how" style={{padding:'100px 24px',position:'relative',zIndex:2,background:'radial-gradient(ellipse 70% 50% at 50% 50%,rgba(124,58,237,.07) 0%,transparent 70%)'}}>
+      <section id="how" style={{padding:'100px 24px',position:'relative',zIndex:2,background:'radial-gradient(ellipse 70% 50% at 50% 50%,rgba(245,158,11,.07) 0%,transparent 70%)'}}>
         <div style={{maxWidth:1100,margin:'0 auto'}}>
           <div style={{textAlign:'center',marginBottom:64}}>
-            <div className="section-tag" style={{background:'rgba(168,85,247,.12)',color:'#a855f7',border:'1px solid rgba(168,85,247,.3)'}}>How It Works</div>
+            <div className="section-tag" style={{background:'rgba(251,191,36,.12)',color:'#fbbf24',border:'1px solid rgba(251,191,36,.3)'}}>How It Works</div>
             <h2 style={{fontFamily:"'Cinzel',serif",fontSize:'clamp(24px,4.5vw,52px)',fontWeight:700,marginBottom:14}}>Create Your Free Account &<br/>Start Your Adventure!</h2>
             <p style={{color:'rgba(255,255,255,.4)',fontSize:16}}>Three simple steps. That's all it takes to start playing.</p>
           </div>
           <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:24,position:'relative'}}>
-            <div style={{position:'absolute',top:56,left:'16%',right:'16%',height:1,background:'linear-gradient(90deg,rgba(168,85,247,.5),rgba(245,158,11,.5),rgba(16,185,129,.5))',zIndex:0}}/>
+            <div style={{position:'absolute',top:56,left:'16%',right:'16%',height:1,background:'linear-gradient(90deg,rgba(251,191,36,.5),rgba(245,158,11,.5),rgba(16,185,129,.5))',zIndex:0}}/>
             {STEPS.map((s,i)=>(
               <div key={i} style={{position:'relative',zIndex:1,background:'rgba(255,255,255,.03)',border:`1px solid ${s.color}33`,borderRadius:24,padding:'44px 28px 32px',textAlign:'center',transition:'all .3s'}}
                 onMouseEnter={e=>{e.currentTarget.style.borderColor=s.color+'99';e.currentTarget.style.transform='translateY(-8px)';e.currentTarget.style.boxShadow=`0 24px 60px rgba(0,0,0,.4),0 0 40px ${s.color}22`}}
@@ -731,10 +731,10 @@ export default function Home(){
       </section>
 
       {/* ── ABOUT SECTION with real image ── */}
-      <section style={{position:'relative',zIndex:2,overflow:'hidden',background:'linear-gradient(135deg,rgba(124,58,237,.1),rgba(245,158,11,.04))',borderTop:'1px solid rgba(168,85,247,.12)',borderBottom:'1px solid rgba(168,85,247,.12)'}}>
+      <section style={{position:'relative',zIndex:2,overflow:'hidden',background:'linear-gradient(135deg,rgba(245,158,11,.1),rgba(245,158,11,.04))',borderTop:'1px solid rgba(251,191,36,.12)',borderBottom:'1px solid rgba(251,191,36,.12)'}}>
         <div className="about-grid" style={{maxWidth:1100,margin:'0 auto',padding:'90px 24px',display:'grid',gridTemplateColumns:'1fr 1fr',gap:60,alignItems:'center'}}>
           {/* Left: image */}
-          <div style={{position:'relative',borderRadius:24,overflow:'hidden',boxShadow:'0 32px 80px rgba(0,0,0,.7)',border:'1px solid rgba(168,85,247,.25)'}}>
+          <div style={{position:'relative',borderRadius:24,overflow:'hidden',boxShadow:'0 32px 80px rgba(0,0,0,.7)',border:'1px solid rgba(251,191,36,.25)'}}>
             <img
               src="https://cdn.pixabay.com/photo/2023/07/25/10/09/wizard-8149654_1280.jpg"
               alt="Elite Gaming"
@@ -744,22 +744,22 @@ export default function Home(){
             <div style={{position:'absolute',inset:0,background:'linear-gradient(to bottom,transparent 40%,rgba(4,0,13,.8) 100%)'}}/>
             {/* Stats overlay */}
             <div style={{position:'absolute',bottom:24,left:24,right:24,display:'flex',gap:24}}>
-              <div style={{background:'rgba(0,0,0,.7)',backdropFilter:'blur(12px)',border:'1px solid rgba(168,85,247,.3)',borderRadius:14,padding:'14px 20px',flex:1,textAlign:'center'}}>
+              <div style={{background:'rgba(0,0,0,.7)',backdropFilter:'blur(12px)',border:'1px solid rgba(251,191,36,.3)',borderRadius:14,padding:'14px 20px',flex:1,textAlign:'center'}}>
                 <div style={{fontFamily:"'Cinzel Decorative',serif",fontSize:28,fontWeight:900,color:'#f59e0b',lineHeight:1}}>10k+</div>
                 <div style={{fontSize:10,color:'rgba(255,255,255,.45)',fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',marginTop:4}}>Daily Players</div>
               </div>
-              <div style={{background:'rgba(0,0,0,.7)',backdropFilter:'blur(12px)',border:'1px solid rgba(168,85,247,.3)',borderRadius:14,padding:'14px 20px',flex:1,textAlign:'center'}}>
-                <div style={{fontFamily:"'Cinzel Decorative',serif",fontSize:28,fontWeight:900,color:'#a855f7',lineHeight:1}}>28+</div>
+              <div style={{background:'rgba(0,0,0,.7)',backdropFilter:'blur(12px)',border:'1px solid rgba(251,191,36,.3)',borderRadius:14,padding:'14px 20px',flex:1,textAlign:'center'}}>
+                <div style={{fontFamily:"'Cinzel Decorative',serif",fontSize:28,fontWeight:900,color:'#fbbf24',lineHeight:1}}>28+</div>
                 <div style={{fontSize:10,color:'rgba(255,255,255,.45)',fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',marginTop:4}}>Game Rooms</div>
               </div>
             </div>
           </div>
           {/* Right: text */}
           <div>
-            <div className="section-tag" style={{background:'rgba(168,85,247,.1)',color:'#a855f7',border:'1px solid rgba(168,85,247,.3)'}}>About Casinoze Room</div>
+            <div className="section-tag" style={{background:'rgba(251,191,36,.1)',color:'#fbbf24',border:'1px solid rgba(251,191,36,.3)'}}>About Casinoze Room</div>
             <h2 style={{fontFamily:"'Cinzel',serif",fontSize:'clamp(22px,3.5vw,42px)',fontWeight:700,marginBottom:20,lineHeight:1.3}}>Forging Legends in<br/>the Gaming Universe</h2>
             <p style={{color:'rgba(255,255,255,.5)',fontSize:15,lineHeight:1.9,marginBottom:16}}>
-              <strong style={{color:'#a855f7'}}>Casinoze Room</strong> brings you the thrill of competitive fish gaming in a safe, automated, and rewarding online experience. Instant credit delivery, 28+ game rooms, one unified wallet.
+              <strong style={{color:'#fbbf24'}}>Casinoze Room</strong> brings you the thrill of competitive fish gaming in a safe, automated, and rewarding online experience. Instant credit delivery, 28+ game rooms, one unified wallet.
             </p>
             <p style={{color:'rgba(255,255,255,.4)',fontSize:14,lineHeight:1.9,marginBottom:28}}>
               From classic fish games to modern sweepstakes rooms, our platform is built for authentic immersive arcade entertainment — all managed from one powerful dashboard.
@@ -821,15 +821,15 @@ export default function Home(){
               <p style={{color:'rgba(255,255,255,.4)',fontSize:14,lineHeight:1.8,marginBottom:28}}>Have questions or need support? Our team is here anytime. Just send us a message.</p>
               <div style={{display:'flex',flexDirection:'column',gap:12}}>
                 {[['First Name','text'],['Last Name','text'],['Email','email'],['Phone','tel']].map(([label,type])=>(
-                  <input key={label} type={type} placeholder={label} style={{background:'rgba(255,255,255,.05)',border:'1px solid rgba(255,255,255,.12)',borderRadius:12,padding:'13px 18px',color:'#fff',fontFamily:"'Outfit',sans-serif",fontSize:14,outline:'none',transition:'border-color .2s'}} onFocus={e=>e.target.style.borderColor='rgba(168,85,247,.6)'} onBlur={e=>e.target.style.borderColor='rgba(255,255,255,.12)'}/>
+                  <input key={label} type={type} placeholder={label} style={{background:'rgba(255,255,255,.05)',border:'1px solid rgba(255,255,255,.12)',borderRadius:12,padding:'13px 18px',color:'#fff',fontFamily:"'Outfit',sans-serif",fontSize:14,outline:'none',transition:'border-color .2s'}} onFocus={e=>e.target.style.borderColor='rgba(251,191,36,.6)'} onBlur={e=>e.target.style.borderColor='rgba(255,255,255,.12)'}/>
                 ))}
-                <textarea placeholder="Your message..." rows={4} style={{background:'rgba(255,255,255,.05)',border:'1px solid rgba(255,255,255,.12)',borderRadius:12,padding:'13px 18px',color:'#fff',fontFamily:"'Outfit',sans-serif",fontSize:14,outline:'none',resize:'vertical',transition:'border-color .2s'}} onFocus={e=>e.target.style.borderColor='rgba(168,85,247,.6)'} onBlur={e=>e.target.style.borderColor='rgba(255,255,255,.12)'}/>
+                <textarea placeholder="Your message..." rows={4} style={{background:'rgba(255,255,255,.05)',border:'1px solid rgba(255,255,255,.12)',borderRadius:12,padding:'13px 18px',color:'#fff',fontFamily:"'Outfit',sans-serif",fontSize:14,outline:'none',resize:'vertical',transition:'border-color .2s'}} onFocus={e=>e.target.style.borderColor='rgba(251,191,36,.6)'} onBlur={e=>e.target.style.borderColor='rgba(255,255,255,.12)'}/>
                 <button className="btn-gold" style={{width:'100%',justifyContent:'center',padding:'14px',fontSize:15}}>Send Message</button>
               </div>
             </div>
             {/* FAQ */}
             <div>
-              <div className="section-tag" style={{background:'rgba(168,85,247,.1)',color:'#a855f7',border:'1px solid rgba(168,85,247,.3)'}}>FAQ</div>
+              <div className="section-tag" style={{background:'rgba(251,191,36,.1)',color:'#fbbf24',border:'1px solid rgba(251,191,36,.3)'}}>FAQ</div>
               <h2 style={{fontFamily:"'Cinzel',serif",fontSize:'clamp(22px,3vw,38px)',fontWeight:700,marginBottom:12}}>Frequently Asked Questions</h2>
               <p style={{color:'rgba(255,255,255,.4)',fontSize:14,lineHeight:1.8,marginBottom:28}}>Everything you need to know about Casinoze Room.</p>
               {FAQS.map((f,i)=><FaqItem key={i} q={f.q} a={f.a}/>)}
@@ -839,7 +839,7 @@ export default function Home(){
       </section>
 
       {/* ── FINAL CTA ── */}
-      <section style={{padding:'80px 24px',textAlign:'center',position:'relative',zIndex:2,background:'linear-gradient(180deg,transparent,rgba(124,58,237,.08),transparent)'}}>
+      <section style={{padding:'80px 24px',textAlign:'center',position:'relative',zIndex:2,background:'linear-gradient(180deg,transparent,rgba(245,158,11,.08),transparent)'}}>
         <h2 style={{fontFamily:"'Cinzel',serif",fontSize:'clamp(22px,4vw,46px)',fontWeight:700,marginBottom:16}}>
           Start Your Journey by Creating<br/>Your Free Account Today!
         </h2>
@@ -861,7 +861,7 @@ export default function Home(){
             <div style={{display:'flex',gap:60}}>
               <div>
                 <div style={{fontSize:11,fontWeight:800,letterSpacing:'.12em',color:'rgba(255,255,255,.3)',textTransform:'uppercase',marginBottom:16}}>Platform</div>
-                {['Games','How It Works','Register','Login'].map(l=>(<div key={l} style={{marginBottom:10}}><a href="#" style={{color:'rgba(255,255,255,.4)',fontSize:14,textDecoration:'none',fontWeight:500,transition:'color .2s'}} onMouseEnter={e=>e.target.style.color='#a855f7'} onMouseLeave={e=>e.target.style.color='rgba(255,255,255,.4)'}>{l}</a></div>))}
+                {['Games','How It Works','Register','Login'].map(l=>(<div key={l} style={{marginBottom:10}}><a href="#" style={{color:'rgba(255,255,255,.4)',fontSize:14,textDecoration:'none',fontWeight:500,transition:'color .2s'}} onMouseEnter={e=>e.target.style.color='#fbbf24'} onMouseLeave={e=>e.target.style.color='rgba(255,255,255,.4)'}>{l}</a></div>))}
               </div>
               <div>
                 <div style={{fontSize:11,fontWeight:800,letterSpacing:'.12em',color:'rgba(255,255,255,.3)',textTransform:'uppercase',marginBottom:16}}>Legal</div>
