@@ -417,7 +417,7 @@ function LiveBar(){
   const[wi,setWi]=useState(0)
   useEffect(()=>{const t=setInterval(()=>setWi(p=>(p+1)%wins.length),3000);return()=>clearInterval(t)},[])
   return(
-    <div style={{background:'rgba(0,0,0,.75)',borderBottom:'1px solid rgba(251,191,36,.2)',padding:'9px 0',overflow:'hidden',position:'relative',zIndex:101}}>
+    <div style={{background:'rgba(5,5,5,.97)',borderBottom:'1px solid rgba(251,191,36,.2)',height:36,display:'flex',alignItems:'center',overflow:'hidden',position:'fixed',top:0,left:0,right:0,zIndex:101}}>
       <div style={{display:'flex',alignItems:'center',gap:40,animation:'marquee 30s linear infinite',whiteSpace:'nowrap',width:'max-content'}}>
         {[...Array(3)].map((_,rep)=>(
           <span key={rep} style={{display:'inline-flex',alignItems:'center',gap:32}}>
@@ -596,7 +596,7 @@ export default function Home(){
       <LiveBar/>
 
       {/* ── NAV ── */}
-      <nav style={{position:'fixed',top:36,left:0,right:0,zIndex:100,display:'flex',alignItems:'center',justifyContent:'space-between',padding:'14px 48px',background:scrollY>40?'rgba(4,0,13,.92)':'transparent',backdropFilter:scrollY>40?'blur(24px)':'none',borderBottom:scrollY>40?'1px solid rgba(251,191,36,.18)':'none',transition:'all .4s'}}>
+      <nav style={{position:'fixed',top:36,left:0,right:0,zIndex:100,display:'flex',alignItems:'center',justifyContent:'space-between',padding:'14px 48px',background:scrollY>40?'rgba(5,5,5,.94)':'transparent',backdropFilter:scrollY>40?'blur(24px)':'none',borderBottom:scrollY>40?'1px solid rgba(251,191,36,.18)':'none',transition:'all .4s'}}>
         <div style={{display:'flex',alignItems:'center',gap:12}}>
           <div style={{width:46,height:46,borderRadius:14,background:'linear-gradient(135deg,#f59e0b,#f59e0b)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:22,animation:'glow 3s infinite',boxShadow:'0 0 20px rgba(251,191,36,.4)'}}>🎰</div>
           <div>
