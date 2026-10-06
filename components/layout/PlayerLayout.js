@@ -165,7 +165,7 @@ export default function PlayerLayout({ children }) {
             <Icon name="menu" size={24} />
           </button>
           <Link href="/dashboard" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span className="logo-full"><Logo variant="full" height={40} /></span><span className="logo-icon"><Logo variant="icon" height={40} /></span>
+            <span className="logo-full"><Logo variant="full" height={54} /></span><span className="logo-icon"><Logo variant="icon" height={50} /></span>
           </Link>
         </div>
 
