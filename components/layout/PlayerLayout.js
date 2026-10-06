@@ -135,7 +135,7 @@ export default function PlayerLayout({ children }) {
   async function handleSignOut() {
     setSigningOut(true)
     await supabase.auth.signOut()
-    router.push('/auth/login')
+    window.location.href = '/'   // full reload to the home page so no old session state lingers
   }
 
   const isActive = (href) =>
