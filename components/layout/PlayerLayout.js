@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { supabase } from '../../lib/supabase'
 import { centsToDisplay } from '../ui/MoneyDisplay'
+import Logo from '../ui/Logo'
 
 // Edit this text to change the strip under the top bar. Set to '' to hide it.
 const PROMO_TEXT = 'Welcome to Casinoze Room — add money, load a game and play.'
@@ -164,11 +165,7 @@ export default function PlayerLayout({ children }) {
             <Icon name="menu" size={24} />
           </button>
           <Link href="/dashboard" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ width: 36, height: 36, borderRadius: 10, background: 'linear-gradient(135deg,#fbbf24,#b45309)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, boxShadow: '0 0 16px rgba(251,191,36,.35)' }}>🎰</div>
-            <div className="brand-text" style={{ lineHeight: 1.1 }}>
-              <div style={{ fontFamily: "'Cinzel', serif", fontSize: 15, fontWeight: 700, letterSpacing: '.06em', color: '#fff' }}>CASINOZE</div>
-              <div style={{ fontFamily: "'Cinzel', serif", fontSize: 11, fontWeight: 700, letterSpacing: '.3em', color: GOLD }}>ROOM</div>
-            </div>
+            <span className="logo-full"><Logo variant="full" height={40} /></span><span className="logo-icon"><Logo variant="icon" height={40} /></span>
           </Link>
         </div>
 
@@ -259,9 +256,11 @@ export default function PlayerLayout({ children }) {
         .player-sidebar::-webkit-scrollbar { display: none; }
         .wins-track { animation: winsScroll 40s linear infinite; padding-left: 20px; }
         @keyframes winsScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+        .logo-icon { display: none; }
         .bal-chip:hover { border-color: rgba(251,191,36,.6) !important; }
         @media (max-width: 900px) {
-          .brand-text { display: none; }
+          .logo-full { display: none; }
+          .logo-icon { display: inline-flex !important; }
           .deposit-btn { padding: 9px 12px !important; }
         }
         @media (max-width: 768px) {

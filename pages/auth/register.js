@@ -3,6 +3,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { signUpWithEmail, signInWithGoogle } from '../../lib/auth';
+import Logo from '../../components/ui/Logo'
 
 const PARTICLES = ['♠', '♥', '♦', '♣'];
 
@@ -145,8 +146,7 @@ export default function Register() {
 
         {/* Logo */}
         <div style={{ animation: 'fadeSlideUp 0.6s ease both', marginBottom: 32, textAlign: 'center' }}>
-          <div style={{ fontSize: 44, lineHeight: 1, marginBottom: 10, filter: 'drop-shadow(0 0 18px rgba(245,158,11,0.6))' }}>🎰</div>
-          <h1 style={{ fontFamily: 'Cinzel Decorative, serif', fontSize: 'clamp(18px, 4vw, 26px)', fontWeight: 700, background: 'linear-gradient(135deg, #f59e0b 0%, #fbbf24 40%, #f59e0b 60%, #fbbf24 100%)', backgroundSize: '200% auto', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', animation: 'shimmer 3s linear infinite', letterSpacing: 3, textTransform: 'uppercase' }}>Casinoze Room</h1>
+          <Logo variant="full" height={84} />
           <div style={{ marginTop: 6, fontSize: 11, letterSpacing: 4, color: 'rgba(251,191,36,0.7)', textTransform: 'uppercase', fontWeight: 500 }}>Premium Fish Game Platform</div>
         </div>
 

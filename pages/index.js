@@ -1,6 +1,7 @@
 import Head from 'next/head'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
+import Logo from '../components/ui/Logo'
 
 // ─── GAME DATA with real brand colors & SVG logos ──────────────────────────
 const GAMES = [
@@ -598,13 +599,7 @@ export default function Home(){
       {/* ── NAV ── */}
       <nav style={{position:'fixed',top:36,left:0,right:0,zIndex:100,display:'flex',alignItems:'center',justifyContent:'space-between',padding:'14px 48px',background:scrollY>40?'rgba(5,5,5,.94)':'transparent',backdropFilter:scrollY>40?'blur(24px)':'none',borderBottom:scrollY>40?'1px solid rgba(251,191,36,.18)':'none',transition:'all .4s'}}>
         <div style={{display:'flex',alignItems:'center',gap:12}}>
-          <div style={{width:46,height:46,borderRadius:14,background:'linear-gradient(135deg,#f59e0b,#f59e0b)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:22,animation:'glow 3s infinite',boxShadow:'0 0 20px rgba(251,191,36,.4)'}}>🎰</div>
-          <div>
-            <div style={{fontFamily:"'Cinzel Decorative',serif",fontSize:17,fontWeight:900,letterSpacing:'.04em',animation:'logoNeon 4s infinite'}}>
-              CASINOZE <span style={{color:'#f59e0b'}}>ROOM</span>
-            </div>
-            <div style={{fontSize:9,letterSpacing:'.16em',color:'rgba(255,255,255,.3)',fontWeight:700,textTransform:'uppercase'}}>Premium Game Platform</div>
-          </div>
+          <Logo variant="full" height={48} />
         </div>
         <div className="nav-links" style={{display:'flex',alignItems:'center',gap:32}}>
           <div style={{display:'flex',gap:28}}>
@@ -853,8 +848,7 @@ export default function Home(){
           <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',flexWrap:'wrap',gap:32,marginBottom:32}}>
             <div>
               <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:12}}>
-                <span style={{fontSize:22}}>🎰</span>
-                <span style={{fontFamily:"'Cinzel Decorative',serif",fontSize:15,fontWeight:900,letterSpacing:'.04em'}}>CASINOZE <span style={{color:'#f59e0b'}}>ROOM</span></span>
+                <Logo variant="full" height={36} />
               </div>
               <p style={{color:'rgba(255,255,255,.25)',fontSize:13,maxWidth:260,lineHeight:1.7}}>The #1 game room management platform. One wallet, 28 game rooms, instant credits.</p>
             </div>
