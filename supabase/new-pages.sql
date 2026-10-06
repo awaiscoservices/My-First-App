@@ -7,6 +7,10 @@
 alter table profiles add column if not exists phone text;
 alter table profiles add column if not exists referral_code text;
 alter table profiles add column if not exists kyc_status text default 'not_started';
+alter table profiles add column if not exists referred_by uuid references profiles(id);
+
+alter table game_loads add column if not exists game_account_id uuid;
+alter table game_loads add column if not exists amount_cents bigint;
 
 alter table redemptions add column if not exists game_account_id uuid;
 alter table redemptions add column if not exists amount_cents bigint;
@@ -76,14 +80,15 @@ create trigger trg_kyc_pending after insert on kyc_records
 -- 5) Players must not be able to edit protected profile fields --
 --    (otherwise anyone could set kyc_status = 'verified' themselves)
 create or replace function protect_profile_columns() returns trigger
-language plpgsql security definer set search_path = public as $$
+language plpgsql as $$
 begin
-  if auth.role() = 'authenticated' then
+  if current_user = 'authenticated' then   -- direct edits from the browser only
     new.kyc_status      := old.kyc_status;
     new.status          := old.status;
     new.player_level_id := old.player_level_id;
     new.total_xp        := old.total_xp;
     new.referral_code   := old.referral_code;
+    new.referred_by     := old.referred_by;
   end if;
   return new;
 end $$;
@@ -118,13 +123,14 @@ begin
   if v_kyc is distinct from 'verified' then raise exception 'Identity verification required'; end if;
 
   select * into v_w from wallets where user_id = v_uid for update;   -- lock the wallet row
-  if not found or v_w.withdrawable_cents < p_amount_cents then
+  if not found or v_w.withdrawable_cents < p_amount_cents or v_w.cash_balance_cents < p_amount_cents then
     raise exception 'Amount exceeds your withdrawable balance';
   end if;
 
   -- hold the funds until an admin approves or rejects the request
   update wallets
-     set withdrawable_cents = withdrawable_cents - p_amount_cents,
+     set cash_balance_cents = cash_balance_cents - p_amount_cents,
+         withdrawable_cents = withdrawable_cents - p_amount_cents,
          reserved_cents     = reserved_cents + p_amount_cents
    where user_id = v_uid;
 
@@ -134,8 +140,57 @@ begin
   return v_id;
 end $$;
 
+create or replace function request_game_load(p_game_account_id uuid, p_amount_cents bigint)
+returns uuid language plpgsql security definer set search_path = public as $$
+declare v_uid uuid := auth.uid(); v_min bigint; v_w wallets%rowtype; v_id uuid;
+begin
+  if v_uid is null then raise exception 'Not signed in'; end if;
+  if p_amount_cents is null or p_amount_cents <= 0 then raise exception 'Invalid amount'; end if;
+
+  select coalesce(gp.min_load_cents, 0) into v_min
+    from game_accounts ga join game_panels gp on gp.id = ga.game_panel_id
+   where ga.id = p_game_account_id and ga.user_id = v_uid and ga.status = 'active';
+  if not found then raise exception 'Game account not found or not active'; end if;
+  if p_amount_cents < v_min then
+    raise exception 'Minimum load for this game is $%', to_char(v_min / 100.0, 'FM999990.00');
+  end if;
+
+  select * into v_w from wallets where user_id = v_uid for update;
+  if not found or v_w.cash_balance_cents < p_amount_cents then
+    raise exception 'Not enough cash balance. Add money first.';
+  end if;
+
+  -- hold the cash until the load is processed
+  update wallets
+     set cash_balance_cents = cash_balance_cents - p_amount_cents,
+         withdrawable_cents = least(withdrawable_cents, cash_balance_cents - p_amount_cents),
+         reserved_cents     = reserved_cents + p_amount_cents
+   where user_id = v_uid;
+
+  insert into game_loads (user_id, game_account_id, amount_cents, status)
+  values (v_uid, p_game_account_id, p_amount_cents, 'pending')
+  returning id into v_id;
+  return v_id;
+end $$;
+
+-- Links a new player to whoever owns the referral code they signed up with
+create or replace function apply_referral(p_code text)
+returns boolean language plpgsql security definer set search_path = public as $$
+declare v_uid uuid := auth.uid(); v_ref uuid;
+begin
+  if v_uid is null or p_code is null or length(trim(p_code)) = 0 then return false; end if;
+  select id into v_ref from profiles where upper(referral_code) = upper(trim(p_code)) and id <> v_uid;
+  if v_ref is null then return false; end if;
+  update profiles set referred_by = v_ref where id = v_uid and referred_by is null;
+  return found;
+end $$;
+
 revoke all on function request_redemption(uuid, bigint, text) from public;
 revoke all on function request_withdrawal(bigint, text, text)  from public;
+revoke all on function request_game_load(uuid, bigint) from public;
+revoke all on function apply_referral(text) from public;
+grant execute on function request_game_load(uuid, bigint) to authenticated;
+grant execute on function apply_referral(text) to authenticated;
 grant execute on function request_redemption(uuid, bigint, text) to authenticated;
 grant execute on function request_withdrawal(bigint, text, text)  to authenticated;
 

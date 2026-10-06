@@ -73,6 +73,8 @@ export default function Dashboard() {
   const [pending, setPending] = useState({ deposits: 0, loads: 0, redeems: 0, withdrawals: 0 })
   const [level, setLevel] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [panels, setPanels] = useState([])
+  useEffect(() => { supabase.from('game_panels').select('id,name,logo_url,accent_color,default_bonus_pct').eq('is_active', true).order('sort_order').then(({ data }) => setPanels(data || [])) }, [])
 
   useEffect(() => { loadDashboard() }, [])
 
@@ -180,11 +182,35 @@ export default function Dashboard() {
         <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,.3)', marginBottom: 12 }}>Quick Actions</div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12 }}>
           <QuickAction href="/dashboard/deposit"      icon="➕" label="Add Money"    desc="Deposit funds to your wallet"      color="#10b981" />
-          <QuickAction href="/dashboard/games"        icon="🎮" label="Load Game"    desc="Send credits to a game room"       color="#fbbf24" />
+          <QuickAction href="/dashboard/load-game"    icon="🎮" label="Load Game"    desc="Send credits to a game room"       color="#fbbf24" />
           <QuickAction href="/dashboard/redeem"       icon="🏆" label="Redeem"       desc="Request a redemption from game"    color="#f59e0b" />
           <QuickAction href="/dashboard/withdraw"     icon="💸" label="Withdraw"     desc="Withdraw funds to your account"    color="#3b82f6" />
         </div>
       </div>
+
+      {/* ── GAMES STRIP ── */}
+      {panels.length > 0 && (
+        <div style={{ marginBottom: 28 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,.3)' }}>Our Games</span>
+            <Link href="/dashboard/games" style={{ fontSize: 12, color: '#fbbf24', fontWeight: 600, textDecoration: 'none' }}>View all →</Link>
+          </div>
+          <div style={{ display: 'flex', gap: 12, overflowX: 'auto', paddingBottom: 8, scrollbarWidth: 'thin' }}>
+            {panels.map(g => {
+              const c = g.accent_color || '#fbbf24'
+              return (
+                <Link key={g.id} href="/dashboard/games" style={{ textDecoration: 'none', flex: '0 0 130px', borderRadius: 16, overflow: 'hidden', position: 'relative', background: `linear-gradient(160deg,${c}33,#0a0a0a)`, border: `1px solid ${c}44` }}>
+                  {g.default_bonus_pct > 0 && <span style={{ position: 'absolute', top: 0, right: 0, background: '#ef4444', color: '#fff', fontSize: 10, fontWeight: 800, padding: '3px 8px', borderBottomLeftRadius: 10 }}>{g.default_bonus_pct}%</span>}
+                  <div style={{ height: 110, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 12 }}>
+                    {g.logo_url ? <img src={g.logo_url} alt={g.name} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} /> : <span style={{ fontSize: 36 }}>🎮</span>}
+                  </div>
+                  <div style={{ padding: '8px 10px', fontSize: 11, fontWeight: 800, color: '#fff', textTransform: 'uppercase', letterSpacing: '.05em', textAlign: 'center', background: 'rgba(0,0,0,.4)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{g.name}</div>
+                </Link>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       {/* ── PENDING REQUESTS ── */}
       {totalPending > 0 && (

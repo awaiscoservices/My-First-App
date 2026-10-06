@@ -22,6 +22,7 @@ export default function Register() {
   const [particles, setParticles] = useState([]);
   const [toast, setToast] = useState(null);
   const [success, setSuccess] = useState(false);
+  useEffect(() => { try { const r = new URLSearchParams(window.location.search).get('ref'); if (r) localStorage.setItem('cz_ref', r.trim().slice(0, 32)) } catch {} }, []);
 
   useEffect(() => {
     const generated = Array.from({ length: 22 }, (_, i) => ({

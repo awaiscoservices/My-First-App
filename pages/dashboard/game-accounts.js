@@ -96,7 +96,7 @@ function AccountCard({ account }) {
         {/* Actions */}
         <div style={{ display: 'flex', gap: 8 }}>
           {account.status === 'active' && (
-            <Link href={`/dashboard/deposit`} style={{ flex: 1, padding: '10px', background: 'linear-gradient(135deg,#10b981,#059669)', borderRadius: 10, color: '#fff', fontSize: 12, fontWeight: 800, textDecoration: 'none', textAlign: 'center', letterSpacing: '.02em' }}>
+            <Link href={`/dashboard/load-game?account=${account.id}`} style={{ flex: 1, padding: '10px', background: 'linear-gradient(135deg,#10b981,#059669)', borderRadius: 10, color: '#fff', fontSize: 12, fontWeight: 800, textDecoration: 'none', textAlign: 'center', letterSpacing: '.02em' }}>
               ➕ Load Credits
             </Link>
           )}
