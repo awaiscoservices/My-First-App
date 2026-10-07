@@ -16,7 +16,7 @@ export default function ForgotPassword() {
     setMsg(error ? { kind: 'error', text: error.message } : { kind: 'success', text: 'If that email has an account, a reset link is on its way.' })
   }
   return (
-    <div style={{ minHeight: '100vh', background: '#050505', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, fontFamily: "'Outfit', sans-serif" }}>
+    <div style={{ minHeight: '100vh', background: 'var(--bg-gradient)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, fontFamily: "'Outfit', sans-serif" }}>
       <Head><title>Forgot password — Casinoze Room</title><link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet" /></Head>
       <form onSubmit={submit} style={{ ...card, width: '100%', maxWidth: 420 }}>
         <h1 style={{ fontSize: 24, fontWeight: 800, marginBottom: 6 }}>Reset your password</h1>

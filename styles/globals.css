@@ -8,8 +8,19 @@
   padding: 0;
 }
 
+/* ── THEME: change these two lines to recolor the whole site ── */
+:root {
+  --bg-gradient:
+    radial-gradient(ellipse 80% 50% at 50% -8%, rgba(251,191,36,.14), transparent 60%),
+    linear-gradient(160deg, #07090f 0%, #0e1a2e 45%, #1c1507 100%);
+  --panel-gradient: linear-gradient(180deg, rgba(15,24,44,.96), rgba(8,12,22,.97));
+}
+html { background: #07090f; }
+
 body {
-  background: #050505;
+  background: var(--bg-gradient);
+  background-attachment: fixed;
+  min-height: 100vh;
   color: #ffffff;
   font-family: 'Inter', -apple-system, sans-serif;
 }

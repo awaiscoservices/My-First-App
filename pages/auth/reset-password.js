@@ -21,7 +21,7 @@ export default function ResetPassword() {
     setTimeout(() => router.push('/dashboard'), 1200)
   }
   return (
-    <div style={{ minHeight: '100vh', background: '#050505', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, fontFamily: "'Outfit', sans-serif" }}>
+    <div style={{ minHeight: '100vh', background: 'var(--bg-gradient)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, fontFamily: "'Outfit', sans-serif" }}>
       <Head><title>New password — Casinoze Room</title><link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet" /></Head>
       <form onSubmit={submit} style={{ ...card, width: '100%', maxWidth: 420 }}>
         <h1 style={{ fontSize: 24, fontWeight: 800, marginBottom: 20 }}>Choose a new password</h1>

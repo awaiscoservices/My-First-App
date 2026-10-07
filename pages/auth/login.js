@@ -105,7 +105,7 @@ export default function Login() {
         <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
         <style>{`
           *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-          body{background:#050505;overflow-x:hidden}
+          body{background:var(--bg-gradient);background-attachment:fixed;overflow-x:hidden}
           input:-webkit-autofill,input:-webkit-autofill:hover,input:-webkit-autofill:focus{
             -webkit-box-shadow:0 0 0 1000px rgba(10,4,30,1) inset!important;
             -webkit-text-fill-color:#ffffff!important;caret-color:#fbbf24!important}
@@ -136,7 +136,7 @@ export default function Login() {
       )}
 
       {/* Background */}
-      <div style={{ position: 'fixed', inset: 0, background: '#050505', overflow: 'hidden', zIndex: 0 }}>
+      <div style={{ position: 'fixed', inset: 0, background: 'var(--bg-gradient)', overflow: 'hidden', zIndex: 0 }}>
         <div style={{ position: 'absolute', width: 600, height: 600, borderRadius: '50%', background: 'radial-gradient(circle, rgba(251,191,36,0.12) 0%, transparent 70%)', top: -200, left: -200, animation: 'orb-float 9s ease-in-out infinite' }} />
         <div style={{ position: 'absolute', width: 500, height: 500, borderRadius: '50%', background: 'radial-gradient(circle, rgba(245,158,11,0.09) 0%, transparent 70%)', bottom: -150, right: -100, animation: 'orb-float 12s ease-in-out infinite reverse' }} />
         <div style={{ position: 'absolute', inset: 0, backgroundImage: `linear-gradient(rgba(251,191,36,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(251,191,36,0.04) 1px, transparent 1px)`, backgroundSize: '60px 60px' }} />

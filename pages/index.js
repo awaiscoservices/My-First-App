@@ -535,9 +535,9 @@ export default function Home(){
         <style>{`
           *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
           html{scroll-behavior:smooth}
-          body{background:#050505;color:#fff;font-family:'Outfit',sans-serif;overflow-x:hidden}
+          body{background:var(--bg-gradient);background-attachment:fixed;color:#fff;font-family:'Outfit',sans-serif;overflow-x:hidden}
           ::-webkit-scrollbar{width:4px}
-          ::-webkit-scrollbar-track{background:#050505}
+          ::-webkit-scrollbar-track{background:#0b1220}
           ::-webkit-scrollbar-thumb{background:linear-gradient(#f59e0b,#f59e0b);border-radius:2px}
           #cz-cur{position:fixed;width:10px;height:10px;background:#f59e0b;border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);mix-blend-mode:screen}
           #cz-ring{position:fixed;width:32px;height:32px;border:1.5px solid rgba(251,191,36,.55);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%)}
@@ -624,7 +624,7 @@ export default function Home(){
             style={{width:'100%',height:'100%',objectFit:'cover',objectPosition:'center top',opacity:.18,filter:'saturate(1.4) hue-rotate(210deg)'}}
             onError={e=>e.target.style.display='none'}
           />
-          <div style={{position:'absolute',inset:0,background:'linear-gradient(to bottom,rgba(4,0,13,.4) 0%,rgba(4,0,13,.3) 40%,rgba(4,0,13,.9) 80%,#050505 100%)'}}/>
+          <div style={{position:'absolute',inset:0,background:'linear-gradient(to bottom,rgba(7,9,15,.4) 0%,rgba(7,9,15,.3) 40%,rgba(7,9,15,.9) 80%,#050505 100%)'}}/>
           {/* Teal/purple scanline glow like highrollers */}
           <div style={{position:'absolute',bottom:0,left:0,right:0,height:180,background:'linear-gradient(to top,rgba(0,200,200,.08),transparent)'}}/>
         </div>
@@ -736,7 +736,7 @@ export default function Home(){
               style={{width:'100%',height:380,objectFit:'cover',objectPosition:'center',filter:'saturate(1.3) hue-rotate(200deg) brightness(.85)'}}
               onError={e=>{e.target.parentElement.style.background='linear-gradient(135deg,#1a0050,#0a0030)';e.target.style.display='none'}}
             />
-            <div style={{position:'absolute',inset:0,background:'linear-gradient(to bottom,transparent 40%,rgba(4,0,13,.8) 100%)'}}/>
+            <div style={{position:'absolute',inset:0,background:'linear-gradient(to bottom,transparent 40%,rgba(7,9,15,.8) 100%)'}}/>
             {/* Stats overlay */}
             <div style={{position:'absolute',bottom:24,left:24,right:24,display:'flex',gap:24}}>
               <div style={{background:'rgba(0,0,0,.7)',backdropFilter:'blur(12px)',border:'1px solid rgba(251,191,36,.3)',borderRadius:14,padding:'14px 20px',flex:1,textAlign:'center'}}>
@@ -776,7 +776,7 @@ export default function Home(){
           style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',objectPosition:'center',opacity:.22,filter:'saturate(1.5) hue-rotate(220deg)'}}
           onError={e=>e.target.style.display='none'}
         />
-        <div style={{position:'absolute',inset:0,background:'linear-gradient(to bottom,rgba(4,0,13,.7),rgba(4,0,13,.5),rgba(4,0,13,.7))'}}/>
+        <div style={{position:'absolute',inset:0,background:'linear-gradient(to bottom,rgba(7,9,15,.7),rgba(7,9,15,.5),rgba(7,9,15,.7))'}}/>
         <div style={{position:'relative',zIndex:1,textAlign:'center',padding:'80px 24px',maxWidth:700}}>
           <h2 style={{fontFamily:"'Cinzel',serif",fontSize:'clamp(24px,4vw,50px)',fontWeight:700,marginBottom:16,lineHeight:1.3}}>
             Join Our Elite Community<br/>of Players & Achievers!

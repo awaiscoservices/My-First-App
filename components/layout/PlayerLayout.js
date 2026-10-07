@@ -145,7 +145,7 @@ export default function PlayerLayout({ children }) {
   const showPromo = PROMO_TEXT && promoOpen
 
   return (
-    <div style={{ minHeight: '100vh', background: '#050505', fontFamily: "'Outfit', sans-serif", color: '#fff' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--bg-gradient)', backgroundAttachment: 'fixed', fontFamily: "'Outfit', sans-serif", color: '#fff' }}>
       <Head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -155,7 +155,7 @@ export default function PlayerLayout({ children }) {
       <header style={{
         position: 'fixed', top: 0, left: 0, right: 0, height: 64, zIndex: 60,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '0 20px',
-        background: 'linear-gradient(180deg,#0d0b05,#070707)',
+        background: 'var(--panel-gradient)', backdropFilter: 'blur(10px)',
         borderBottom: '1px solid rgba(251,191,36,.18)',
         boxShadow: '0 4px 24px rgba(0,0,0,.6)',
       }}>
@@ -193,7 +193,7 @@ export default function PlayerLayout({ children }) {
       {/* ── SIDEBAR ── */}
       <aside className={`player-sidebar${sidebarOpen ? ' open' : ''}`} style={{
         position: 'fixed', top: 64, left: 0, bottom: 0, width: 250, zIndex: 50,
-        background: 'linear-gradient(180deg,#0a0905,#060606)',
+        background: 'var(--panel-gradient)',
         borderRight: '1px solid rgba(251,191,36,.1)',
         display: 'flex', flexDirection: 'column',
       }}>
