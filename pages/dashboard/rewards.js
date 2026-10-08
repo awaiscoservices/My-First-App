@@ -29,7 +29,7 @@ export default function Rewards() {
         <div style={{ fontSize: 13, color: 'rgba(255,255,255,.5)' }}>{next ? `${(next.xp_required - xp).toLocaleString()} XP to reach ${next.name}` : levels.length ? "You've reached the top level 👑" : ''}</div>
       </div>
       {levels.length === 0 ? <Empty icon="⭐" text="Levels are coming soon" /> : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(210px,1fr))', gap: 14 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(min(210px,100%),1fr))', gap: 14 }}>
           {levels.map(l => {
             const reached = xp >= l.xp_required, current = l.id === levelId
             const c = l.badge_color || '#fbbf24'

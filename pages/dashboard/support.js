@@ -37,7 +37,7 @@ export default function Support() {
     <PlayerLayout>
       <Head><title>Support — Casinoze Room</title></Head>
       <Title sub="Tell us what you need help with">Support</Title>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(300px,100%),1fr))', gap: 20 }}>
         <form onSubmit={submit} style={card}>
           <Notice kind={msg?.kind}>{msg?.text}</Notice>
           <div style={{ marginBottom: 16 }}><Label>Category</Label><select value={category} onChange={e => setCategory(e.target.value)} style={input}>{CATEGORIES.map(c => <option key={c}>{c}</option>)}</select></div>

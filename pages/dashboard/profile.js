@@ -40,7 +40,7 @@ export default function Profile() {
     <PlayerLayout>
       <Head><title>Profile — Casinoze Room</title></Head>
       <Title sub="Manage your personal details and security">My Profile</Title>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(300px,100%),1fr))', gap: 20 }}>
         <form onSubmit={save} style={card}>
           <Notice kind={msg?.kind}>{msg?.text}</Notice>
           <div style={{ marginBottom: 16 }}><Label>Full name</Label><input value={name} onChange={e => setName(e.target.value)} style={input} /></div>

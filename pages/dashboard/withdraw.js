@@ -53,7 +53,7 @@ export default function Withdraw() {
       {kyc && !verified && (
         <Notice kind="info">Identity verification is required before you can withdraw. <Link href="/dashboard/kyc" style={{ color: '#fbbf24', fontWeight: 800 }}>Verify now →</Link></Notice>
       )}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(300px,100%),1fr))', gap: 20 }}>
         <form onSubmit={submit} style={card}>
           <div style={{ marginBottom: 18 }}><Label>Withdrawable balance</Label><MoneyDisplay cents={wallet?.withdrawable_cents || 0} size="xl" color="#10b981" /></div>
           <Notice kind={msg?.kind}>{msg?.text}</Notice>

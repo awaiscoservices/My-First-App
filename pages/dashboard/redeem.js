@@ -46,7 +46,7 @@ export default function Redeem() {
     <PlayerLayout>
       <Head><title>Redeem — Casinoze Room</title></Head>
       <Title sub="Cash out your winnings from a game account">Redeem</Title>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(300px,100%),1fr))', gap: 20 }}>
         <form onSubmit={submit} style={card}>
           <Notice kind={msg?.kind}>{msg?.text}</Notice>
           {accounts.length === 0 ? (

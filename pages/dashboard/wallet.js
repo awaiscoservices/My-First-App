@@ -95,7 +95,7 @@ export default function WalletPage() {
       {/* Balance grid */}
       {wallet && (
         <div style={{ marginBottom: 28 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12, marginBottom: 12 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(160px,100%),1fr))', gap: 12, marginBottom: 12 }}>
             <BucketCard label="Cash"         cents={wallet.cash_balance_cents}    color="#10b981" icon="💵" desc="Available to load or withdraw" />
             <BucketCard label="Bonus"        cents={wallet.bonus_balance_cents}   color="#f59e0b" icon="🎁" desc="Bonus credits" />
             <BucketCard label="Reserved"     cents={wallet.reserved_cents}        color="#94a3b8" icon="🔒" desc="Held for pending requests" />
@@ -103,7 +103,7 @@ export default function WalletPage() {
           </div>
 
           {/* Lifetime stats */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(160px,100%),1fr))', gap: 12 }}>
             {[
               { label: 'Total Deposited',  cents: wallet.total_deposited_cents,  color: '#10b981' },
               { label: 'Total Bonus',      cents: wallet.total_bonus_cents,      color: '#f59e0b' },

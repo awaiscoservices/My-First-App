@@ -223,7 +223,7 @@ export default function GamesPage() {
           )}
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 16 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(240px,46%),1fr))', gap: 16 }}>
           {filteredGames.map(game => (
             <GameCard
               key={game.id}

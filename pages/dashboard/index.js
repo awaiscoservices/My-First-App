@@ -168,7 +168,7 @@ export default function Dashboard() {
       {wallet && (
         <div style={{ marginBottom: 24 }}>
           <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,.3)', marginBottom: 12 }}>Your Wallet</div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(160px,100%),1fr))', gap: 12 }}>
             <WalletCard label="Cash Balance"   cents={wallet.cash_balance_cents}      color="#10b981" icon="💵" sub="Available to play or withdraw" />
             <WalletCard label="Bonus Balance"  cents={wallet.bonus_balance_cents}      color="#f59e0b" icon="🎁" sub="Bonus credits from promotions" />
             <WalletCard label="Reserved"       cents={wallet.reserved_cents}           color="#94a3b8" icon="🔒" sub="Held for pending requests" />
@@ -180,7 +180,7 @@ export default function Dashboard() {
       {/* ── QUICK ACTIONS ── */}
       <div style={{ marginBottom: 28 }}>
         <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,.3)', marginBottom: 12 }}>Quick Actions</div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(180px,100%),1fr))', gap: 12 }}>
           <QuickAction href="/dashboard/deposit"      icon="➕" label="Add Money"    desc="Deposit funds to your wallet"      color="#10b981" />
           <QuickAction href="/dashboard/load-game"    icon="🎮" label="Load Game"    desc="Send credits to a game room"       color="#fbbf24" />
           <QuickAction href="/dashboard/redeem"       icon="🏆" label="Redeem"       desc="Request a redemption from game"    color="#f59e0b" />

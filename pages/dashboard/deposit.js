@@ -219,7 +219,7 @@ export default function DepositPage() {
           Your deposit request has been submitted and is pending review by our team. You will be notified once it's approved.
         </p>
         <div style={{ background: 'rgba(16,185,129,.08)', border: '1px solid rgba(16,185,129,.25)', borderRadius: 16, padding: '24px', marginBottom: 28 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, textAlign: 'left' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(120px,100%), 1fr))', gap: 16, textAlign: 'left' }}>
             {[
               ['Reference', result.reference_id],
               ['Status', 'Pending Review'],

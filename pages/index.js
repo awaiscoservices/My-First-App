@@ -562,14 +562,26 @@ export default function Home(){
           .btn-outline{display:inline-flex;align-items:center;gap:8px;padding:14px 36px;background:rgba(255,255,255,.04);border:1.5px solid rgba(251,191,36,.45);color:#fff;font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;border-radius:14px;text-decoration:none;letter-spacing:.04em;cursor:pointer;transition:all .2s;backdrop-filter:blur(12px)}
           .btn-outline:hover{background:rgba(251,191,36,.18);border-color:rgba(251,191,36,.85);transform:translateY(-3px);box-shadow:0 0 28px rgba(251,191,36,.3)}
           .section-tag{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;padding:5px 16px;border-radius:99px;margin-bottom:16px}
-          .game-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:16px}
+          .game-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(170px,100%),1fr));gap:16px}
           @media(max-width:768px){
-            .game-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
+            .game-grid{grid-template-columns:repeat(auto-fill,minmax(min(140px,100%),1fr));gap:12px}
             .hero-btns{flex-direction:column;align-items:center}
             .stats-bar>div{border-right:none!important;border-bottom:1px solid rgba(255,255,255,.06)}
             .about-grid{grid-template-columns:1fr!important}
             .contact-grid{grid-template-columns:1fr!important}
-            nav .nav-links{display:none}
+            .nav-anchors{display:none!important}
+            .site-nav{padding:8px 14px!important}
+            .nav-links{gap:0!important}
+            .nav-logo .logo-mark{height:40px!important;width:40px!important}
+            .nav-logo .logo-text>span:first-child{font-size:16px!important}
+            .nav-logo .logo-text>span:last-child{font-size:11px!important}
+            .nav-btns{gap:8px!important}
+            .nav-btns a{padding:8px 14px!important;font-size:12px!important}
+            .about-grid{padding:56px 20px!important;gap:32px!important}
+            .contact-grid{gap:32px!important}
+          }
+          @media(max-width:420px){
+            .nav-logo .logo-text{display:none}
           }
         `}</style>
       </Head>
@@ -597,17 +609,17 @@ export default function Home(){
       <LiveBar/>
 
       {/* ── NAV ── */}
-      <nav style={{position:'fixed',top:36,left:0,right:0,zIndex:100,display:'flex',alignItems:'center',justifyContent:'space-between',padding:'14px 48px',background:scrollY>40?'rgba(5,5,5,.94)':'transparent',backdropFilter:scrollY>40?'blur(24px)':'none',borderBottom:scrollY>40?'1px solid rgba(251,191,36,.18)':'none',transition:'all .4s'}}>
-        <div style={{display:'flex',alignItems:'center',gap:12}}>
+      <nav className="site-nav" style={{position:'fixed',top:36,left:0,right:0,zIndex:100,display:'flex',alignItems:'center',justifyContent:'space-between',padding:'14px 48px',background:scrollY>40?'rgba(5,5,5,.94)':'transparent',backdropFilter:scrollY>40?'blur(24px)':'none',borderBottom:scrollY>40?'1px solid rgba(251,191,36,.18)':'none',transition:'all .4s'}}>
+        <div className="nav-logo" style={{display:'flex',alignItems:'center',gap:12}}>
           <Logo variant="full" height={66} />
         </div>
         <div className="nav-links" style={{display:'flex',alignItems:'center',gap:32}}>
-          <div style={{display:'flex',gap:28}}>
+          <div className="nav-anchors" style={{display:'flex',gap:28}}>
             {[['Games','#games'],['How It Works','#how'],['Reviews','#reviews'],['FAQ','#faq']].map(([label,href])=>(
               <a key={label} href={href} style={{color:'rgba(255,255,255,.6)',textDecoration:'none',fontSize:14,fontWeight:600,letterSpacing:'.03em',transition:'color .2s'}} onMouseEnter={e=>e.target.style.color='#fff'} onMouseLeave={e=>e.target.style.color='rgba(255,255,255,.6)'}>{label}</a>
             ))}
           </div>
-          <div style={{display:'flex',gap:10}}>
+          <div className="nav-btns" style={{display:'flex',gap:10}}>
             <Link href="/auth/login" className="btn-outline" style={{padding:'9px 22px',fontSize:13}}>Login</Link>
             <Link href="/auth/register" className="btn-gold" style={{padding:'9px 22px',fontSize:13}}>🎲 Join Free</Link>
           </div>
@@ -707,7 +719,7 @@ export default function Home(){
             <h2 style={{fontFamily:"'Cinzel',serif",fontSize:'clamp(24px,4.5vw,52px)',fontWeight:700,marginBottom:14}}>Create Your Free Account &<br/>Start Your Adventure!</h2>
             <p style={{color:'rgba(255,255,255,.4)',fontSize:16}}>Three simple steps. That's all it takes to start playing.</p>
           </div>
-          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:24,position:'relative'}}>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(min(280px,100%),1fr))',gap:24,position:'relative'}}>
             <div style={{position:'absolute',top:56,left:'16%',right:'16%',height:1,background:'linear-gradient(90deg,rgba(251,191,36,.5),rgba(245,158,11,.5),rgba(16,185,129,.5))',zIndex:0}}/>
             {STEPS.map((s,i)=>(
               <div key={i} style={{position:'relative',zIndex:1,background:'rgba(255,255,255,.03)',border:`1px solid ${s.color}33`,borderRadius:24,padding:'44px 28px 32px',textAlign:'center',transition:'all .3s'}}
@@ -799,7 +811,7 @@ export default function Home(){
             <h2 style={{fontFamily:"'Cinzel',serif",fontSize:'clamp(24px,4vw,48px)',fontWeight:700,marginBottom:12}}>Loved by Players Worldwide</h2>
             <p style={{color:'rgba(255,255,255,.4)',fontSize:15}}>Real players. Real wins. Real fast credits.</p>
           </div>
-          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))',gap:20}}>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(min(240px,100%),1fr))',gap:20}}>
             {TESTIMONIALS.map((t,i)=><TestiCard key={i} t={t}/>)}
           </div>
         </div>

@@ -152,9 +152,9 @@ export default function PlayerLayout({ children }) {
       </Head>
 
       {/* ── TOP BAR ── */}
-      <header style={{
+      <header className="top-header" style={{
         position: 'fixed', top: 0, left: 0, right: 0, height: 64, zIndex: 60,
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '0 20px',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '0 20px', maxWidth: '100vw',
         background: 'var(--panel-gradient)', backdropFilter: 'blur(10px)',
         borderBottom: '1px solid rgba(251,191,36,.18)',
         boxShadow: '0 4px 24px rgba(0,0,0,.6)',
@@ -169,7 +169,7 @@ export default function PlayerLayout({ children }) {
           </Link>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div className="header-right" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <Link href="/dashboard/deposit" className="deposit-btn" style={{
             display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 18px',
             background: 'linear-gradient(135deg,#fbbf24,#f59e0b)', borderRadius: 12,
@@ -246,7 +246,7 @@ export default function PlayerLayout({ children }) {
             <button onClick={() => setPromoOpen(false)} aria-label="Dismiss" style={{ position: 'absolute', right: 14, background: 'none', border: 'none', color: 'rgba(255,255,255,.5)', fontSize: 18, cursor: 'pointer' }}>×</button>
           </div>
         )}
-        <main style={{ padding: '28px', maxWidth: 1200, width: '100%', margin: '0 auto' }}>
+        <main className="player-content" style={{ padding: '28px', maxWidth: 1200, width: '100%', margin: '0 auto' }}>
           {children}
         </main>
       </div>
@@ -266,13 +266,22 @@ export default function PlayerLayout({ children }) {
         @media (max-width: 768px) {
           .player-sidebar { transform: translateX(-100%); transition: transform .25s; }
           .player-sidebar.open { transform: translateX(0); }
-          .player-main { margin-left: 0 !important; }
+          .player-main { margin-left: 0 !important; overflow-x: hidden; }
+          .player-content { padding: 18px 14px !important; }
+          .top-header { padding: 0 12px !important; gap: 8px !important; }
+          .header-right { gap: 8px !important; }
+          .logo-icon .logo-mark { height: 42px !important; width: 42px !important; }
           .mobile-hamburger { display: flex !important; }
           .avatar-btn { display: none !important; }
           .bal-chip { min-width: 0 !important; padding: 4px 8px !important; }
         }
         @media (max-width: 480px) {
           .deposit-btn { display: none !important; }
+          .header-right { gap: 6px !important; }
+          .bal-chip { padding: 3px 7px !important; }
+          .bal-chip span:last-child { font-size: 12.5px !important; }
+          .bal-chip span:first-child { font-size: 8px !important; letter-spacing: .06em !important; }
+          .player-content { padding: 14px 12px !important; }
         }
       `}</style>
     </div>

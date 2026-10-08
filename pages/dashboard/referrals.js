@@ -25,7 +25,7 @@ export default function Referrals() {
     <PlayerLayout>
       <Head><title>Referrals — Casinoze Room</title></Head>
       <Title sub="Invite friends and earn referral bonuses">Referrals</Title>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(280px,100%),1fr))', gap: 20 }}>
         <div style={card}>
           <Label>Your referral code</Label>
           <div style={{ fontSize: 28, fontWeight: 800, color: '#fbbf24', letterSpacing: '.1em', marginBottom: 16 }}>{code || '—'}</div>
