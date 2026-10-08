@@ -68,7 +68,7 @@ export default function AdminPlayers() {
       p.referral_code?.toLowerCase().includes(s)
   })
 
-  const levelColors = { 1: '#6b7280', 2: '#10b981', 3: '#3b82f6', 4: '#a855f7', 5: '#f59e0b', 6: '#ef4444' }
+  const levelColors = { 1: '#6b7280', 2: '#10b981', 3: '#3b82f6', 4: '#fbbf24', 5: '#f59e0b', 6: '#ef4444' }
 
   return (
     <AdminLayout>
@@ -95,14 +95,14 @@ export default function AdminPlayers() {
           style={{ padding: '9px 14px', background: 'rgba(255,255,255,.05)', border: '1px solid rgba(255,255,255,.1)', borderRadius: 10, color: '#fff', fontSize: 13, fontFamily: "'Outfit',sans-serif", outline: 'none', minWidth: 260 }}
         />
         <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
-          style={{ padding: '9px 14px', background: '#0d0020', border: '1px solid rgba(255,255,255,.1)', borderRadius: 10, color: '#fff', fontSize: 13, fontFamily: "'Outfit',sans-serif", outline: 'none' }}>
+          style={{ padding: '9px 14px', background: '#0e1a2e', border: '1px solid rgba(255,255,255,.1)', borderRadius: 10, color: '#fff', fontSize: 13, fontFamily: "'Outfit',sans-serif", outline: 'none' }}>
           <option value="all">All Statuses</option>
           <option value="active">Active</option>
           <option value="suspended">Suspended</option>
           <option value="banned">Banned</option>
         </select>
         <select value={kycFilter} onChange={e => setKycFilter(e.target.value)}
-          style={{ padding: '9px 14px', background: '#0d0020', border: '1px solid rgba(255,255,255,.1)', borderRadius: 10, color: '#fff', fontSize: 13, fontFamily: "'Outfit',sans-serif", outline: 'none' }}>
+          style={{ padding: '9px 14px', background: '#0e1a2e', border: '1px solid rgba(255,255,255,.1)', borderRadius: 10, color: '#fff', fontSize: 13, fontFamily: "'Outfit',sans-serif", outline: 'none' }}>
           <option value="all">All KYC</option>
           <option value="not_started">Not Started</option>
           <option value="pending">Pending</option>
@@ -137,7 +137,7 @@ export default function AdminPlayers() {
                   <td style={{ padding: '12px 14px' }}>
                     <Link href={`/admin/players/${p.id}`} style={{ textDecoration: 'none' }}>
                       <div style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>{p.full_name || '—'}</div>
-                      <div style={{ fontSize: 11, color: '#a855f7' }}>{p.email}</div>
+                      <div style={{ fontSize: 11, color: '#fbbf24' }}>{p.email}</div>
                       {p.is_flagged && <div style={{ fontSize: 10, color: '#ef4444', fontWeight: 700, marginTop: 2 }}>⚠️ Flagged</div>}
                     </Link>
                   </td>
@@ -163,7 +163,7 @@ export default function AdminPlayers() {
                   </td>
                   <td style={{ padding: '12px 14px' }}>
                     <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
-                      <Link href={`/admin/players/${p.id}`} style={{ padding: '5px 10px', background: 'rgba(168,85,247,.15)', border: '1px solid rgba(168,85,247,.3)', borderRadius: 7, color: '#a855f7', fontSize: 11, fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap' }}>
+                      <Link href={`/admin/players/${p.id}`} style={{ padding: '5px 10px', background: 'rgba(251,191,36,.15)', border: '1px solid rgba(251,191,36,.3)', borderRadius: 7, color: '#fbbf24', fontSize: 11, fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap' }}>
                         View
                       </Link>
                       {p.status === 'active' ? (

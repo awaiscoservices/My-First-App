@@ -2,6 +2,7 @@ import Head from 'next/head'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import Logo from '../components/ui/Logo'
+import { FAQS } from '../lib/siteContent'
 
 // ─── GAME DATA with real brand colors & SVG logos ──────────────────────────
 const GAMES = [
@@ -346,33 +347,33 @@ const GAMES = [
   },
 ]
 
+// ═══════════════════════════════════════════════════════════════════
+//  EDIT HERE. Only put things in this block that are TRUE for your business.
+//  Anything left empty ('' / null / []) is simply hidden on the page.
+// ═══════════════════════════════════════════════════════════════════
+const SITE = {
+  signupBonus: '',      // e.g. '100% first-deposit bonus'  → shows in the top bar and the hero badge
+  playersOnline: null,  // a REAL number, e.g. 312            → shows "312 PLAYERS ONLINE" in the top bar
+  heroBanner: '',       // e.g. '/images/banners/hero.jpg'  (file in public/images/banners/) — '' keeps the default background
+  gameImages: [],       // game logos you uploaded to public/images/games/, by lowercase name without spaces,
+                        // e.g. ['firekirin','orionstars','milkyway']  →  uses /images/games/firekirin.png etc.
+  reviews: [],          // REAL player reviews, e.g. [{ name:'Jay G.', tag:'Fire Kirin', stars:5, text:'…' }]
+                        // (the Reviews section and its menu link are hidden while this is empty)
+}
+
 const STEPS = [
-  { num:'01', icon:'👤', title:'Register Free',  sub:'Create Account', desc:'60-second signup. Your personal wallet and game account created automatically.', color:'#fbbf24' },
-  { num:'02', icon:'💳', title:'Deposit Funds',  sub:'Upload & Approve', desc:'Pick any payment method, upload screenshot. Approved lightning fast.', color:'#f59e0b' },
-  { num:'03', icon:'🎮', title:'Credits Go Live', sub:'Enjoy the Game', desc:'Credits appear in your chosen game room automatically. Zero waiting.', color:'#10b981' },
+  { num:'01', icon:'👤', title:'Register Free',  sub:'Create Account', desc:'Create your account. Your wallet is set up for you.', color:'#fbbf24' },
+  { num:'02', icon:'💳', title:'Add Money',      sub:'Upload & Review', desc:'Choose a payment method and upload your payment proof. Our team reviews it and adds the funds to your wallet.', color:'#f59e0b' },
+  { num:'03', icon:'🎮', title:'Load & Play',    sub:'Enjoy the Game', desc:'Load credits from your wallet into your game room. Our team processes the load, then you play.', color:'#10b981' },
 ]
 
+// Only facts that come from this page itself
 const STATS = [
-  { val:28,    suffix:'+',  label:'Game Rooms' },
-  { val:10,    suffix:'k+', label:'Active Players' },
-  { val:24,    suffix:'/7', label:'Live Support' },
-  { val:100,   suffix:'%',  label:'Secure & Fast' },
+  { val:GAMES.length, suffix:'', label:'Game Rooms' },
+  { val:1,            suffix:'', label:'Wallet for Every Game' },
 ]
 
-const TESTIMONIALS = [
-  { name:'Jay G.',    tag:'Elite Player',  stars:5, text:'Credits hit my account in 2 minutes after approval. Best platform I have ever used — fast, secure, professional.' },
-  { name:'Ryan V.',   tag:'VBLink Pro',    stars:5, text:'The auto-credit system is insane. Upload screenshot, get approved, boom — game credits instantly. Love it.' },
-  { name:'Daniel T.', tag:'Game Vault',    stars:5, text:'27+ games on one wallet?! This is the future. Support team is super responsive too. Highly recommended.' },
-  { name:'Mike R.',   tag:'Fire Kirin',   stars:5, text:'I play across 4 different game rooms and manage everything from one dashboard. Casinoze Room is unmatched.' },
-]
-
-const FAQS = [
-  { q:'How do I start playing?',         a:'Create a free account, make a deposit by uploading your payment screenshot, and credits appear in your game automatically after approval.' },
-  { q:'Is the platform free to join?',   a:'Yes! Registration is 100% free. You only deposit when you want to play.' },
-  { q:'Can I play on mobile?',           a:'Absolutely. Casinoze Room is fully optimized for mobile, tablet, and desktop.' },
-  { q:'How fast are deposits approved?', a:'Most deposits are reviewed and approved within minutes during active hours.' },
-  { q:'How do I earn bonus credits?',    a:'Every game offers a signup bonus. Refer friends and earn additional credits on their deposits.' },
-]
+const TESTIMONIALS = SITE.reviews
 
 const PARTICLES = Array.from({length:30},(_,i)=>({
   id:i, symbol:['♠','♥','♦','♣','🎰','💎','🃏','⭐','🎲','👑'][i%10],
@@ -413,28 +414,40 @@ function StatCard({val,suffix,label}){
 }
 
 function LiveBar(){
-  const[players]=useState(()=>1247+Math.floor(Math.random()*400))
-  const wins=['$240 on Fire Kirin','$185 on VBLink','$310 on Game Vault','$95 on Orion Stars','$420 on Juwa']
-  const[wi,setWi]=useState(0)
-  useEffect(()=>{const t=setInterval(()=>setWi(p=>(p+1)%wins.length),3000);return()=>clearInterval(t)},[])
+  const items=[
+    SITE.playersOnline ? ['#10b981',`🟢 ${Number(SITE.playersOnline).toLocaleString()} PLAYERS ONLINE`] : null,
+    SITE.signupBonus   ? ['#fbbf24',`💎 ${String(SITE.signupBonus).toUpperCase()}`] : null,
+    ['#fbbf24',`🎮 ${GAMES.length} GAME ROOMS`],
+    ['#10b981','👛 ONE WALLET FOR EVERY GAME'],
+    ['rgba(255,255,255,.6)','18+ · PLAY RESPONSIBLY'],
+  ].filter(Boolean)
   return(
     <div style={{background:'rgba(5,5,5,.97)',borderBottom:'1px solid rgba(251,191,36,.2)',height:36,display:'flex',alignItems:'center',overflow:'hidden',position:'fixed',top:0,left:0,right:0,zIndex:101}}>
       <div style={{display:'flex',alignItems:'center',gap:40,animation:'marquee 30s linear infinite',whiteSpace:'nowrap',width:'max-content'}}>
         {[...Array(3)].map((_,rep)=>(
           <span key={rep} style={{display:'inline-flex',alignItems:'center',gap:32}}>
-            <span style={{color:'#10b981',fontSize:12,fontWeight:800,letterSpacing:'.08em'}}>🟢 {players.toLocaleString()} PLAYERS ONLINE</span>
-            <span style={{color:'rgba(255,255,255,.2)',fontSize:12}}>✦</span>
-            <span style={{color:'#fbbf24',fontSize:12,fontWeight:800}}>🏆 LATEST WIN: {wins[wi]}</span>
-            <span style={{color:'rgba(255,255,255,.2)',fontSize:12}}>✦</span>
-            <span style={{color:'#fbbf24',fontSize:12,fontWeight:800}}>💎 150% SIGNUP BONUS — LIMITED OFFER</span>
-            <span style={{color:'rgba(255,255,255,.2)',fontSize:12}}>✦</span>
-            <span style={{color:'#ec4899',fontSize:12,fontWeight:800}}>⚡ AUTO CREDITS IN ALL 28 GAME ROOMS</span>
-            <span style={{color:'rgba(255,255,255,.2)',fontSize:12}}>✦</span>
+            {items.map(([c,t],i)=>(
+              <span key={i} style={{display:'inline-flex',alignItems:'center',gap:32}}>
+                <span style={{color:c,fontSize:12,fontWeight:800,letterSpacing:'.06em'}}>{t}</span>
+                <span style={{color:'rgba(255,255,255,.2)',fontSize:12}}>✦</span>
+              </span>
+            ))}
           </span>
         ))}
       </div>
     </div>
   )
+}
+
+const gameSlug=(name)=>name.toLowerCase().replace(/[^a-z0-9]/g,'')
+
+function GameLogo({game}){
+  const slug=gameSlug(game.name)
+  const[failed,setFailed]=useState(false)
+  if(SITE.gameImages.includes(slug)&&!failed){
+    return <img src={`/images/games/${slug}.png`} alt={game.name} onError={()=>setFailed(true)} style={{width:'85%',height:100,objectFit:'contain',position:'relative',zIndex:1,filter:'drop-shadow(0 4px 12px rgba(0,0,0,.5))'}}/>
+  }
+  return <div style={{width:'85%',height:80,position:'relative',zIndex:1}} dangerouslySetInnerHTML={{__html:game.logo}}/>
 }
 
 function GameCard({game,index}){
@@ -460,8 +473,7 @@ function GameCard({game,index}){
       <div style={{height:140,background:game.bg,position:'relative',display:'flex',alignItems:'center',justifyContent:'center'}}>
         {/* Glow orb behind logo */}
         <div style={{position:'absolute',inset:0,background:`radial-gradient(ellipse at 50% 50%, ${game.accent}22 0%, transparent 70%)`,transition:'opacity .25s',opacity:hov?1:.5}}/>
-        {/* SVG Logo */}
-        <div style={{width:'85%',height:80,position:'relative',zIndex:1}} dangerouslySetInnerHTML={{__html:game.logo}}/>
+        <GameLogo game={game}/>
       </div>
 
       {/* Name bar */}
@@ -530,7 +542,7 @@ export default function Home(){
       <Head>
         <title>Casinoze Room — #1 Fish Game Room Platform</title>
         <meta name="viewport" content="width=device-width,initial-scale=1"/>
-        <meta name="description" content="One account unlocks 28 premium fish game rooms. Deposit, get approved, play — credits hit automatically."/>
+        <meta name="description" content="One account and one wallet for every game room. Add money, load credits and play."/>
         <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@400;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
         <style>{`
           *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -615,7 +627,7 @@ export default function Home(){
         </div>
         <div className="nav-links" style={{display:'flex',alignItems:'center',gap:32}}>
           <div className="nav-anchors" style={{display:'flex',gap:28}}>
-            {[['Games','#games'],['How It Works','#how'],['Reviews','#reviews'],['FAQ','#faq']].map(([label,href])=>(
+            {[['Games','#games'],['How It Works','#how'],...(TESTIMONIALS.length?[['Reviews','#reviews']]:[]),['FAQ','#faq']].map(([label,href])=>(
               <a key={label} href={href} style={{color:'rgba(255,255,255,.6)',textDecoration:'none',fontSize:14,fontWeight:600,letterSpacing:'.03em',transition:'color .2s'}} onMouseEnter={e=>e.target.style.color='#fff'} onMouseLeave={e=>e.target.style.color='rgba(255,255,255,.6)'}>{label}</a>
             ))}
           </div>
@@ -631,9 +643,9 @@ export default function Home(){
         {/* Hero background image — dark fantasy wizard/dragon from Pixabay (free) */}
         <div style={{position:'absolute',inset:0,zIndex:0}}>
           <img
-            src="https://cdn.pixabay.com/photo/2023/09/11/08/15/ai-generated-8246488_1280.jpg"
+            src={SITE.heroBanner||"https://cdn.pixabay.com/photo/2023/09/11/08/15/ai-generated-8246488_1280.jpg"}
             alt=""
-            style={{width:'100%',height:'100%',objectFit:'cover',objectPosition:'center top',opacity:.18,filter:'saturate(1.4) hue-rotate(210deg)'}}
+            style={{width:'100%',height:'100%',objectFit:'cover',objectPosition:'center top',opacity:SITE.heroBanner?.5:.18,filter:SITE.heroBanner?'none':'saturate(1.4) hue-rotate(210deg)'}}
             onError={e=>e.target.style.display='none'}
           />
           <div style={{position:'absolute',inset:0,background:'linear-gradient(to bottom,rgba(7,9,15,.4) 0%,rgba(7,9,15,.3) 40%,rgba(7,9,15,.9) 80%,#050505 100%)'}}/>
@@ -643,10 +655,12 @@ export default function Home(){
 
         {/* Content */}
         <div style={{position:'relative',zIndex:1}}>
+          {SITE.signupBonus && (
           <div className="fade1" style={{display:'inline-flex',alignItems:'center',gap:8,background:'rgba(245,158,11,.12)',border:'1px solid rgba(245,158,11,.35)',borderRadius:99,padding:'6px 20px',fontSize:12,fontWeight:800,color:'#fbbf24',letterSpacing:'.1em',textTransform:'uppercase',marginBottom:20}}>
             <span style={{width:7,height:7,borderRadius:'50%',background:'#10b981',display:'inline-block',animation:'pulseDot 1.5s infinite'}}/>
-            🎁 150% Signup Bonus — Limited Time Offer
+            🎁 {SITE.signupBonus}
           </div>
+          )}
 
           <h1 className="fade2" style={{fontFamily:"'Cinzel Decorative',serif",fontSize:'clamp(34px,7vw,90px)',fontWeight:900,lineHeight:1.05,marginBottom:12,letterSpacing:'-.01em'}}>
             Play Smart.
@@ -656,7 +670,7 @@ export default function Home(){
           </h1>
 
           <p className="fade4" style={{color:'rgba(255,255,255,.55)',fontSize:18,maxWidth:560,margin:'0 auto 48px',lineHeight:1.85,fontWeight:400}}>
-            One account unlocks <strong style={{color:'#fff',fontWeight:700}}>28 premium game rooms</strong>. Deposit, get approved, play — credits appear automatically. No waiting, no hassle.
+            One account and one wallet unlock <strong style={{color:'#fff',fontWeight:700}}>{GAMES.length} game rooms</strong>. Add money, load credits into your game, and play.
           </p>
 
           <div className="fade5 hero-btns" style={{display:'flex',gap:14,justifyContent:'center',flexWrap:'wrap',marginBottom:80}}>
@@ -752,11 +766,7 @@ export default function Home(){
             {/* Stats overlay */}
             <div style={{position:'absolute',bottom:24,left:24,right:24,display:'flex',gap:24}}>
               <div style={{background:'rgba(0,0,0,.7)',backdropFilter:'blur(12px)',border:'1px solid rgba(251,191,36,.3)',borderRadius:14,padding:'14px 20px',flex:1,textAlign:'center'}}>
-                <div style={{fontFamily:"'Cinzel Decorative',serif",fontSize:28,fontWeight:900,color:'#f59e0b',lineHeight:1}}>10k+</div>
-                <div style={{fontSize:10,color:'rgba(255,255,255,.45)',fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',marginTop:4}}>Daily Players</div>
-              </div>
-              <div style={{background:'rgba(0,0,0,.7)',backdropFilter:'blur(12px)',border:'1px solid rgba(251,191,36,.3)',borderRadius:14,padding:'14px 20px',flex:1,textAlign:'center'}}>
-                <div style={{fontFamily:"'Cinzel Decorative',serif",fontSize:28,fontWeight:900,color:'#fbbf24',lineHeight:1}}>28+</div>
+                <div style={{fontFamily:"'Cinzel Decorative',serif",fontSize:28,fontWeight:900,color:'#fbbf24',lineHeight:1}}>{GAMES.length}</div>
                 <div style={{fontSize:10,color:'rgba(255,255,255,.45)',fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',marginTop:4}}>Game Rooms</div>
               </div>
             </div>
@@ -766,10 +776,10 @@ export default function Home(){
             <div className="section-tag" style={{background:'rgba(251,191,36,.1)',color:'#fbbf24',border:'1px solid rgba(251,191,36,.3)'}}>About Casinoze Room</div>
             <h2 style={{fontFamily:"'Cinzel',serif",fontSize:'clamp(22px,3.5vw,42px)',fontWeight:700,marginBottom:20,lineHeight:1.3}}>Forging Legends in<br/>the Gaming Universe</h2>
             <p style={{color:'rgba(255,255,255,.5)',fontSize:15,lineHeight:1.9,marginBottom:16}}>
-              <strong style={{color:'#fbbf24'}}>Casinoze Room</strong> brings you the thrill of competitive fish gaming in a safe, automated, and rewarding online experience. Instant credit delivery, 28+ game rooms, one unified wallet.
+              <strong style={{color:'#fbbf24'}}>Casinoze Room</strong> gives you one account and one wallet for a whole range of game rooms. Add money, load credits into the game you choose, and manage everything from one dashboard.
             </p>
             <p style={{color:'rgba(255,255,255,.4)',fontSize:14,lineHeight:1.9,marginBottom:28}}>
-              From classic fish games to modern sweepstakes rooms, our platform is built for authentic immersive arcade entertainment — all managed from one powerful dashboard.
+              From classic fish games to modern sweepstakes rooms, everything is managed from your dashboard: deposits, game accounts, loads, redemptions and withdrawals.
             </p>
             <div style={{display:'flex',gap:16}}>
               <Link href="/auth/register" className="btn-gold" style={{fontSize:14,padding:'13px 32px'}}>🎲 Get Started</Link>
@@ -803,19 +813,21 @@ export default function Home(){
         </div>
       </section>
 
-      {/* ── TESTIMONIALS ── */}
+      {/* ── TESTIMONIALS (only shown when SITE.reviews has real reviews) ── */}
+      {TESTIMONIALS.length>0 && (
       <section id="reviews" style={{padding:'90px 24px',position:'relative',zIndex:2}}>
         <div style={{maxWidth:1100,margin:'0 auto'}}>
           <div style={{textAlign:'center',marginBottom:56}}>
             <div className="section-tag" style={{background:'rgba(245,158,11,.1)',color:'#f59e0b',border:'1px solid rgba(245,158,11,.3)'}}>★ Customer Feedback</div>
-            <h2 style={{fontFamily:"'Cinzel',serif",fontSize:'clamp(24px,4vw,48px)',fontWeight:700,marginBottom:12}}>Loved by Players Worldwide</h2>
-            <p style={{color:'rgba(255,255,255,.4)',fontSize:15}}>Real players. Real wins. Real fast credits.</p>
+            <h2 style={{fontFamily:"'Cinzel',serif",fontSize:'clamp(24px,4vw,48px)',fontWeight:700,marginBottom:12}}>What Players Say</h2>
+            <p style={{color:'rgba(255,255,255,.4)',fontSize:15}}>Feedback from our players.</p>
           </div>
           <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(min(240px,100%),1fr))',gap:20}}>
             {TESTIMONIALS.map((t,i)=><TestiCard key={i} t={t}/>)}
           </div>
         </div>
       </section>
+      )}
 
       {/* ── CONTACT + FAQ ── */}
       <section id="faq" style={{padding:'80px 24px 100px',position:'relative',zIndex:2,borderTop:'1px solid rgba(255,255,255,.05)'}}>
@@ -850,7 +862,7 @@ export default function Home(){
         <h2 style={{fontFamily:"'Cinzel',serif",fontSize:'clamp(22px,4vw,46px)',fontWeight:700,marginBottom:16}}>
           Start Your Journey by Creating<br/>Your Free Account Today!
         </h2>
-        <p style={{color:'rgba(255,255,255,.4)',fontSize:16,maxWidth:480,margin:'0 auto 36px',lineHeight:1.8}}>Join thousands already winning. One click to register. Instant setup. Auto credits.</p>
+        <p style={{color:'rgba(255,255,255,.4)',fontSize:16,maxWidth:480,margin:'0 auto 36px',lineHeight:1.8}}>Create your free account and pick your game room.</p>
         <Link href="/auth/register" className="btn-gold" style={{fontSize:17,padding:'18px 64px'}}>🎰 Play Game Now</Link>
       </section>
 
@@ -862,21 +874,21 @@ export default function Home(){
               <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:12}}>
                 <Logo variant="full" height={52} />
               </div>
-              <p style={{color:'rgba(255,255,255,.25)',fontSize:13,maxWidth:260,lineHeight:1.7}}>The #1 game room management platform. One wallet, 28 game rooms, instant credits.</p>
+              <p style={{color:'rgba(255,255,255,.25)',fontSize:13,maxWidth:260,lineHeight:1.7}}>One wallet. {GAMES.length} game rooms.</p>
             </div>
             <div style={{display:'flex',gap:60}}>
               <div>
                 <div style={{fontSize:11,fontWeight:800,letterSpacing:'.12em',color:'rgba(255,255,255,.3)',textTransform:'uppercase',marginBottom:16}}>Platform</div>
-                {['Games','How It Works','Register','Login'].map(l=>(<div key={l} style={{marginBottom:10}}><a href="#" style={{color:'rgba(255,255,255,.4)',fontSize:14,textDecoration:'none',fontWeight:500,transition:'color .2s'}} onMouseEnter={e=>e.target.style.color='#fbbf24'} onMouseLeave={e=>e.target.style.color='rgba(255,255,255,.4)'}>{l}</a></div>))}
+                {[['Games','#games'],['How It Works','#how'],['Register','/auth/register'],['Login','/auth/login']].map(([l,h])=>(<div key={l} style={{marginBottom:10}}><a href={h} style={{color:'rgba(255,255,255,.4)',fontSize:14,textDecoration:'none',fontWeight:500,transition:'color .2s'}} onMouseEnter={e=>e.target.style.color='#fbbf24'} onMouseLeave={e=>e.target.style.color='rgba(255,255,255,.4)'}>{l}</a></div>))}
               </div>
               <div>
                 <div style={{fontSize:11,fontWeight:800,letterSpacing:'.12em',color:'rgba(255,255,255,.3)',textTransform:'uppercase',marginBottom:16}}>Legal</div>
-                {['Terms of Service','Privacy Policy','Support','Contact'].map(l=>(<div key={l} style={{marginBottom:10}}><a href="#" style={{color:'rgba(255,255,255,.4)',fontSize:14,textDecoration:'none',fontWeight:500,transition:'color .2s'}} onMouseEnter={e=>e.target.style.color='#f59e0b'} onMouseLeave={e=>e.target.style.color='rgba(255,255,255,.4)'}>{l}</a></div>))}
+                {[['Terms of Service','/terms'],['Privacy Policy','/privacy'],['FAQ','/faq'],['About','/about'],['Support','/dashboard/support']].map(([l,h])=>(<div key={l} style={{marginBottom:10}}><a href={h} style={{color:'rgba(255,255,255,.4)',fontSize:14,textDecoration:'none',fontWeight:500,transition:'color .2s'}} onMouseEnter={e=>e.target.style.color='#f59e0b'} onMouseLeave={e=>e.target.style.color='rgba(255,255,255,.4)'}>{l}</a></div>))}
               </div>
             </div>
           </div>
           <div style={{borderTop:'1px solid rgba(255,255,255,.06)',paddingTop:20,display:'flex',justifyContent:'space-between',alignItems:'center',flexWrap:'wrap',gap:12}}>
-            <div style={{color:'rgba(255,255,255,.18)',fontSize:12}}>© 2025 Casinoze Room. All rights reserved.</div>
+            <div style={{color:'rgba(255,255,255,.18)',fontSize:12}}>© {new Date().getFullYear()} Casinoze Room. All rights reserved.</div>
             <div style={{color:'rgba(255,255,255,.18)',fontSize:12}}>Play responsibly. 18+</div>
           </div>
         </div>

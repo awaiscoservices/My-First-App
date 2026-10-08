@@ -115,8 +115,8 @@ export default function AdminDashboard() {
       </div>
 
       {/* ── STAT CARDS ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 12, marginBottom: 24 }}>
-        <StatCard label="Total Players"     value={stats.totalPlayers}      icon="👥" color="#a855f7" href="/admin/players" sub={`${stats.verifiedPlayers} verified`} />
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(180px,100%),1fr))', gap: 12, marginBottom: 24 }}>
+        <StatCard label="Total Players"     value={stats.totalPlayers}      icon="👥" color="#fbbf24" href="/admin/players" sub={`${stats.verifiedPlayers} verified`} />
         <StatCard label="Total Deposited"   value={<MoneyDisplay cents={stats.totalDeposited} size="lg" color="#10b981" />} icon="💳" color="#10b981" href="/admin/deposits" sub="All time approved" />
         <StatCard label="Total Bonus Paid"  value={<MoneyDisplay cents={stats.totalBonus} size="lg" color="#f59e0b" />}     icon="🎁" color="#f59e0b" sub="All time bonus credits" />
         <StatCard label="Pending Actions"   value={stats.totalPending}      icon="⏳" color="#ef4444" sub="Needs attention" />
@@ -132,7 +132,7 @@ export default function AdminDashboard() {
             {stats.totalPending > 0 && <span style={{ background: '#ef4444', color: '#fff', fontSize: 10, fontWeight: 800, padding: '2px 7px', borderRadius: 99 }}>{stats.totalPending}</span>}
           </div>
           <PendingRow label="Deposits to Approve"     count={stats.pendingDeposits}      href="/admin/deposits"      color="#10b981" />
-          <PendingRow label="Game Accounts to Setup"  count={stats.pendingGameAccounts}   href="/admin/game-accounts" color="#a855f7" />
+          <PendingRow label="Game Accounts to Setup"  count={stats.pendingGameAccounts}   href="/admin/game-accounts" color="#fbbf24" />
           <PendingRow label="Redemptions to Process"  count={stats.pendingRedemptions}    href="/admin/redemptions"   color="#f59e0b" />
           <PendingRow label="Withdrawals to Pay"      count={stats.pendingWithdrawals}    href="/admin/withdrawals"   color="#3b82f6" />
           {stats.totalPending === 0 && (
@@ -144,7 +144,7 @@ export default function AdminDashboard() {
         <div style={{ background: 'rgba(255,255,255,.02)', border: '1px solid rgba(255,255,255,.07)', borderRadius: 18, overflow: 'hidden' }}>
           <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <span style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>Recent Deposits</span>
-            <Link href="/admin/deposits" style={{ fontSize: 11, color: '#a855f7', fontWeight: 600, textDecoration: 'none' }}>View All →</Link>
+            <Link href="/admin/deposits" style={{ fontSize: 11, color: '#fbbf24', fontWeight: 600, textDecoration: 'none' }}>View All →</Link>
           </div>
           {recentDeposits.map((d, i) => (
             <div key={d.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '11px 18px', borderBottom: i < recentDeposits.length - 1 ? '1px solid rgba(255,255,255,.04)' : 'none' }}>
@@ -167,7 +167,7 @@ export default function AdminDashboard() {
       <div style={{ background: 'rgba(255,255,255,.02)', border: '1px solid rgba(255,255,255,.07)', borderRadius: 18, overflow: 'hidden' }}>
         <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <span style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>Recent Signups</span>
-          <Link href="/admin/players" style={{ fontSize: 11, color: '#a855f7', fontWeight: 600, textDecoration: 'none' }}>View All →</Link>
+          <Link href="/admin/players" style={{ fontSize: 11, color: '#fbbf24', fontWeight: 600, textDecoration: 'none' }}>View All →</Link>
         </div>
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>

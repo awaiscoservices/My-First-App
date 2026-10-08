@@ -27,7 +27,7 @@ function SetupModal({ account, onClose, onSave }) {
 
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.8)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }} onClick={onClose}>
-      <div style={{ background: '#0d0020', border: '1px solid rgba(168,85,247,.3)', borderRadius: 20, padding: 32, width: '100%', maxWidth: 480, maxHeight: '90vh', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
+      <div style={{ background: '#0e1a2e', border: '1px solid rgba(251,191,36,.3)', borderRadius: 20, padding: 32, width: '100%', maxWidth: 480, maxHeight: '90vh', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
           <h2 style={{ fontFamily: "'Cinzel',serif", fontSize: 18, fontWeight: 700, color: '#fff' }}>
             Setup Game Account
@@ -36,10 +36,10 @@ function SetupModal({ account, onClose, onSave }) {
         </div>
 
         {/* Player info */}
-        <div style={{ background: 'rgba(168,85,247,.08)', border: '1px solid rgba(168,85,247,.2)', borderRadius: 12, padding: '12px 16px', marginBottom: 20 }}>
+        <div style={{ background: 'rgba(251,191,36,.08)', border: '1px solid rgba(251,191,36,.2)', borderRadius: 12, padding: '12px 16px', marginBottom: 20 }}>
           <div style={{ fontSize: 13, fontWeight: 700, color: '#fff', marginBottom: 4 }}>{account.profiles?.full_name}</div>
           <div style={{ fontSize: 11, color: 'rgba(255,255,255,.5)' }}>{account.profiles?.email}</div>
-          <div style={{ fontSize: 11, color: '#a855f7', marginTop: 4 }}>Game: {account.game_panels?.name}</div>
+          <div style={{ fontSize: 11, color: '#fbbf24', marginTop: 4 }}>Game: {account.game_panels?.name}</div>
           <div style={{ fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 2 }}>Request: {account.reference_id}</div>
           <div style={{ fontSize: 11, color: 'rgba(255,255,255,.35)', marginTop: 2 }}>KYC: {account.profiles?.kyc_status}</div>
         </div>
@@ -62,7 +62,7 @@ function SetupModal({ account, onClose, onSave }) {
                 value={form[f.key]}
                 onChange={e => setForm(p => ({ ...p, [f.key]: e.target.value }))}
                 style={{ width: '100%', padding: '11px 14px', background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.12)', borderRadius: 10, color: '#fff', fontSize: 13, fontFamily: "'Outfit',sans-serif", outline: 'none', boxSizing: 'border-box' }}
-                onFocus={e => e.target.style.borderColor = '#a855f7'}
+                onFocus={e => e.target.style.borderColor = '#fbbf24'}
                 onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,.12)'}
               />
             </div>
@@ -167,7 +167,7 @@ export default function AdminGameAccounts() {
       <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' }}>
         <div style={{ display: 'flex', gap: 4, background: 'rgba(255,255,255,.04)', padding: 4, borderRadius: 10 }}>
           {['all', 'pending', 'active', 'suspended'].map(s => (
-            <button key={s} onClick={() => setFilter(s)} style={{ padding: '7px 16px', borderRadius: 8, border: 'none', cursor: 'pointer', fontFamily: "'Outfit',sans-serif", fontSize: 12, fontWeight: 700, background: filter === s ? 'rgba(168,85,247,.7)' : 'transparent', color: filter === s ? '#fff' : 'rgba(255,255,255,.4)', textTransform: 'capitalize', transition: 'all .15s' }}>
+            <button key={s} onClick={() => setFilter(s)} style={{ padding: '7px 16px', borderRadius: 8, border: 'none', cursor: 'pointer', fontFamily: "'Outfit',sans-serif", fontSize: 12, fontWeight: 700, background: filter === s ? 'rgba(251,191,36,.7)' : 'transparent', color: filter === s ? '#fff' : 'rgba(255,255,255,.4)', textTransform: 'capitalize', transition: 'all .15s' }}>
               {s}
             </button>
           ))}
@@ -204,7 +204,7 @@ export default function AdminGameAccounts() {
                   onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,.02)'}
                   onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                   <td style={{ padding: '12px 14px' }}>
-                    <div style={{ fontSize: 11, fontWeight: 800, color: '#a855f7', fontFamily: 'monospace' }}>{a.reference_id}</div>
+                    <div style={{ fontSize: 11, fontWeight: 800, color: '#fbbf24', fontFamily: 'monospace' }}>{a.reference_id}</div>
                   </td>
                   <td style={{ padding: '12px 14px' }}>
                     <div style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>{a.profiles?.full_name}</div>
@@ -212,7 +212,7 @@ export default function AdminGameAccounts() {
                   </td>
                   <td style={{ padding: '12px 14px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <div style={{ width: 8, height: 8, borderRadius: '50%', background: a.game_panels?.accent_color || '#a855f7' }} />
+                      <div style={{ width: 8, height: 8, borderRadius: '50%', background: a.game_panels?.accent_color || '#fbbf24' }} />
                       <span style={{ fontSize: 13, color: '#fff', fontWeight: 600 }}>{a.game_panels?.name}</span>
                     </div>
                   </td>
@@ -230,7 +230,7 @@ export default function AdminGameAccounts() {
                   </td>
                   <td style={{ padding: '12px 14px' }}>
                     <div style={{ display: 'flex', gap: 6 }}>
-                      <button onClick={() => setModalAccount(a)} style={{ padding: '6px 12px', background: a.status === 'pending' ? 'linear-gradient(135deg,#a855f7,#7c3aed)' : 'rgba(168,85,247,.15)', border: '1px solid rgba(168,85,247,.3)', borderRadius: 8, color: '#fff', fontSize: 11, fontWeight: 800, cursor: 'pointer', fontFamily: "'Outfit',sans-serif", whiteSpace: 'nowrap' }}>
+                      <button onClick={() => setModalAccount(a)} style={{ padding: '6px 12px', background: a.status === 'pending' ? 'linear-gradient(135deg,#fbbf24,#f59e0b)' : 'rgba(251,191,36,.15)', border: '1px solid rgba(251,191,36,.3)', borderRadius: 8, color: a.status === 'pending' ? '#050505' : '#fff', fontSize: 11, fontWeight: 800, cursor: 'pointer', fontFamily: "'Outfit',sans-serif", whiteSpace: 'nowrap' }}>
                         {a.status === 'pending' ? '⚡ Setup' : '✏️ Edit'}
                       </button>
                       {a.status === 'active' && (

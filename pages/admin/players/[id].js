@@ -13,13 +13,13 @@ function Tab({ label, active, onClick, badge }) {
     <button onClick={onClick} style={{
       padding: '9px 18px', borderRadius: 9, border: 'none', cursor: 'pointer',
       fontFamily: "'Outfit',sans-serif", fontSize: 13, fontWeight: 700,
-      background: active ? 'rgba(168,85,247,.2)' : 'transparent',
+      background: active ? 'rgba(251,191,36,.2)' : 'transparent',
       color: active ? '#fff' : 'rgba(255,255,255,.4)',
-      borderBottom: active ? '2px solid #a855f7' : '2px solid transparent',
+      borderBottom: active ? '2px solid #fbbf24' : '2px solid transparent',
       transition: 'all .15s', display: 'flex', alignItems: 'center', gap: 6,
     }}>
       {label}
-      {badge > 0 && <span style={{ background: '#a855f7', color: '#fff', fontSize: 9, fontWeight: 800, padding: '1px 6px', borderRadius: 99 }}>{badge}</span>}
+      {badge > 0 && <span style={{ background: '#fbbf24', color: '#050505', fontSize: 9, fontWeight: 800, padding: '1px 6px', borderRadius: 99 }}>{badge}</span>}
     </button>
   )
 }
@@ -54,7 +54,7 @@ function AdjustmentModal({ playerId, onClose, onSave }) {
 
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.8)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }} onClick={onClose}>
-      <div style={{ background: '#0d0020', border: '1px solid rgba(168,85,247,.3)', borderRadius: 20, padding: 28, width: '100%', maxWidth: 440 }} onClick={e => e.stopPropagation()}>
+      <div style={{ background: '#0e1a2e', border: '1px solid rgba(251,191,36,.3)', borderRadius: 20, padding: 28, width: '100%', maxWidth: 440 }} onClick={e => e.stopPropagation()}>
         <h3 style={{ fontFamily: "'Cinzel',serif", fontSize: 16, fontWeight: 700, color: '#fff', marginBottom: 20 }}>⚖️ Wallet Adjustment</h3>
 
         <div style={{ background: 'rgba(245,158,11,.08)', border: '1px solid rgba(245,158,11,.2)', borderRadius: 10, padding: '10px 14px', marginBottom: 18, fontSize: 12, color: '#f59e0b', lineHeight: 1.5 }}>
@@ -74,7 +74,7 @@ function AdjustmentModal({ playerId, onClose, onSave }) {
           <div style={{ display: 'flex', gap: 10 }}>
             {['cash', 'bonus'].map(b => (
               <button key={b} onClick={() => setForm(p => ({ ...p, wallet_bucket: b }))}
-                style={{ flex: 1, padding: '9px', borderRadius: 10, border: `1px solid ${form.wallet_bucket === b ? '#a855f7' : 'rgba(255,255,255,.1)'}`, background: form.wallet_bucket === b ? 'rgba(168,85,247,.15)' : 'transparent', color: form.wallet_bucket === b ? '#a855f7' : 'rgba(255,255,255,.4)', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: "'Outfit',sans-serif", textTransform: 'capitalize' }}>
+                style={{ flex: 1, padding: '9px', borderRadius: 10, border: `1px solid ${form.wallet_bucket === b ? '#fbbf24' : 'rgba(255,255,255,.1)'}`, background: form.wallet_bucket === b ? 'rgba(251,191,36,.15)' : 'transparent', color: form.wallet_bucket === b ? '#fbbf24' : 'rgba(255,255,255,.4)', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: "'Outfit',sans-serif", textTransform: 'capitalize' }}>
                 {b} wallet
               </button>
             ))}
@@ -89,7 +89,7 @@ function AdjustmentModal({ playerId, onClose, onSave }) {
               <label style={{ display: 'block', fontSize: 10, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,.4)', marginBottom: 5 }}>{f.label}</label>
               <input type={f.type} placeholder={f.placeholder} value={form[f.key]} onChange={e => setForm(p => ({ ...p, [f.key]: e.target.value }))}
                 style={{ width: '100%', padding: '10px 14px', background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.12)', borderRadius: 10, color: '#fff', fontSize: 13, fontFamily: "'Outfit',sans-serif", outline: 'none', boxSizing: 'border-box' }}
-                onFocus={e => e.target.style.borderColor = '#a855f7'}
+                onFocus={e => e.target.style.borderColor = '#fbbf24'}
                 onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,.12)'}
               />
             </div>
@@ -100,7 +100,7 @@ function AdjustmentModal({ playerId, onClose, onSave }) {
 
         <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
           <button onClick={onClose} style={{ flex: 1, padding: '11px', background: 'rgba(255,255,255,.05)', border: '1px solid rgba(255,255,255,.1)', borderRadius: 10, color: 'rgba(255,255,255,.5)', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>Cancel</button>
-          <button onClick={handleSave} disabled={saving} style={{ flex: 2, padding: '11px', background: saving ? 'rgba(168,85,247,.4)' : 'linear-gradient(135deg,#a855f7,#7c3aed)', border: 'none', borderRadius: 10, color: '#fff', fontSize: 13, fontWeight: 800, cursor: saving ? 'not-allowed' : 'pointer', fontFamily: "'Outfit',sans-serif" }}>
+          <button onClick={handleSave} disabled={saving} style={{ flex: 2, padding: '11px', background: saving ? 'rgba(251,191,36,.4)' : 'linear-gradient(135deg,#fbbf24,#f59e0b)', border: 'none', borderRadius: 10, color: '#050505', fontSize: 13, fontWeight: 800, cursor: saving ? 'not-allowed' : 'pointer', fontFamily: "'Outfit',sans-serif" }}>
             {saving ? '⏳ Processing…' : '⚖️ Apply Adjustment'}
           </button>
         </div>
@@ -200,7 +200,7 @@ export default function AdminPlayerDetail() {
       <div style={{ textAlign: 'center', padding: '60px 20px' }}>
         <div style={{ fontSize: 48, marginBottom: 16 }}>❌</div>
         <div style={{ color: 'rgba(255,255,255,.5)', fontSize: 16 }}>Player not found</div>
-        <Link href="/admin/players" style={{ display: 'inline-block', marginTop: 16, color: '#a855f7', textDecoration: 'none', fontSize: 14, fontWeight: 700 }}>← Back to Players</Link>
+        <Link href="/admin/players" style={{ display: 'inline-block', marginTop: 16, color: '#fbbf24', textDecoration: 'none', fontSize: 14, fontWeight: 700 }}>← Back to Players</Link>
       </div>
     </AdminLayout>
   )
@@ -221,22 +221,22 @@ export default function AdminPlayerDetail() {
 
       {/* Back + header */}
       <div style={{ marginBottom: 20 }}>
-        <Link href="/admin/players" style={{ color: '#a855f7', textDecoration: 'none', fontSize: 13, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 6, marginBottom: 14 }}>← Players</Link>
+        <Link href="/admin/players" style={{ color: '#fbbf24', textDecoration: 'none', fontSize: 13, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 6, marginBottom: 14 }}>← Players</Link>
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-            <div style={{ width: 52, height: 52, borderRadius: 14, background: 'linear-gradient(135deg,#7c3aed,#a855f7)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, fontWeight: 900, color: '#fff' }}>
+            <div style={{ width: 52, height: 52, borderRadius: 14, background: 'linear-gradient(135deg,#f59e0b,#fbbf24)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, fontWeight: 900, color: '#050505' }}>
               {(player.full_name || 'U')[0].toUpperCase()}
             </div>
             <div>
               <h1 style={{ fontFamily: "'Cinzel',serif", fontSize: 20, fontWeight: 700, color: '#fff', marginBottom: 4 }}>{player.full_name}</h1>
-              <div style={{ fontSize: 13, color: '#a855f7' }}>{player.email}</div>
+              <div style={{ fontSize: 13, color: '#fbbf24' }}>{player.email}</div>
               <div style={{ fontSize: 11, color: 'rgba(255,255,255,.35)', marginTop: 2 }}>ID: {player.id}</div>
             </div>
           </div>
 
           {/* Action buttons */}
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <button onClick={() => setShowAdjModal(true)} style={{ padding: '9px 16px', background: 'rgba(168,85,247,.15)', border: '1px solid rgba(168,85,247,.3)', borderRadius: 10, color: '#a855f7', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>
+            <button onClick={() => setShowAdjModal(true)} style={{ padding: '9px 16px', background: 'rgba(251,191,36,.15)', border: '1px solid rgba(251,191,36,.3)', borderRadius: 10, color: '#fbbf24', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>
               ⚖️ Adjust Wallet
             </button>
             {player.status === 'active' ? (
@@ -262,17 +262,17 @@ export default function AdminPlayerDetail() {
         <StatusBadge status={player.status} />
         <StatusBadge status={player.kyc_status || 'not_started'} />
         {player.is_flagged && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 99, background: 'rgba(239,68,68,.15)', fontSize: 11, fontWeight: 800, color: '#f87171', letterSpacing: '.04em', textTransform: 'uppercase' }}>⚠️ Flagged</span>}
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 99, background: 'rgba(168,85,247,.12)', fontSize: 11, fontWeight: 800, color: '#a855f7', letterSpacing: '.04em', textTransform: 'uppercase' }}>Level {player.player_level_id || 1}</span>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 99, background: 'rgba(251,191,36,.12)', fontSize: 11, fontWeight: 800, color: '#fbbf24', letterSpacing: '.04em', textTransform: 'uppercase' }}>Level {player.player_level_id || 1}</span>
       </div>
 
       {/* Wallet summary bar */}
       {wallet && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 10, marginBottom: 20 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(150px,100%),1fr))', gap: 10, marginBottom: 20 }}>
           {[
             { label: 'Cash',        cents: wallet.cash_balance_cents,    color: '#10b981' },
             { label: 'Bonus',       cents: wallet.bonus_balance_cents,   color: '#f59e0b' },
-            { label: 'Reserved',    cents: wallet.reserved_cents,        color: '#818cf8' },
-            { label: 'Withdrawable',cents: wallet.withdrawable_cents,    color: '#a855f7' },
+            { label: 'Reserved',    cents: wallet.reserved_cents,        color: '#94a3b8' },
+            { label: 'Withdrawable',cents: wallet.withdrawable_cents,    color: '#fbbf24' },
             { label: 'Total Deposited', cents: wallet.total_deposited_cents, color: 'rgba(255,255,255,.5)' },
           ].map(b => (
             <div key={b.label} style={{ padding: '14px 16px', borderRadius: 12, background: 'rgba(255,255,255,.03)', border: '1px solid rgba(255,255,255,.07)' }}>
@@ -337,7 +337,7 @@ export default function AdminPlayerDetail() {
                 <tr><td colSpan={7} style={{ padding: '30px', textAlign: 'center', color: 'rgba(255,255,255,.3)' }}>No deposits yet</td></tr>
               ) : deposits.map(d => (
                 <tr key={d.id} style={{ borderTop: '1px solid rgba(255,255,255,.04)' }}>
-                  <td style={{ padding: '11px 14px', fontSize: 11, fontWeight: 800, color: '#a855f7', fontFamily: 'monospace' }}>{d.reference_id}</td>
+                  <td style={{ padding: '11px 14px', fontSize: 11, fontWeight: 800, color: '#fbbf24', fontFamily: 'monospace' }}>{d.reference_id}</td>
                   <td style={{ padding: '11px 14px', fontSize: 12, color: 'rgba(255,255,255,.6)' }}>{d.payment_methods?.name}</td>
                   <td style={{ padding: '11px 14px' }}><MoneyDisplay cents={d.amount_cents} size="sm" color="#fff" /></td>
                   <td style={{ padding: '11px 14px' }}><MoneyDisplay cents={d.bonus_cents} size="sm" color="#10b981" /></td>
@@ -353,11 +353,11 @@ export default function AdminPlayerDetail() {
 
       {/* ── TAB: GAME ACCOUNTS ── */}
       {activeTab === 'game-accounts' && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 12 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(280px,100%),1fr))', gap: 12 }}>
           {gameAccounts.length === 0 ? (
             <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '40px', color: 'rgba(255,255,255,.3)' }}>No game accounts</div>
           ) : gameAccounts.map(ga => (
-            <div key={ga.id} style={{ background: 'rgba(255,255,255,.03)', border: `1px solid ${ga.game_panels?.accent_color || '#a855f7'}33`, borderRadius: 14, padding: '16px' }}>
+            <div key={ga.id} style={{ background: 'rgba(255,255,255,.03)', border: `1px solid ${ga.game_panels?.accent_color || '#fbbf24'}33`, borderRadius: 14, padding: '16px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                 <div style={{ fontSize: 14, fontWeight: 700, color: '#fff' }}>{ga.game_panels?.name}</div>
                 <StatusBadge status={ga.status} size="xs" />
@@ -387,7 +387,7 @@ export default function AdminPlayerDetail() {
                 <tr><td colSpan={7} style={{ padding: '30px', textAlign: 'center', color: 'rgba(255,255,255,.3)' }}>No transactions yet</td></tr>
               ) : transactions.map(tx => (
                 <tr key={tx.id} style={{ borderTop: '1px solid rgba(255,255,255,.04)' }}>
-                  <td style={{ padding: '11px 14px', fontSize: 10, fontWeight: 800, color: '#a855f7', fontFamily: 'monospace' }}>{tx.reference_id}</td>
+                  <td style={{ padding: '11px 14px', fontSize: 10, fontWeight: 800, color: '#fbbf24', fontFamily: 'monospace' }}>{tx.reference_id}</td>
                   <td style={{ padding: '11px 14px', fontSize: 11, color: 'rgba(255,255,255,.6)', textTransform: 'uppercase', letterSpacing: '.04em' }}>{tx.type?.replace(/_/g, ' ')}</td>
                   <td style={{ padding: '11px 14px', fontSize: 11, color: 'rgba(255,255,255,.4)', textTransform: 'capitalize' }}>{tx.wallet_bucket}</td>
                   <td style={{ padding: '11px 14px' }}><MoneyDisplay cents={tx.amount_cents} size="sm" color={txTypeColor(tx.type)} /></td>

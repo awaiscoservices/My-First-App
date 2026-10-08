@@ -34,7 +34,7 @@ function DepositRow({ deposit, onAction }) {
         onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,.02)'}
         onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
         <td style={{ padding: '13px 16px' }}>
-          <div style={{ fontSize: 12, fontWeight: 800, color: '#a855f7', fontFamily: 'monospace' }}>{deposit.reference_id}</div>
+          <div style={{ fontSize: 12, fontWeight: 800, color: '#fbbf24', fontFamily: 'monospace' }}>{deposit.reference_id}</div>
           <div style={{ fontSize: 10, color: 'rgba(255,255,255,.3)', marginTop: 2 }}>{new Date(deposit.created_at).toLocaleString()}</div>
         </td>
         <td style={{ padding: '13px 16px' }}>
@@ -56,7 +56,7 @@ function DepositRow({ deposit, onAction }) {
       </tr>
 
       {expanded && (
-        <tr style={{ background: 'rgba(168,85,247,.04)', borderTop: '1px solid rgba(168,85,247,.1)' }}>
+        <tr style={{ background: 'rgba(251,191,36,.04)', borderTop: '1px solid rgba(251,191,36,.1)' }}>
           <td colSpan={8} style={{ padding: '16px' }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, marginBottom: 16 }}>
               {/* Player info */}
@@ -104,7 +104,7 @@ function DepositRow({ deposit, onAction }) {
                         const { data } = await supabase.storage.from('deposits').createSignedUrl(deposit.screenshot_url, 300)
                         if (data?.signedUrl) window.open(data.signedUrl, '_blank')
                       }}
-                      style={{ padding: '6px 14px', background: 'rgba(168,85,247,.15)', border: '1px solid rgba(168,85,247,.3)', borderRadius: 8, color: '#a855f7', fontSize: 11, fontWeight: 700, cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>
+                      style={{ padding: '6px 14px', background: 'rgba(251,191,36,.15)', border: '1px solid rgba(251,191,36,.3)', borderRadius: 8, color: '#fbbf24', fontSize: 11, fontWeight: 700, cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>
                       📷 View Screenshot
                     </button>
                   </div>
@@ -151,7 +151,7 @@ function DepositRow({ deposit, onAction }) {
                 <button
                   onClick={() => handleAction('under_review')}
                   disabled={!!actionLoading}
-                  style={{ padding: '10px 24px', background: 'rgba(99,102,241,.12)', border: '1px solid rgba(99,102,241,.3)', borderRadius: 10, color: '#818cf8', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>
+                  style={{ padding: '10px 24px', background: 'rgba(99,102,241,.12)', border: '1px solid rgba(99,102,241,.3)', borderRadius: 10, color: '#94a3b8', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>
                   🔍 Mark Under Review
                 </button>
               </div>
@@ -240,7 +240,7 @@ export default function AdminDeposits() {
       <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' }}>
         <div style={{ display: 'flex', gap: 4, background: 'rgba(255,255,255,.04)', padding: 4, borderRadius: 10 }}>
           {STATUS_FILTERS.map(s => (
-            <button key={s} onClick={() => setFilter(s)} style={{ padding: '7px 16px', borderRadius: 8, border: 'none', cursor: 'pointer', fontFamily: "'Outfit',sans-serif", fontSize: 12, fontWeight: 700, background: filter === s ? 'rgba(168,85,247,.7)' : 'transparent', color: filter === s ? '#fff' : 'rgba(255,255,255,.4)', textTransform: 'capitalize', transition: 'all .15s' }}>
+            <button key={s} onClick={() => setFilter(s)} style={{ padding: '7px 16px', borderRadius: 8, border: 'none', cursor: 'pointer', fontFamily: "'Outfit',sans-serif", fontSize: 12, fontWeight: 700, background: filter === s ? 'rgba(251,191,36,.7)' : 'transparent', color: filter === s ? '#fff' : 'rgba(255,255,255,.4)', textTransform: 'capitalize', transition: 'all .15s' }}>
               {s === 'all' ? 'All' : s.replace('_', ' ')}
             </button>
           ))}

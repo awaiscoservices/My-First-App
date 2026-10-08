@@ -49,7 +49,7 @@ export default function Support() {
           <div style={{ padding: '16px 20px', fontWeight: 700, borderBottom: '1px solid rgba(255,255,255,.06)' }}>Your tickets</div>
           {tickets.length === 0 ? <Empty icon="💬" text="No tickets yet" /> : tickets.map(t => (
             <div key={t.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '13px 20px', borderBottom: '1px solid rgba(255,255,255,.04)' }}>
-              <div><div style={{ fontSize: 13, fontWeight: 600 }}>{t.subject}</div><div style={{ fontSize: 11, color: 'rgba(255,255,255,.35)' }}>{t.category} · {fmtDate(t.created_at)}</div></div>
+              <div style={{ minWidth: 0 }}><div style={{ fontSize: 13, fontWeight: 600 }}>{t.subject}</div><div style={{ fontSize: 11, color: 'rgba(255,255,255,.35)' }}>{t.category} · {fmtDate(t.created_at)}</div>{t.admin_reply && <div style={{ marginTop: 6, fontSize: 12, color: '#fbbf24' }}>Support: {t.admin_reply}</div>}</div>
               <StatusBadge status={t.status} size="xs" />
             </div>
           ))}
