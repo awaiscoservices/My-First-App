@@ -43,3 +43,18 @@ body {
            focus:border-amber-400 transition-colors;
   }
 }
+
+/* ── MOBILE HARDENING ── */
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+html, body { max-width: 100%; overflow-x: hidden; }
+img, video, svg { max-width: 100%; }
+a, button, select, label { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+
+@media (max-width: 768px) {
+  /* iPhones zoom the whole page when a field is smaller than 16px */
+  input, select, textarea { font-size: 16px !important; }
+  /* keep long words / emails / wallet addresses from stretching a card */
+  main, main * { overflow-wrap: anywhere; }
+  /* comfortable tap targets */
+  button, .btn-gold, .btn-outline { min-height: 42px; }
+}

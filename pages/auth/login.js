@@ -148,7 +148,7 @@ export default function Login() {
 
         {/* Logo */}
         <div style={{ animation: 'fadeSlideUp 0.6s ease both', marginBottom: 36, textAlign: 'center' }}>
-          <Logo variant="full" height={120} />
+          <Logo variant="full" stack height={88} />
           <div style={{ marginTop: 6, fontSize: 11, letterSpacing: 4, color: 'rgba(251,191,36,0.7)', textTransform: 'uppercase', fontWeight: 500 }}>Premium Fish Game Platform</div>
         </div>
 

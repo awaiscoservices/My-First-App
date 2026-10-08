@@ -5,7 +5,7 @@ import { useState, useRef, useEffect } from 'react'
 // variant "icon" = mark only
 const SRC = '/images/logo/logo.png'
 
-export default function Logo({ variant = 'full', height = 40, className, style }) {
+export default function Logo({ variant = 'full', height = 40, stack = false, className, style }) {
   const [failed, setFailed] = useState(false)
   const ref = useRef(null)
 
@@ -25,9 +25,9 @@ export default function Logo({ variant = 'full', height = 40, className, style }
   if (variant === 'icon') return <span className={className} style={{ display: 'inline-flex', ...style }}>{mark}</span>
 
   return (
-    <span className={className} style={{ display: 'inline-flex', alignItems: 'center', gap: height * 0.25, ...style }}>
+    <span className={className} style={{ display: 'inline-flex', flexDirection: stack ? 'column' : 'row', alignItems: 'center', gap: height * (stack ? 0.12 : 0.25), maxWidth: '100%', ...style }}>
       {mark}
-      <span className="logo-text" style={{ lineHeight: 1.1, textAlign: 'left' }}>
+      <span className="logo-text" style={{ lineHeight: 1.1, textAlign: stack ? 'center' : 'left' }}>
         <span style={{ display: 'block', fontFamily: "'Cinzel', serif", fontSize: height * 0.4, fontWeight: 700, letterSpacing: '.06em', color: '#fff' }}>CASINOZE</span>
         <span style={{ display: 'block', fontFamily: "'Cinzel', serif", fontSize: height * 0.29, fontWeight: 700, letterSpacing: '.3em', color: '#fbbf24' }}>ROOM</span>
       </span>
