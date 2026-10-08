@@ -64,8 +64,16 @@ export default function Login() {
     setErrors({});
     setLoading(true);
     try {
-      await signInWithEmail({ email, password });
-      router.push('/dashboard');
+      const data = await signInWithEmail({ email, password });
+      // Check role and redirect accordingly
+      const { supabase: sb } = await import('../../lib/supabase');
+      const { data: prof } = await sb.from('profiles').select('role').eq('id', data.user.id).single();
+      const adminRoles = ['super_admin','finance','game_ops','support','kyc_agent','risk','reporting','marketing'];
+      if (prof?.role && adminRoles.includes(prof.role)) {
+        router.push('/admin');
+      } else {
+        router.push('/dashboard');
+      }
     } catch (err) {
       showToast(err.message || 'Invalid email or password');
     } finally {
