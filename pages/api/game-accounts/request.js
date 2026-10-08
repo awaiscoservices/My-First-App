@@ -83,7 +83,7 @@ export default async function handler(req, res) {
     title: 'Game Account Requested',
     message: `Your request for a ${panel.name} account (${account.reference_id}) has been submitted. Our team will set it up shortly.`,
     reference_id: account.reference_id,
-  }).catch(() => {})
+  }).then(() => {}, () => {})
 
   return res.status(201).json({
     message: `${panel.name} account request submitted successfully`,

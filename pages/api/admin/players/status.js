@@ -69,7 +69,7 @@ export default async function handler(req, res) {
     target_type: 'player', target_id: player_id,
     before_state: before, after_state: { status },
     reason,
-  }).catch(() => {})
+  }).then(() => {}, () => {})
 
   return res.status(200).json({ message: `Player ${status} successfully` })
 }

@@ -162,18 +162,11 @@ export default async function handler(req, res) {
     xp_earned:   Math.floor(deposit.amount_cents / 100), // 1 XP per dollar
   }).eq('id', deposit_id)
 
-  // Award XP to player
+  // Award XP to player (non-critical: never blocks the approval)
   const xpEarned = Math.floor(deposit.amount_cents / 100)
-  await supabaseAdmin.from('profiles').update({
-    total_xp: supabaseAdmin.rpc ? undefined : wallet.version, // handled below
-  }).eq('id', deposit.user_id)
-  // XP increment using raw SQL update
-  await supabaseAdmin.rpc('increment_player_xp', {
-    p_user_id: deposit.user_id,
-    p_xp: xpEarned,
-  }).catch(() => {
-    // RPC may not exist yet — silent fail, xp is non-critical
-  })
+  await Promise.resolve(
+    supabaseAdmin.rpc('increment_player_xp', { p_user_id: deposit.user_id, p_xp: xpEarned })
+  ).then(() => {}, () => {})
 
   // Notify player
   await supabaseAdmin.from('notifications').insert({
@@ -208,5 +201,5 @@ async function logAudit(client, actor, action, targetType, targetId, before, aft
     target_id:   targetId,
     before_state: before,
     after_state:  after,
-  }).catch(() => {})
+  }).then(() => {}, () => {})
 }

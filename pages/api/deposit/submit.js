@@ -117,7 +117,7 @@ export default async function handler(req, res) {
   await supabaseAdmin.rpc('increment_wallet_pending', {
     p_user_id: user.id,
     p_cents: total_credit_cents,
-  }).catch(() => {}) // non-fatal if RPC not yet created
+  }).then(() => {}, () => {}) // non-fatal if RPC not yet created
 
   // ── Create notification ───────────────────────────────────
   await supabaseAdmin.from('notifications').insert({
@@ -126,7 +126,7 @@ export default async function handler(req, res) {
     title: 'Deposit Submitted',
     message: `Your deposit of $${(amount_cents / 100).toFixed(2)} (${deposit.reference_id}) has been submitted and is pending review.`,
     reference_id: deposit.reference_id,
-  }).catch(() => {})
+  }).then(() => {}, () => {})
 
   return res.status(201).json({
     message: 'Deposit submitted successfully',

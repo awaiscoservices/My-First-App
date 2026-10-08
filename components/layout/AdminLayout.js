@@ -101,6 +101,9 @@ function Icon({ name, size = 18 }) {
   )
 }
 
+// Admin pages that exist. The sidebar only links to these (others would 404). Add a path when you build its page.
+const BUILT = ['/admin', '/admin/players', '/admin/kyc', '/admin/deposits', '/admin/game-accounts', '/admin/game-loads', '/admin/redemptions', '/admin/withdrawals', '/admin/support']
+
 const GOLD = '#fbbf24'
 
 // Pending counts badge colors
@@ -249,7 +252,7 @@ export default function AdminLayout({ children }) {
 
         <nav style={{ flex: 1, overflowY: 'auto', padding: '12px', scrollbarWidth: 'none' }}>
           {NAV_SECTIONS.map(section => {
-            const visibleItems = section.items.filter(item => canSee(item.roles))
+            const visibleItems = section.items.filter(item => BUILT.includes(item.href) && canSee(item.roles))
             if (visibleItems.length === 0) return null
             return (
               <div key={section.label} style={{ marginBottom: 16 }}>

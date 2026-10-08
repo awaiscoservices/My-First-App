@@ -113,7 +113,7 @@ export default async function handler(req, res) {
     before_state: { [balanceField]: currentBalance },
     after_state: { [balanceField]: newBalance },
     reason: `${reason}${case_reference ? ` | Case: ${case_reference}` : ''}`,
-  }).catch(() => {})
+  }).then(() => {}, () => {})
 
   return res.status(200).json({
     message: `Wallet ${direction}ed successfully`,

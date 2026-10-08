@@ -111,5 +111,5 @@ async function logAudit(client, actor, action, targetType, targetId, before, aft
     actor_role: actor.role,
     action, target_type: targetType, target_id: targetId,
     before_state: before, after_state: after,
-  }).catch(() => {})
+  }).then(() => {}, () => {})
 }
