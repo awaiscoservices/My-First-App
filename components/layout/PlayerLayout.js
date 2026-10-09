@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react'
 import Head from 'next/head'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
@@ -100,11 +100,29 @@ function WinsTicker() {
   )
 }
 
+// Each player page renders its own PlayerLayout, so it is rebuilt on every click.
+// This cache (lives until the tab is reloaded) keeps balances and the sidebar scroll from resetting.
+const cache = { profile: null, wallet: null, unread: 0, navScroll: 0 }
+const useIsoLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
+
 export default function PlayerLayout({ children }) {
   const router = useRouter()
-  const [profile, setProfile] = useState(null)
-  const [wallet, setWallet] = useState(null)
-  const [unread, setUnread] = useState(0)
+  const [profile, setProfile] = useState(cache.profile)
+  const [wallet, setWallet] = useState(cache.wallet)
+  const [unread, setUnread] = useState(cache.unread)
+  const navRef = useRef(null)
+
+  useIsoLayoutEffect(() => {
+    const nav = navRef.current
+    if (!nav) return
+    nav.scrollTop = cache.navScroll
+    const el = nav.querySelector('.nav-link.active')
+    if (el) {
+      const n = nav.getBoundingClientRect(), e = el.getBoundingClientRect()
+      if (e.top < n.top || e.bottom > n.bottom) nav.scrollTop += (e.top - n.top) - (n.height / 2 - e.height / 2)
+    }
+    cache.navScroll = nav.scrollTop
+  }, [router.pathname])
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [signingOut, setSigningOut] = useState(false)
   const [promoOpen, setPromoOpen] = useState(true)
@@ -122,6 +140,7 @@ export default function PlayerLayout({ children }) {
       supabase.from('notifications').select('*', { count: 'exact', head: true })
         .eq('user_id', user.id).eq('is_read', false),
     ])
+    cache.profile = prof; cache.wallet = wal; cache.unread = count || 0
     setProfile(prof); setWallet(wal); setUnread(count || 0)
   }, [])
 
@@ -136,6 +155,7 @@ export default function PlayerLayout({ children }) {
   async function handleSignOut() {
     setSigningOut(true)
     await supabase.auth.signOut()
+    cache.profile = null; cache.wallet = null; cache.unread = 0; cache.navScroll = 0
     window.location.href = '/'   // full reload to the home page so no old session state lingers
   }
 
@@ -197,7 +217,7 @@ export default function PlayerLayout({ children }) {
         borderRight: '1px solid rgba(251,191,36,.1)',
         display: 'flex', flexDirection: 'column',
       }}>
-        <nav style={{ flex: 1, overflowY: 'auto', padding: '14px 12px', scrollbarWidth: 'none' }}>
+        <nav ref={navRef} onScroll={e => { cache.navScroll = e.currentTarget.scrollTop }} style={{ flex: 1, overflowY: 'auto', padding: '14px 12px', scrollbarWidth: 'none' }}>
           {NAV_GROUPS.map(group => (
             <div key={group.title} style={{ marginBottom: 18 }}>
               <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '.2em', textTransform: 'uppercase', color: 'rgba(251,191,36,.7)', padding: '4px 12px 8px' }}>{group.title}</div>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useLayoutEffect, useRef } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
@@ -115,15 +115,36 @@ const PENDING_COLORS = {
   '/admin/withdrawals':   '#3b82f6',
   '/admin/kyc':           '#ec4899',
   '/admin/support':       '#6366f1',
+  '/admin/game-loads':    '#14b8a6',
 }
+
+// Every admin page renders its own AdminLayout, so it is rebuilt on each click.
+// This small cache (lives until the browser tab is reloaded) lets the new copy start
+// exactly where the old one left off: no "Verifying access…" flash, same badges, same sidebar scroll.
+const cache = { profile: null, counts: {}, navScroll: 0 }
+const useIsoLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
 
 export default function AdminLayout({ children }) {
   const router = useRouter()
-  const [profile, setProfile] = useState(null)
-  const [pendingCounts, setPendingCounts] = useState({})
+  const [profile, setProfile] = useState(cache.profile)
+  const [pendingCounts, setPendingCounts] = useState(cache.counts)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [signingOut, setSigningOut] = useState(false)
-  const [authorized, setAuthorized] = useState(false)
+  const [authorized, setAuthorized] = useState(!!cache.profile)
+  const navRef = useRef(null)
+
+  // restore the sidebar scroll position, and make sure the active link is visible
+  useIsoLayoutEffect(() => {
+    const nav = navRef.current
+    if (!nav) return
+    nav.scrollTop = cache.navScroll
+    const el = nav.querySelector('.admin-nav.active')
+    if (el) {
+      const n = nav.getBoundingClientRect(), e = el.getBoundingClientRect()
+      if (e.top < n.top || e.bottom > n.bottom) nav.scrollTop += (e.top - n.top) - (n.height / 2 - e.height / 2)
+    }
+    cache.navScroll = nav.scrollTop
+  }, [authorized, router.pathname])
 
   useEffect(() => { loadAdminData() }, [])
 
@@ -138,38 +159,45 @@ export default function AdminLayout({ children }) {
       .single()
 
     if (!prof || prof.role === 'player') {
+      cache.profile = null
       router.push('/dashboard')
       return
     }
 
+    cache.profile = prof
     setProfile(prof)
     setAuthorized(true)
     loadPendingCounts()
   }
 
   async function loadPendingCounts() {
-    const [deposits, gameAccounts, redemptions, withdrawals, kyc, support] = await Promise.all([
+    const [deposits, gameAccounts, redemptions, withdrawals, kyc, support, gameLoads] = await Promise.all([
       supabase.from('deposits').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
       supabase.from('game_accounts').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
       supabase.from('redemptions').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
       supabase.from('withdrawals').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
       supabase.from('kyc_records').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
-      supabase.from('support_tickets').select('*', { count: 'exact', head: true }).eq('status', 'open'),
+      supabase.from('support_tickets').select('*', { count: 'exact', head: true }).in('status', ['pending', 'open']),
+      supabase.from('game_loads').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
     ])
-    setPendingCounts({
+    const counts = {
+      '/admin/game-loads':     gameLoads.count || 0,
       '/admin/deposits':       deposits.count || 0,
       '/admin/game-accounts':  gameAccounts.count || 0,
       '/admin/redemptions':    redemptions.count || 0,
       '/admin/withdrawals':    withdrawals.count || 0,
       '/admin/kyc':            kyc.count || 0,
       '/admin/support':        support.count || 0,
-    })
+    }
+    cache.counts = counts
+    setPendingCounts(counts)
   }
 
   async function handleSignOut() {
     setSigningOut(true)
     await supabase.auth.signOut()
-    router.push('/auth/login')
+    cache.profile = null; cache.counts = {}; cache.navScroll = 0
+    window.location.href = '/auth/login'   // full reload so nothing from this session lingers
   }
 
   const isActive = (href) => {
@@ -251,7 +279,7 @@ export default function AdminLayout({ children }) {
           </div>
         )}
 
-        <nav style={{ flex: 1, overflowY: 'auto', padding: '12px', scrollbarWidth: 'none' }}>
+        <nav ref={navRef} onScroll={e => { cache.navScroll = e.currentTarget.scrollTop }} style={{ flex: 1, overflowY: 'auto', padding: '12px', scrollbarWidth: 'none' }}>
           {NAV_SECTIONS.map(section => {
             const visibleItems = section.items.filter(item => BUILT.includes(item.href) && canSee(item.roles))
             if (visibleItems.length === 0) return null
