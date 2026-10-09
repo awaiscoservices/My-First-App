@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import Head from 'next/head'
-import { supabase } from '../../lib/supabase'
+import { adminFetch } from '../../lib/adminFetch'
 import AdminLayout from '../layout/AdminLayout'
 import StatusBadge from '../ui/StatusBadge'
 import { centsToDisplay } from '../ui/MoneyDisplay'
@@ -138,25 +138,18 @@ export default function RequestQueue({ kind }) {
   const [toast, setToast] = useState(null)
   const [loadErr, setLoadErr] = useState('')
 
-  const token = async () => (await supabase.auth.getSession()).data.session?.access_token
-
   const load = useCallback(async () => {
     setLoading(true); setLoadErr('')
-    const res = await fetch(`/api/admin/queue?kind=${kind}&view=${view}`, { headers: { Authorization: `Bearer ${await token()}` } })
-    const j = await res.json()
-    if (!res.ok) setLoadErr(j.error || 'Could not load')
-    else setRows(j.rows || [])
+    const r = await adminFetch(`/api/admin/queue?kind=${kind}&view=${view}`)
+    if (!r.ok) setLoadErr(r.error); else setRows(r.data.rows || [])
     setLoading(false)
   }, [kind, view])
   useEffect(() => { load() }, [load])
 
   async function act(body) {
-    const res = await fetch('/api/admin/requests/action', {
-      method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${await token()}` }, body: JSON.stringify(body),
-    })
-    const j = await res.json()
-    if (!res.ok) return j.error || 'Action failed'
-    setToast(j.message); setTimeout(() => setToast(null), 3500)
+    const r = await adminFetch('/api/admin/requests/action', { method: 'POST', body })
+    if (!r.ok) return r.error || 'Action failed'
+    setToast(r.data.message); setTimeout(() => setToast(null), 3500)
     load()
     return null
   }

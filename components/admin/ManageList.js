@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import Head from 'next/head'
-import { supabase } from '../../lib/supabase'
+import { adminFetch } from '../../lib/adminFetch'
 import AdminLayout from '../layout/AdminLayout'
 import { MANAGE } from '../../lib/adminSchemas'
 
@@ -29,11 +29,10 @@ function Editor({ cfg, kind, row, onSaved, onCancel }) {
     setMsg(null); setBusy(true)
     const fields = {}
     for (const f of cfg.fields) if (creating || d[f.key] !== toInput(f, row[f.key])) fields[f.key] = fromInput(f, d[f.key])
-    const token = (await supabase.auth.getSession()).data.session?.access_token
-    const res = await fetch('/api/admin/manage', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ kind, op: creating ? 'create' : 'update', id: row?.id, fields }) })
-    const j = await res.json(); setBusy(false)
-    if (!res.ok) return setMsg({ ok: false, t: j.error || 'Could not save' })
-    setMsg({ ok: true, t: j.message }); onSaved()
+    const r = await adminFetch('/api/admin/manage', { method: 'POST', body: { kind, op: creating ? 'create' : 'update', id: row?.id, fields } })
+    setBusy(false)
+    if (!r.ok) return setMsg({ ok: false, t: r.error || 'Could not save' })
+    setMsg({ ok: true, t: r.data.message }); onSaved()
   }
 
   return (
@@ -74,10 +73,8 @@ export default function ManageList({ kind }) {
   const [loading, setLoading] = useState(true)
 
   const load = useCallback(async () => {
-    const token = (await supabase.auth.getSession()).data.session?.access_token
-    const res = await fetch(`/api/admin/manage?kind=${kind}`, { headers: { Authorization: `Bearer ${token}` } })
-    const j = await res.json()
-    if (!res.ok) setErr(j.error || 'Could not load'); else { setErr(''); setRows(j.rows || []) }
+    const r = await adminFetch(`/api/admin/manage?kind=${kind}`)
+    if (!r.ok) setErr(r.error); else { setErr(''); setRows(r.data.rows || []) }
     setLoading(false)
   }, [kind])
   useEffect(() => { load() }, [load])

@@ -12,7 +12,7 @@ export default async function handler(req, res) {
   if (!admin) return
 
   if (req.method === 'GET') {
-    const { data, error } = await supabaseAdmin.from('profiles').select('*').in('role', STAFF_ROLES).order('full_name', { ascending: true })
+    const { data, error } = await supabaseAdmin.from('profiles').select('*').neq('role', 'player').order('full_name', { ascending: true })
     if (error) return res.status(500).json({ error: error.message })
     return res.status(200).json({ rows: (data || []).map(p => ({ id: p.id, name: p.full_name, email: p.email || null, role: p.role })), me: admin.id })
   }

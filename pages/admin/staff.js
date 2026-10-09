@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import Head from 'next/head'
-import { supabase } from '../../lib/supabase'
+import { adminFetch } from '../../lib/adminFetch'
 import AdminLayout from '../../components/layout/AdminLayout'
 import { STAFF_ROLES } from '../../lib/adminSchemas'
 
@@ -19,22 +19,23 @@ export default function Staff() {
   const [pick, setPick] = useState({})
   const [busy, setBusy] = useState(false)
 
-  const token = async () => (await supabase.auth.getSession()).data.session?.access_token
+  const [loaded, setLoaded] = useState(false)
+
   const load = useCallback(async () => {
-    const res = await fetch('/api/admin/staff', { headers: { Authorization: `Bearer ${await token()}` } })
-    const j = await res.json()
-    if (!res.ok) return setMsg({ ok: false, t: j.error })
-    setRows(j.rows || []); setMe(j.me)
+    const r = await adminFetch('/api/admin/staff')
+    setLoaded(true)
+    if (!r.ok) return setMsg({ ok: false, t: r.error })
+    setRows(r.data.rows || []); setMe(r.data.me)
   }, [])
   useEffect(() => { load() }, [load])
 
   async function change(body, confirmText) {
     if (confirmText && !window.confirm(confirmText)) return
     setBusy(true); setMsg(null)
-    const res = await fetch('/api/admin/staff', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${await token()}` }, body: JSON.stringify(body) })
-    const j = await res.json(); setBusy(false)
-    setMsg({ ok: res.ok, t: j.message || j.error })
-    if (res.ok) { setEmail(''); setPick({}); load() }
+    const r = await adminFetch('/api/admin/staff', { method: 'POST', body })
+    setBusy(false)
+    setMsg({ ok: r.ok, t: r.ok ? r.data.message : r.error })
+    if (r.ok) { setEmail(''); setPick({}); load() }
   }
 
   return (
@@ -70,7 +71,7 @@ export default function Staff() {
             </div>
           )
         })}
-        {rows.length === 0 && <div style={{ padding: 30, textAlign: 'center', color: 'rgba(255,255,255,.4)' }}>Loading…</div>}
+        {rows.length === 0 && !(msg && !msg.ok) && <div style={{ padding: 30, textAlign: 'center', color: 'rgba(255,255,255,.4)' }}>{loaded ? 'No staff members found.' : 'Loading…'}</div>}
       </div>
     </AdminLayout>
   )

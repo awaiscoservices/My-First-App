@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import Head from 'next/head'
-import { supabase } from '../../lib/supabase'
+import { adminFetch } from '../../lib/adminFetch'
 import AdminLayout from '../layout/AdminLayout'
 import StatusBadge from '../ui/StatusBadge'
 import { centsToDisplay as m } from '../ui/MoneyDisplay'
@@ -40,10 +40,8 @@ export default function BrowseTable({ kind }) {
 
   const load = useCallback(async () => {
     setLoading(true); setErr('')
-    const token = (await supabase.auth.getSession()).data.session?.access_token
-    const res = await fetch(`/api/admin/browse?kind=${kind}&page=${page}&q=${encodeURIComponent(term)}`, { headers: { Authorization: `Bearer ${token}` } })
-    const j = await res.json()
-    if (!res.ok) setErr(j.error || 'Could not load'); else { setRows(j.rows || []); setInfo({ total: j.total || 0, hasMore: !!j.hasMore }) }
+    const r = await adminFetch(`/api/admin/browse?kind=${kind}&page=${page}&q=${encodeURIComponent(term)}`)
+    if (!r.ok) setErr(r.error); else { setRows(r.data.rows || []); setInfo({ total: r.data.total || 0, hasMore: !!r.data.hasMore }) }
     setLoading(false)
   }, [kind, page, term])
   useEffect(() => { load() }, [load])
