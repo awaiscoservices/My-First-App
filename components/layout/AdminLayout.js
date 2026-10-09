@@ -102,7 +102,8 @@ function Icon({ name, size = 18 }) {
 }
 
 // Admin pages that exist. The sidebar only links to these (others would 404). Add a path when you build its page.
-const BUILT = ['/admin', '/admin/players', '/admin/kyc', '/admin/deposits', '/admin/game-accounts', '/admin/game-loads', '/admin/redemptions', '/admin/withdrawals', '/admin/support']
+const BUILT = ['/admin', '/admin/players', '/admin/kyc', '/admin/deposits', '/admin/game-accounts', '/admin/game-loads', '/admin/redemptions', '/admin/withdrawals', '/admin/support',
+  '/admin/wallets', '/admin/transactions', '/admin/adjustments', '/admin/games', '/admin/payments', '/admin/levels', '/admin/staff', '/admin/audit-logs']
 
 const GOLD = '#fbbf24'
 
