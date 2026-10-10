@@ -16,7 +16,7 @@ export default function AdminAuditLogs() {
 
   const fetchLogs = useCallback(async () => {
     setLoading(true);
-    let q = supabase.from('audit_logs').select('id, action, performed_by, target_type, target_id, details, created_at, staff:performed_by(email)')
+    let q = supabase.from('audit_logs').select('id, action, performed_by, target_type, target_id, details, created_at, performed_by_profile:performed_by(full_name, email)')
       .order('created_at', { ascending: false })
       .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
     if (actionFilter) q = q.eq('action', actionFilter);

@@ -17,7 +17,7 @@ export default function AdminRisk() {
   const fetchFlags = useCallback(async () => {
     setLoading(true);
     const { data } = await supabase.from('risk_flags')
-      .select('id, reason, note, status, created_at, resolved_at, players:player_id(id, display_name, email)')
+      .select('id, reason, note, status, created_at, resolved_at, profiles:user_id(id, full_name, email)')
       .eq('status', filter).order('created_at', { ascending: false }).limit(100);
     setFlags(data || []);
     setLoading(false);
@@ -29,7 +29,7 @@ export default function AdminRisk() {
 
   const searchPlayers = async () => {
     if (!playerSearch.trim()) return;
-    const { data } = await supabase.from('players').select('id, display_name, email').or(`email.ilike.%${playerSearch}%,display_name.ilike.%${playerSearch}%`).limit(5);
+    const { data } = await supabase.from('profiles').select('id, full_name, email').or(`email.ilike.%${playerSearch}%,full_name.ilike.%${playerSearch}%`).limit(5);
     setSearchResults(data||[]);
   };
 
@@ -40,7 +40,7 @@ export default function AdminRisk() {
     setSubmitting(true);
     try {
       const body = modal.action === 'flag'
-        ? { action: 'flag', player_id: modal.player.id, reason, note }
+        ? { action: 'flag', user_id: modal.player.id, reason, note }
         : { action: 'unflag', flag_id: modal.flag.id, note };
       const res = await fetch('/api/admin/risk/action', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
       const d = await res.json();
@@ -81,8 +81,8 @@ export default function AdminRisk() {
                 {flags.map((f,i) => (
                   <tr key={f.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: i%2===0?'rgba(255,255,255,0.02)':'transparent' }}>
                     <td style={{ padding: '10px 12px', color: '#e2e8f0' }}>
-                      <div style={{ fontWeight: 600 }}>{f.players?.display_name||'—'}</div>
-                      <div style={{ fontSize: 12, color: '#64748b' }}>{f.players?.email}</div>
+                      <div style={{ fontWeight: 600 }}>{f.profiles??.full_name||'—'}</div>
+                      <div style={{ fontSize: 12, color: '#64748b' }}>{f.profiles??.email}</div>
                     </td>
                     <td style={{ padding: '10px 12px', color: '#f87171', fontSize: 13 }}>{f.reason||'—'}</td>
                     <td style={{ padding: '10px 12px', color: '#94a3b8', fontSize: 13, maxWidth: 200 }}>{f.note||'—'}</td>
@@ -110,13 +110,13 @@ export default function AdminRisk() {
                   <input value={playerSearch} onChange={e=>setPlayerSearch(e.target.value)} onKeyDown={e=>e.key==='Enter'&&searchPlayers()} placeholder="Search player…" style={{ flex: 1, padding: '9px 12px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: '#e2e8f0', fontSize: 14, outline: 'none' }} />
                   <button onClick={searchPlayers} style={{ padding: '9px 14px', borderRadius: 8, border: 'none', background: '#fbbf24', color: '#0f172a', cursor: 'pointer', fontWeight: 700 }}>Find</button>
                 </div>
-                {searchResults.map(p => <div key={p.id} onClick={() => setModal(m=>({...m,player:p}))} style={{ padding: '8px 12px', borderRadius: 8, background: 'rgba(255,255,255,0.04)', cursor: 'pointer', marginBottom: 4, border: '1px solid rgba(255,255,255,0.06)' }}><span style={{ color: '#e2e8f0', fontWeight: 600 }}>{p.display_name}</span><span style={{ color: '#64748b', fontSize: 12, marginLeft: 8 }}>{p.email}</span></div>)}
+                {searchResults.map(p => <div key={p.id} onClick={() => setModal(m=>({...m,player:p}))} style={{ padding: '8px 12px', borderRadius: 8, background: 'rgba(255,255,255,0.04)', cursor: 'pointer', marginBottom: 4, border: '1px solid rgba(255,255,255,0.06)' }}><span style={{ color: '#e2e8f0', fontWeight: 600 }}>{p.full_name}</span><span style={{ color: '#64748b', fontSize: 12, marginLeft: 8 }}>{p.email}</span></div>)}
               </div>
             )}
 
             {modal.action === 'flag' && modal.player && (
               <div style={{ padding: 12, background: 'rgba(248,113,113,0.08)', borderRadius: 8, border: '1px solid rgba(248,113,113,0.2)', marginBottom: 14 }}>
-                <div style={{ color: '#e2e8f0', fontWeight: 600 }}>{modal.player.display_name}</div>
+                <div style={{ color: '#e2e8f0', fontWeight: 600 }}>{modal.player.full_name}</div>
                 <div style={{ color: '#64748b', fontSize: 12 }}>{modal.player.email}</div>
               </div>
             )}
@@ -124,7 +124,7 @@ export default function AdminRisk() {
             {modal.action === 'unflag' && (
               <div style={{ padding: 12, background: 'rgba(255,255,255,0.05)', borderRadius: 8, marginBottom: 14 }}>
                 <div style={{ color: '#f87171', fontSize: 13 }}>{modal.flag?.reason}</div>
-                <div style={{ color: '#e2e8f0', fontWeight: 600 }}>{modal.flag?.players?.display_name}</div>
+                <div style={{ color: '#e2e8f0', fontWeight: 600 }}>{modal.flag?.players?.full_name}</div>
               </div>
             )}
 

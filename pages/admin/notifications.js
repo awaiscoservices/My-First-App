@@ -11,7 +11,7 @@ export default function AdminNotifications() {
 
   const fetchHistory = async () => {
     setLoading(true);
-    const { data } = await supabase.from('broadcast_notifications').select('*').order('created_at', { ascending: false }).limit(50);
+    const { data } = await supabase.from('audit_logs').select('id, action, details, created_at, performed_by').eq('action', 'notification_broadcast').order('created_at', { ascending: false }).limit(50);
     setHistory(data || []);
     setLoading(false);
   };
