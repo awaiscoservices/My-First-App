@@ -12,7 +12,7 @@ export default function AdminLevels() {
 
   const fetchLevels = async () => {
     setLoading(true);
-    const { data } = await supabase.from('vip_levels').select('*').order('level_number');
+    const { data } = await supabase.from('player_levels').select('*').order('level_number');
     setLevels(data || []);
     setLoading(false);
   };

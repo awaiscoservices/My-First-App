@@ -14,7 +14,7 @@ export default function AdminKyc() {
   const fetchItems = useCallback(async () => {
     setLoading(true);
     const { data } = await supabase
-      .from('kyc_submissions')
+      .from('kyc_records')
       .select('id, status, doc_type, doc_url, created_at, updated_at, players:player_id(id, display_name, email)')
       .eq('status', filter)
       .order('created_at', { ascending: true })

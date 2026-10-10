@@ -16,7 +16,7 @@ export default function AdminTransactions() {
 
   const fetchItems = useCallback(async () => {
     setLoading(true);
-    let q = supabase.from('ledger_entries')
+    let q = supabase.from('ledger')
       .select('id, ref_id, type, direction, amount_cents, created_at, players:player_id(display_name, email)', { count: 'exact' })
       .order('created_at', { ascending: false })
       .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);

@@ -1,42 +1,48 @@
-import { createPagesServerClient } from '../../../../lib/supabaseServer';
+import { createClient } from '@supabase/supabase-js'
 
-const ALLOWED_ROLES = ['super_admin', 'kyc_agent'];
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+)
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
 
-  const supabase = createPagesServerClient({ req, res });
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) return res.status(401).json({ error: 'Unauthorized' });
+  const token = req.headers.authorization?.replace('Bearer ', '')
+  if (!token) return res.status(401).json({ error: 'Unauthorized' })
+  const { data: { user }, error: authErr } = await supabaseAdmin.auth.getUser(token)
+  if (authErr || !user) return res.status(401).json({ error: 'Unauthorized' })
+  const { data: admin } = await supabaseAdmin.from('profiles').select('id, role').eq('id', user.id).single()
+  if (!admin || !['super_admin', 'kyc_agent'].includes(admin.role)) return res.status(403).json({ error: 'Forbidden' })
 
-  const svc = createPagesServerClient({ req, res }, {
-    supabaseKey: process.env.SUPABASE_SERVICE_ROLE_KEY,
-    supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
-  });
+  const { id, action, reason } = req.body
+  if (!id || !['verified', 'rejected', 'more_info_required'].includes(action)) return res.status(400).json({ error: 'Invalid params' })
+  if (['rejected', 'more_info_required'].includes(action) && !reason?.trim()) return res.status(400).json({ error: 'Reason required' })
 
-  const { data: staff } = await svc.from('staff_profiles').select('role').eq('user_id', session.user.id).single();
-  if (!staff || !ALLOWED_ROLES.includes(staff.role)) return res.status(403).json({ error: 'Forbidden' });
+  const { data: rec } = await supabaseAdmin.from('kyc_records').select('*').eq('id', id).single()
+  if (!rec) return res.status(404).json({ error: 'Not found' })
+  if (!['pending', 'under_review'].includes(rec.status)) return res.status(409).json({ error: `Already ${rec.status}` })
 
-  const { kyc_id, action, reason } = req.body;
-  if (!kyc_id || !['approve', 'reject'].includes(action)) return res.status(400).json({ error: 'Invalid params' });
-  if (action === 'reject' && !reason?.trim()) return res.status(400).json({ error: 'Reason required' });
+  const { error: updateErr } = await supabaseAdmin.from('kyc_records').update({
+    status: action, rejection_reason: reason?.trim() || null,
+    reviewed_by: admin.id, reviewed_at: new Date().toISOString(),
+  }).eq('id', id)
+  if (updateErr) return res.status(500).json({ error: updateErr.message })
 
-  const { data: kyc, error: fetchErr } = await svc.from('kyc_submissions').select('*').eq('id', kyc_id).single();
-  if (fetchErr || !kyc) return res.status(404).json({ error: 'Not found' });
-  if (kyc.status !== 'pending') return res.status(409).json({ error: 'Already processed' });
+  await supabaseAdmin.from('profiles').update({ kyc_status: action }).eq('id', rec.user_id)
 
-  const newStatus = action === 'approve' ? 'approved' : 'rejected';
+  await supabaseAdmin.from('notifications').insert({
+    user_id: rec.user_id, type: `kyc_${action}`,
+    title: action === 'verified' ? 'Identity Verified ✅' : action === 'rejected' ? 'Verification Rejected' : 'More Information Needed',
+    message: action === 'verified' ? 'Your identity is verified. Withdrawals are now unlocked.' : `${reason}`,
+    read: false, created_at: new Date().toISOString()
+  })
 
-  const { error: updateErr } = await svc.from('kyc_submissions').update({ status: newStatus, reviewed_by: session.user.id, reviewed_at: new Date().toISOString(), rejection_reason: reason || null }).eq('id', kyc_id);
-  if (updateErr) return res.status(500).json({ error: updateErr.message });
+  await supabaseAdmin.from('audit_logs').insert({
+    action: `kyc_${action}`, performed_by: admin.id,
+    target_type: 'kyc_record', target_id: id,
+    details: { user_id: rec.user_id, reason: reason || null }
+  })
 
-  if (action === 'approve') {
-    await svc.from('players').update({ kyc_status: 'verified' }).eq('id', kyc.player_id);
-  }
-
-  await svc.from('notifications').insert({ player_id: kyc.player_id, type: 'kyc_result', title: action === 'approve' ? 'KYC Approved' : 'KYC Rejected', message: action === 'approve' ? 'Your identity has been verified.' : `KYC rejected: ${reason}`, read: false });
-
-  await svc.from('audit_logs').insert({ action: `kyc_${action}`, performed_by: session.user.id, target_type: 'kyc_submission', target_id: kyc_id, details: { player_id: kyc.player_id, reason: reason || null } });
-
-  return res.status(200).json({ success: true });
+  return res.status(200).json({ success: true })
 }

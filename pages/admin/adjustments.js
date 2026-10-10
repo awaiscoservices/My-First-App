@@ -23,7 +23,7 @@ export default function AdminAdjustments() {
 
   const selectPlayer = async (p) => {
     setPlayer(p); setResults([]);
-    const { data } = await supabase.from('ledger_entries').select('*').eq('player_id', p.id).eq('type','adjustment').order('created_at',{ascending:false}).limit(20);
+    const { data } = await supabase.from('ledger').select('*').eq('user_id', p.id).eq('type','adjustment').order('created_at',{ascending:false}).limit(20);
     setHistory(data || []);
   };
 
