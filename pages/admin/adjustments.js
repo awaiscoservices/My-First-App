@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import AdminLayout from '../../components/layout/AdminLayout';
-import { createPagesBrowserClient } from '@supabase/ssr';
-const supabase = createPagesBrowserClient();
+import { supabase } from '../../lib/supabase';
 
 export default function AdminAdjustments() {
   const [query, setQuery] = useState('');

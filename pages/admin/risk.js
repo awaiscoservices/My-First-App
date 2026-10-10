@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import AdminLayout from '../../components/layout/AdminLayout';
-import { createPagesBrowserClient } from '@supabase/ssr';
-const supabase = createPagesBrowserClient();
+import { supabase } from '../../lib/supabase';
 
 export default function AdminRisk() {
   const [flags, setFlags] = useState([]);

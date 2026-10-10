@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import AdminLayout from '../../components/layout/AdminLayout';
-import { createPagesBrowserClient } from '@supabase/ssr';
-const supabase = createPagesBrowserClient();
+import { supabase } from '../../lib/supabase';
 
 export default function AdminNotifications() {
   const [form, setForm] = useState({ title: '', message: '', target: 'all', min_level: 1, send_at: '' });

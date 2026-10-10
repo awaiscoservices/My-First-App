@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import AdminLayout from '../../components/layout/AdminLayout';
-import { createPagesBrowserClient } from '@supabase/ssr';
-const supabase = createPagesBrowserClient();
+import { supabase } from '../../lib/supabase';
 
 const ROLES = ['super_admin','finance','game_ops','support','kyc_agent','risk','reporting','marketing'];
 

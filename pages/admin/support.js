@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import AdminLayout from '../../components/layout/AdminLayout';
-import { createPagesBrowserClient } from '@supabase/ssr';
-const supabase = createPagesBrowserClient();
+import { supabase } from '../../lib/supabase';
 
 const PRIORITY_COLOR = { low: '#64748b', medium: '#fbbf24', high: '#f87171', urgent: '#dc2626' };
 

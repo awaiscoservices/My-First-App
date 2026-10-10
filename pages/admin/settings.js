@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import AdminLayout from '../../components/layout/AdminLayout';
-import { createPagesBrowserClient } from '@supabase/ssr';
-const supabase = createPagesBrowserClient();
+import { supabase } from '../../lib/supabase';
 
 const SETTING_DEFS = [
   { key: 'maintenance_mode', label: 'Maintenance Mode', type: 'boolean', description: 'Prevents new logins and deposits when enabled' },

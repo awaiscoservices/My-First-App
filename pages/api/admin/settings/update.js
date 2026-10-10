@@ -1,4 +1,4 @@
-import { createPagesServerClient } from '@supabase/ssr';
+import { createPagesServerClient } from '../../../../lib/supabaseServer';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });

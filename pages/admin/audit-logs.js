@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import AdminLayout from '../../components/layout/AdminLayout';
-import { createPagesBrowserClient } from '@supabase/ssr';
-const supabase = createPagesBrowserClient();
+import { supabase } from '../../lib/supabase';
 
 const ACTIONS = ['','kyc_approve','kyc_reject','game_load_approve','game_load_reject','redemption_approve','redemption_reject','withdrawal_approve','withdrawal_reject','adjustment_credit','adjustment_debit','staff_invite','staff_role_change','staff_activate','staff_deactivate','game_create','game_update','promo_create','promo_update','level_update','setting_update','risk_flag','risk_unflag'];
 

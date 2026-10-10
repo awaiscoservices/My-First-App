@@ -1,4 +1,4 @@
-import { createPagesServerClient } from '@supabase/ssr';
+import { createPagesServerClient } from '../../../../lib/supabaseServer';
 
 const ALLOWED_ROLES = ['super_admin', 'kyc_agent'];
 

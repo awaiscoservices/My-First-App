@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import AdminLayout from '../../components/layout/AdminLayout';
-import { createPagesBrowserClient } from '@supabase/ssr';
-const supabase = createPagesBrowserClient();
+import { supabase } from '../../lib/supabase';
 
 const Tile = ({ label, value, color = '#e2e8f0' }) => (
   <div style={{ background: 'rgba(255,255,255,0.04)', borderRadius: 10, padding: '16px 20px', border: '1px solid rgba(255,255,255,0.06)' }}>

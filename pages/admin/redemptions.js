@@ -1,8 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import AdminLayout from '../../components/layout/AdminLayout';
-import { createPagesBrowserClient } from '@supabase/ssr';
+import { supabase } from '../../lib/supabase';
 
-const supabase = createPagesBrowserClient();
 
 export default function AdminRedemptions() {
   const [items, setItems] = useState([]);

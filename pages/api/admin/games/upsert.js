@@ -1,4 +1,4 @@
-import { createPagesServerClient } from '@supabase/ssr';
+import { createPagesServerClient } from '../../../../lib/supabaseServer';
 import crypto from 'crypto';
 
 const ALGO = 'aes-256-gcm';
