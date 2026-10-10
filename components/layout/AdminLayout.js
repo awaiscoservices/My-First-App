@@ -73,6 +73,20 @@ const BUILT = new Set([
   '/admin/game-loads',
   '/admin/redemptions',
   '/admin/withdrawals',
+  // Phase 6
+  '/admin/kyc',
+  '/admin/support',
+  '/admin/wallets',
+  '/admin/transactions',
+  '/admin/adjustments',
+  '/admin/games',
+  '/admin/promotions',
+  '/admin/levels',
+  '/admin/staff',
+  '/admin/audit-logs',
+  '/admin/settings',
+  '/admin/risk',
+  '/admin/notifications',
 ])
 
 const ICONS = {
