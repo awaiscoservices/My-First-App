@@ -1,212 +1,312 @@
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
 import Head from 'next/head'
-import Link from 'next/link'
-import { supabase } from '../../lib/supabase'
 import AdminLayout from '../../components/layout/AdminLayout'
-import MoneyDisplay from '../../components/ui/MoneyDisplay'
+import { supabase } from '../../lib/supabase'
 
-function StatCard({ label, value, sub, color, icon, href }) {
-  const [hov, setHov] = useState(false)
-  const inner = (
-    <div onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)} style={{
-      padding: '20px', borderRadius: 16,
-      background: hov ? `${color}12` : 'rgba(255,255,255,.03)',
-      border: `1px solid ${hov ? color + '40' : 'rgba(255,255,255,.07)'}`,
-      transition: 'all .2s', cursor: href ? 'pointer' : 'default',
-      transform: hov && href ? 'translateY(-2px)' : 'none',
+const gold = '#fbbf24'
+const green = '#22c55e'
+const red = '#ef4444'
+const purple = '#a855f7'
+const blue = '#3b82f6'
+
+function StatCard({ label, value, sub, color = gold, icon }) {
+  return (
+    <div style={{
+      background: 'rgba(255,255,255,0.03)',
+      border: `1px solid ${color}22`,
+      borderRadius: 14,
+      padding: '20px 22px',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 6,
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-        <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,.4)' }}>{label}</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
         <span style={{ fontSize: 20 }}>{icon}</span>
+        <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', letterSpacing: '0.5px', textTransform: 'uppercase', fontWeight: 500 }}>{label}</span>
       </div>
-      <div style={{ fontFamily: "'Cinzel Decorative',serif", fontSize: 28, fontWeight: 900, color, lineHeight: 1, marginBottom: 6 }}>{value}</div>
-      {sub && <div style={{ fontSize: 11, color: 'rgba(255,255,255,.3)', fontWeight: 500 }}>{sub}</div>}
+      <div style={{ fontSize: 28, fontWeight: 700, color, fontFamily: 'Outfit, sans-serif' }}>{value}</div>
+      {sub && <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)' }}>{sub}</div>}
     </div>
   )
-  return href ? <Link href={href} style={{ textDecoration: 'none' }}>{inner}</Link> : inner
 }
 
-function PendingRow({ label, count, href, color }) {
-  if (!count) return null
+// Inline bar chart — no external deps
+function BarChart({ data, color = gold, height = 120 }) {
+  if (!data?.length) return <div style={{ height, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.2)', fontSize: 13 }}>No data</div>
+  const max = Math.max(...data.map(d => d.value), 1)
   return (
-    <Link href={href} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '13px 16px', borderRadius: 12, background: `${color}0d`, border: `1px solid ${color}25`, marginBottom: 8, transition: 'all .15s' }}
-      onMouseEnter={e => e.currentTarget.style.background = `${color}18`}
-      onMouseLeave={e => e.currentTarget.style.background = `${color}0d`}>
-      <span style={{ fontSize: 13, color: 'rgba(255,255,255,.7)', fontWeight: 600 }}>{label}</span>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <span style={{ background: color, color: '#fff', fontSize: 11, fontWeight: 800, padding: '3px 10px', borderRadius: 99 }}>{count} pending</span>
-        <span style={{ color, fontSize: 14 }}>→</span>
-      </div>
-    </Link>
+    <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4, height, padding: '0 4px' }}>
+      {data.map((d, i) => (
+        <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, height: '100%', justifyContent: 'flex-end' }}>
+          <div
+            title={`${d.label}: ${d.display || d.value}`}
+            style={{
+              width: '100%',
+              height: `${Math.max((d.value / max) * (height - 24), 2)}px`,
+              background: `linear-gradient(to top, ${color}cc, ${color}66)`,
+              borderRadius: '4px 4px 0 0',
+              transition: 'height 0.5s ease',
+              cursor: 'default',
+            }}
+          />
+          <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)', whiteSpace: 'nowrap', overflow: 'hidden', maxWidth: '100%', textAlign: 'center' }}>
+            {d.label}
+          </span>
+        </div>
+      ))}
+    </div>
   )
+}
+
+// Sparkline using inline SVG
+function Sparkline({ values, color = gold, width = 200, height = 40 }) {
+  if (!values?.length) return null
+  const max = Math.max(...values, 1)
+  const min = Math.min(...values, 0)
+  const range = max - min || 1
+  const pts = values.map((v, i) => {
+    const x = (i / (values.length - 1)) * width
+    const y = height - ((v - min) / range) * (height - 4) - 2
+    return `${x},${y}`
+  }).join(' ')
+  return (
+    <svg width={width} height={height} style={{ overflow: 'visible' }}>
+      <polyline points={pts} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <polyline points={`0,${height} ${pts} ${width},${height}`} fill={`${color}18`} stroke="none" />
+    </svg>
+  )
+}
+
+function fmt(cents) {
+  return `$${((cents || 0) / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+}
+function fmtNum(n) {
+  return Number(n || 0).toLocaleString()
+}
+
+const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
+function last7Labels() {
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(); d.setDate(d.getDate() - 6 + i); return DAYS[d.getDay()]
+  })
 }
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState(null)
-  const [recentDeposits, setRecentDeposits] = useState([])
-  const [recentPlayers, setRecentPlayers] = useState([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => { loadStats() }, [])
+  useEffect(() => { fetchStats() }, [])
 
-  async function loadStats() {
-    const [
-      { count: totalPlayers },
-      { count: verifiedPlayers },
-      { count: pendingDeposits },
-      { count: pendingGameAccounts },
-      { count: pendingRedemptions },
-      { count: pendingWithdrawals },
-      { count: pendingKyc },
-      { count: openTickets },
-      { data: depositStats },
-      { data: deposits },
-      { data: players },
-    ] = await Promise.all([
-      supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'player'),
-      supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'player').eq('kyc_status', 'verified'),
-      supabase.from('deposits').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
-      supabase.from('game_accounts').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
-      supabase.from('redemptions').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
-      supabase.from('withdrawals').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
-      supabase.from('kyc_records').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
-      supabase.from('support_tickets').select('*', { count: 'exact', head: true }).eq('status', 'open'),
-      supabase.from('deposits').select('amount_cents, bonus_cents').eq('status', 'approved'),
-      supabase.from('deposits').select('*, profiles(full_name, email), payment_methods(name)').order('created_at', { ascending: false }).limit(6),
-      supabase.from('profiles').select('*').eq('role', 'player').order('created_at', { ascending: false }).limit(5),
-    ])
+  const fetchStats = async () => {
+    setLoading(true)
+    const { data: { session } } = await supabase.auth.getSession()
+    const token = session?.access_token
+    if (!token) { setLoading(false); return }
 
-    const totalDeposited = (depositStats || []).reduce((s, d) => s + (d.amount_cents || 0), 0)
-    const totalBonus = (depositStats || []).reduce((s, d) => s + (d.bonus_cents || 0), 0)
-
-    setStats({
-      totalPlayers: totalPlayers || 0,
-      verifiedPlayers: verifiedPlayers || 0,
-      pendingDeposits: pendingDeposits || 0,
-      pendingGameAccounts: pendingGameAccounts || 0,
-      pendingRedemptions: pendingRedemptions || 0,
-      pendingWithdrawals: pendingWithdrawals || 0,
-      pendingKyc: pendingKyc || 0,
-      openTickets: openTickets || 0,
-      totalDeposited,
-      totalBonus,
-      totalPending: (pendingDeposits || 0) + (pendingGameAccounts || 0) + (pendingRedemptions || 0) + (pendingWithdrawals || 0),
-    })
-    setRecentDeposits(deposits || [])
-    setRecentPlayers(players || [])
+    try {
+      const res = await fetch('/api/admin/analytics', {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setStats(data)
+      }
+    } catch (e) {
+      console.error('Analytics fetch error', e)
+    }
     setLoading(false)
   }
 
-  if (loading) return (
-    <AdminLayout>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 300 }}>
-        <div style={{ color: 'rgba(255,255,255,.4)', fontSize: 14 }}>Loading dashboard…</div>
-      </div>
-    </AdminLayout>
-  )
+  const s = stats || {}
+  const labels7 = last7Labels()
 
   return (
     <AdminLayout>
-      <Head><title>Admin Dashboard — Casinoze Room</title></Head>
+      <Head><title>Dashboard — Casinoze Admin</title></Head>
+      <div style={{ fontFamily: 'Outfit, sans-serif', color: '#fff' }}>
 
-      <div style={{ marginBottom: 24 }}>
-        <h1 style={{ fontFamily: "'Cinzel',serif", fontSize: 24, fontWeight: 700, color: '#fff', marginBottom: 4 }}>Operations Dashboard</h1>
-        <p style={{ color: 'rgba(255,255,255,.35)', fontSize: 13 }}>{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
-      </div>
-
-      {/* ── STAT CARDS ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(180px,100%),1fr))', gap: 12, marginBottom: 24 }}>
-        <StatCard label="Total Players"     value={stats.totalPlayers}      icon="👥" color="#fbbf24" href="/admin/players" sub={`${stats.verifiedPlayers} verified`} />
-        <StatCard label="Total Deposited"   value={<MoneyDisplay cents={stats.totalDeposited} size="lg" color="#10b981" />} icon="💳" color="#10b981" href="/admin/deposits" sub="All time approved" />
-        <StatCard label="Total Bonus Paid"  value={<MoneyDisplay cents={stats.totalBonus} size="lg" color="#f59e0b" />}     icon="🎁" color="#f59e0b" sub="All time bonus credits" />
-        <StatCard label="Pending Actions"   value={stats.totalPending}      icon="⏳" color="#ef4444" sub="Needs attention" />
-        <StatCard label="KYC Pending"       value={stats.pendingKyc}        icon="🔐" color="#ec4899" href="/admin/kyc" sub="Awaiting review" />
-        <StatCard label="Open Tickets"      value={stats.openTickets}       icon="💬" color="#6366f1" href="/admin/support" sub="Support requests" />
-      </div>
-
-      {/* ── PENDING ACTIONS ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 24 }}>
-        <div style={{ background: 'rgba(255,255,255,.02)', border: '1px solid rgba(255,255,255,.07)', borderRadius: 18, padding: '20px' }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: '#fff', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
-            ⏳ Pending Actions
-            {stats.totalPending > 0 && <span style={{ background: '#ef4444', color: '#fff', fontSize: 10, fontWeight: 800, padding: '2px 7px', borderRadius: 99 }}>{stats.totalPending}</span>}
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 28 }}>
+          <div>
+            <h1 style={{ fontSize: 24, fontWeight: 700, color: gold, margin: 0 }}>Platform Overview</h1>
+            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginTop: 4 }}>
+              Live stats · {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+            </p>
           </div>
-          <PendingRow label="Deposits to Approve"     count={stats.pendingDeposits}      href="/admin/deposits"      color="#10b981" />
-          <PendingRow label="Game Accounts to Setup"  count={stats.pendingGameAccounts}   href="/admin/game-accounts" color="#fbbf24" />
-          <PendingRow label="Redemptions to Process"  count={stats.pendingRedemptions}    href="/admin/redemptions"   color="#f59e0b" />
-          <PendingRow label="Withdrawals to Pay"      count={stats.pendingWithdrawals}    href="/admin/withdrawals"   color="#3b82f6" />
-          {stats.totalPending === 0 && (
-            <div style={{ textAlign: 'center', padding: '20px 0', color: 'rgba(255,255,255,.3)', fontSize: 13 }}>✅ All caught up!</div>
-          )}
+          <button
+            onClick={fetchStats}
+            style={{
+              padding: '8px 18px',
+              background: 'rgba(251,191,36,0.1)',
+              border: '1px solid rgba(251,191,36,0.3)',
+              borderRadius: 8,
+              color: gold,
+              fontSize: 13,
+              cursor: 'pointer',
+              fontFamily: 'Outfit, sans-serif',
+            }}
+          >
+            ↻ Refresh
+          </button>
         </div>
 
-        {/* Recent deposits */}
-        <div style={{ background: 'rgba(255,255,255,.02)', border: '1px solid rgba(255,255,255,.07)', borderRadius: 18, overflow: 'hidden' }}>
-          <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>Recent Deposits</span>
-            <Link href="/admin/deposits" style={{ fontSize: 11, color: '#fbbf24', fontWeight: 600, textDecoration: 'none' }}>View All →</Link>
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: '60px 0', color: 'rgba(255,255,255,0.3)', fontSize: 14 }}>
+            <div style={{
+              width: 32, height: 32, border: `3px solid rgba(251,191,36,0.2)`,
+              borderTopColor: gold, borderRadius: '50%',
+              animation: 'spin 0.8s linear infinite',
+              margin: '0 auto 16px',
+            }} />
+            <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+            Loading analytics…
           </div>
-          {recentDeposits.map((d, i) => (
-            <div key={d.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '11px 18px', borderBottom: i < recentDeposits.length - 1 ? '1px solid rgba(255,255,255,.04)' : 'none' }}>
-              <div>
-                <div style={{ fontSize: 12, fontWeight: 700, color: '#fff' }}>{d.profiles?.full_name || d.profiles?.email}</div>
-                <div style={{ fontSize: 10, color: 'rgba(255,255,255,.3)', marginTop: 1 }}>{d.reference_id} · {d.payment_methods?.name}</div>
+        ) : (
+          <>
+            {/* KPI Cards Row 1 */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 16, marginBottom: 24 }}>
+              <StatCard icon="👥" label="Total Players" value={fmtNum(s.total_players)} sub={`${fmtNum(s.new_players_today)} new today`} color={blue} />
+              <StatCard icon="💰" label="Total Deposits" value={fmt(s.total_deposits_cents)} sub={`${fmtNum(s.deposits_count)} transactions`} color={green} />
+              <StatCard icon="📤" label="Total Withdrawals" value={fmt(s.total_withdrawals_cents)} sub={`${fmtNum(s.withdrawals_count)} paid out`} color={red} />
+              <StatCard icon="🎮" label="Active Game Accounts" value={fmtNum(s.active_game_accounts)} sub={`${fmtNum(s.pending_game_accounts)} pending`} color={purple} />
+            </div>
+
+            {/* KPI Cards Row 2 */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 16, marginBottom: 32 }}>
+              <StatCard icon="⏳" label="Pending Deposits" value={fmtNum(s.pending_deposits)} sub="Awaiting approval" color={gold} />
+              <StatCard icon="⏳" label="Pending Withdrawals" value={fmtNum(s.pending_withdrawals)} sub="Awaiting approval" color={gold} />
+              <StatCard icon="🆔" label="KYC Pending" value={fmtNum(s.pending_kyc)} sub="Needs review" color={gold} />
+              <StatCard icon="🎫" label="Open Tickets" value={fmtNum(s.open_tickets)} sub="Support queue" color={gold} />
+            </div>
+
+            {/* Charts Row */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 28 }}>
+              {/* Deposits last 7 days */}
+              <div style={{
+                background: 'rgba(255,255,255,0.03)',
+                border: '1px solid rgba(255,255,255,0.07)',
+                borderRadius: 14,
+                padding: '20px 20px 16px',
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                  <h3 style={{ fontSize: 14, fontWeight: 600, color: green, margin: 0 }}>Deposits — Last 7 Days</h3>
+                  <span style={{ fontSize: 20, fontWeight: 700, color: green }}>{fmt(s.deposits_7d_cents)}</span>
+                </div>
+                <BarChart
+                  color={green}
+                  height={100}
+                  data={(s.deposits_by_day || labels7.map(l => ({ label: l, value: 0 }))).map((d, i) => ({
+                    ...d, label: labels7[i] || d.label,
+                    display: fmt(d.value),
+                  }))}
+                />
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <MoneyDisplay cents={d.amount_cents} size="sm" color="#fff" />
-                <span style={{ fontSize: 9, fontWeight: 800, padding: '2px 6px', borderRadius: 99, background: d.status === 'pending' ? 'rgba(245,158,11,.2)' : d.status === 'approved' ? 'rgba(16,185,129,.2)' : 'rgba(239,68,68,.2)', color: d.status === 'pending' ? '#f59e0b' : d.status === 'approved' ? '#10b981' : '#f87171', textTransform: 'uppercase', letterSpacing: '.06em' }}>
-                  {d.status}
-                </span>
+
+              {/* Withdrawals last 7 days */}
+              <div style={{
+                background: 'rgba(255,255,255,0.03)',
+                border: '1px solid rgba(255,255,255,0.07)',
+                borderRadius: 14,
+                padding: '20px 20px 16px',
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                  <h3 style={{ fontSize: 14, fontWeight: 600, color: red, margin: 0 }}>Withdrawals — Last 7 Days</h3>
+                  <span style={{ fontSize: 20, fontWeight: 700, color: red }}>{fmt(s.withdrawals_7d_cents)}</span>
+                </div>
+                <BarChart
+                  color={red}
+                  height={100}
+                  data={(s.withdrawals_by_day || labels7.map(l => ({ label: l, value: 0 }))).map((d, i) => ({
+                    ...d, label: labels7[i] || d.label,
+                    display: fmt(d.value),
+                  }))}
+                />
               </div>
             </div>
-          ))}
-        </div>
-      </div>
 
-      {/* Recent players */}
-      <div style={{ background: 'rgba(255,255,255,.02)', border: '1px solid rgba(255,255,255,.07)', borderRadius: 18, overflow: 'hidden' }}>
-        <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>Recent Signups</span>
-          <Link href="/admin/players" style={{ fontSize: 11, color: '#fbbf24', fontWeight: 600, textDecoration: 'none' }}>View All →</Link>
-        </div>
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr style={{ background: 'rgba(255,255,255,.03)' }}>
-                {['Player', 'Email', 'KYC', 'Status', 'Joined'].map(h => (
-                  <th key={h} style={{ padding: '10px 18px', textAlign: 'left', fontSize: 10, fontWeight: 800, letterSpacing: '.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,.3)', whiteSpace: 'nowrap' }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {recentPlayers.map((p, i) => (
-                <tr key={p.id} style={{ borderTop: '1px solid rgba(255,255,255,.04)' }}
-                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,.02)'}
-                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                  <td style={{ padding: '12px 18px' }}>
-                    <Link href={`/admin/players/${p.id}`} style={{ fontSize: 13, fontWeight: 700, color: '#fff', textDecoration: 'none' }}>
-                      {p.full_name || '—'}
-                    </Link>
-                  </td>
-                  <td style={{ padding: '12px 18px', fontSize: 12, color: 'rgba(255,255,255,.5)' }}>{p.email}</td>
-                  <td style={{ padding: '12px 18px' }}>
-                    <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 99, textTransform: 'uppercase', letterSpacing: '.06em', background: p.kyc_status === 'verified' ? 'rgba(16,185,129,.15)' : 'rgba(245,158,11,.15)', color: p.kyc_status === 'verified' ? '#10b981' : '#f59e0b' }}>
-                      {p.kyc_status?.replace('_', ' ')}
-                    </span>
-                  </td>
-                  <td style={{ padding: '12px 18px' }}>
-                    <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 99, textTransform: 'uppercase', background: p.status === 'active' ? 'rgba(16,185,129,.15)' : 'rgba(239,68,68,.15)', color: p.status === 'active' ? '#10b981' : '#f87171' }}>
-                      {p.status}
-                    </span>
-                  </td>
-                  <td style={{ padding: '12px 18px', fontSize: 11, color: 'rgba(255,255,255,.3)', whiteSpace: 'nowrap' }}>
-                    {new Date(p.created_at).toLocaleDateString()}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            {/* Player Growth Sparkline */}
+            <div style={{
+              background: 'rgba(255,255,255,0.03)',
+              border: '1px solid rgba(255,255,255,0.07)',
+              borderRadius: 14,
+              padding: '20px 24px',
+              marginBottom: 28,
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
+                <div>
+                  <h3 style={{ fontSize: 14, fontWeight: 600, color: blue, margin: '0 0 4px' }}>New Player Signups — Last 14 Days</h3>
+                  <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', margin: 0 }}>Daily registrations trend</p>
+                </div>
+                <span style={{ fontSize: 22, fontWeight: 700, color: blue }}>{fmtNum(s.new_players_14d)}</span>
+              </div>
+              <div style={{ overflowX: 'auto' }}>
+                <Sparkline
+                  values={(s.signups_by_day || Array(14).fill(0)).map(d => typeof d === 'object' ? d.value : d)}
+                  color={blue}
+                  width={Math.max(600, 600)}
+                  height={60}
+                />
+              </div>
+            </div>
+
+            {/* Recent Activity Table */}
+            <div style={{
+              background: 'rgba(255,255,255,0.03)',
+              border: '1px solid rgba(255,255,255,0.07)',
+              borderRadius: 14,
+              overflow: 'hidden',
+            }}>
+              <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+                <h3 style={{ fontSize: 14, fontWeight: 600, color: gold, margin: 0 }}>Recent Transactions</h3>
+              </div>
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+                  <thead>
+                    <tr style={{ background: 'rgba(255,255,255,0.03)' }}>
+                      {['Reference', 'Player', 'Type', 'Amount', 'Status', 'Time'].map(h => (
+                        <th key={h} style={{ padding: '10px 16px', textAlign: 'left', color: 'rgba(255,255,255,0.4)', fontWeight: 500, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(s.recent_transactions || []).length === 0 ? (
+                      <tr><td colSpan={6} style={{ padding: '24px', textAlign: 'center', color: 'rgba(255,255,255,0.2)', fontSize: 13 }}>No transactions yet</td></tr>
+                    ) : (s.recent_transactions || []).map((tx, i) => (
+                      <tr key={i} style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                        <td style={{ padding: '12px 16px', color: 'rgba(255,255,255,0.6)', fontFamily: 'monospace', fontSize: 11 }}>{tx.reference_id}</td>
+                        <td style={{ padding: '12px 16px', color: '#fff' }}>{tx.player_name || '—'}</td>
+                        <td style={{ padding: '12px 16px' }}>
+                          <span style={{
+                            padding: '3px 8px', borderRadius: 4, fontSize: 11, fontWeight: 600,
+                            background: tx.type === 'deposit' ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)',
+                            color: tx.type === 'deposit' ? green : red,
+                          }}>
+                            {tx.type?.toUpperCase()}
+                          </span>
+                        </td>
+                        <td style={{ padding: '12px 16px', color: tx.type === 'deposit' ? green : red, fontWeight: 600 }}>
+                          {tx.type === 'deposit' ? '+' : '-'}{fmt(tx.amount_cents)}
+                        </td>
+                        <td style={{ padding: '12px 16px' }}>
+                          <span style={{
+                            padding: '3px 8px', borderRadius: 4, fontSize: 11, fontWeight: 500,
+                            background: tx.status === 'approved' ? 'rgba(34,197,94,0.1)' : tx.status === 'pending' ? 'rgba(251,191,36,0.1)' : 'rgba(239,68,68,0.1)',
+                            color: tx.status === 'approved' ? green : tx.status === 'pending' ? gold : red,
+                          }}>
+                            {tx.status}
+                          </span>
+                        </td>
+                        <td style={{ padding: '12px 16px', color: 'rgba(255,255,255,0.35)', fontSize: 12 }}>
+                          {tx.created_at ? new Date(tx.created_at).toLocaleString() : '—'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </AdminLayout>
   )
