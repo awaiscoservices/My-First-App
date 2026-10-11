@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 
 // Routes that require login
-const PROTECTED_ROUTES = ['/dashboard', '/dashboard/wallet', '/dashboard/deposit', '/dashboard/redeem', '/dashboard/profile', '/dashboard/chat', '/dashboard/games']
+const PROTECTED_ROUTES = ['/profile', '/notifications', '/dashboard', '/dashboard/wallet', '/dashboard/deposit', '/dashboard/redeem', '/dashboard/profile', '/dashboard/chat', '/dashboard/games']
 
 // Routes that require admin role (checked client-side too)
 const ADMIN_ROUTES = ['/admin']
@@ -33,5 +33,5 @@ export function middleware(request) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/admin/:path*', '/auth/:path*'],
+  matcher: ['/profile/:path*', '/notifications/:path*', '/dashboard/:path*', '/admin/:path*', '/auth/:path*'],
 }

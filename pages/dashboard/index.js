@@ -511,6 +511,7 @@ export default function Dashboard() {
   const [level, setLevel]             = useState(null)
   const [loading, setLoading]         = useState(true)
   const [panels, setPanels]           = useState([])
+  const [unread, setUnread]           = useState(0)
 
   useEffect(() => {
     supabase.from('game_panels').select('id,name,logo_url,accent_color,default_bonus_pct').eq('is_active', true).order('sort_order').then(({ data }) => setPanels(data || []))
@@ -522,6 +523,8 @@ export default function Dashboard() {
     const { data: { user: u } } = await supabase.auth.getUser()
     if (!u) { router.push('/auth/login'); return }
     setUser(u)
+    supabase.from('notifications').select('*', { count: 'exact', head: true }).eq('user_id', u.id).eq('is_read', false)
+      .then(({ count }) => setUnread(count || 0), () => {})
     try {
       const [{ data: prof }, { data: wal }, txs, accounts, counts] = await Promise.all([
         supabase.from('profiles').select('*, kyc_records(status)').eq('id', u.id).single(),
@@ -563,13 +566,19 @@ export default function Dashboard() {
       <Head><title>Dashboard — Casinoze Room</title></Head>
 
       {/* WELCOME */}
-      <div style={{ marginBottom: 20 }}>
+      <div style={{ marginBottom: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
+        <div style={{ minWidth: 0 }}>
         <h1 style={{ fontFamily: "'Cinzel', serif", fontSize: 'clamp(20px,3vw,28px)', fontWeight: 700, color: '#fff', marginBottom: 4 }}>
           Welcome back, {profile?.full_name?.split(' ')[0] || 'Player'} 👋
         </h1>
         <p style={{ color: 'rgba(255,255,255,.4)', fontSize: 14 }}>
           {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
         </p>
+        </div>
+        <Link href="/dashboard/notifications" aria-label={`Notifications${unread ? `, ${unread} unread` : ''}`} style={{ position: 'relative', flexShrink: 0, width: 44, height: 44, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,.05)', border: '1px solid rgba(251,191,36,.25)', color: '#fbbf24' }}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M6 8a6 6 0 1112 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 003.4 0" /></svg>
+          {unread > 0 && <span style={{ position: 'absolute', top: -6, right: -6, minWidth: 18, textAlign: 'center', background: '#fbbf24', color: '#000', fontSize: 10, fontWeight: 800, padding: '2px 5px', borderRadius: 99 }}>{unread > 99 ? '99+' : unread}</span>}
+        </Link>
       </div>
 
       {/* KYC BANNER */}
@@ -600,6 +609,25 @@ export default function Dashboard() {
             <WalletCard label="Bonus"       cents={wallet.bonus_balance_cents}  color="#f59e0b" icon="🎁" sub="Bonus credits" />
             <WalletCard label="Reserved"    cents={wallet.reserved_cents}       color="#94a3b8" icon="🔒" sub="Held pending" />
             <WalletCard label="Withdrawable" cents={wallet.withdrawable_cents}  color="#fbbf24" icon="💸" sub="Ready to withdraw" />
+          </div>
+        </div>
+      )}
+
+      {/* QUICK STATS */}
+      {wallet && (
+        <div style={{ marginBottom: 24 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,.3)', marginBottom: 12 }}>Quick Stats</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(170px,100%),1fr))', gap: 12 }}>
+            {[
+              ['Total Deposited', wallet.total_deposited_cents || 0, '#10b981'],
+              ['Total Withdrawn', wallet.total_withdrawn_cents || 0, '#3b82f6'],
+              ['Current Balance', (wallet.cash_balance_cents || 0) + (wallet.bonus_balance_cents || 0), '#fbbf24'],
+            ].map(([label, cents, color]) => (
+              <div key={label} style={{ padding: '16px 18px', borderRadius: 14, background: 'rgba(255,255,255,.03)', border: '1px solid rgba(251,191,36,.14)' }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.4)', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 6 }}>{label}</div>
+                <MoneyDisplay cents={cents} size="lg" color={color} />
+              </div>
+            ))}
           </div>
         </div>
       )}

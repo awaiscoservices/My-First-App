@@ -3,6 +3,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { signUpWithEmail, signInWithGoogle } from '../../lib/auth';
+import { supabase } from '../../lib/supabase';
 import Logo from '../../components/ui/Logo'
 
 const PARTICLES = ['♠', '♥', '♦', '♣'];
@@ -23,7 +24,15 @@ export default function Register() {
   const [particles, setParticles] = useState([]);
   const [toast, setToast] = useState(null);
   const [success, setSuccess] = useState(false);
-  useEffect(() => { try { const r = new URLSearchParams(window.location.search).get('ref'); if (r) localStorage.setItem('cz_ref', r.trim().slice(0, 32)) } catch {} }, []);
+  const [refCode, setRefCode] = useState('');
+  // ?ref=CODE → remember it (also used by Google sign-up and email-confirmation flows) and show the banner
+  useEffect(() => {
+    try {
+      const r = (new URLSearchParams(window.location.search).get('ref') || '').trim().slice(0, 32);
+      if (r) { localStorage.setItem('referral_code', r); setRefCode(r); }
+      else setRefCode(localStorage.getItem('referral_code') || '');
+    } catch {}
+  }, []);
 
   useEffect(() => {
     const generated = Array.from({ length: 22 }, (_, i) => ({
@@ -63,7 +72,12 @@ export default function Register() {
     setErrors({});
     setLoading(true);
     try {
-      await signUpWithEmail({ fullName: form.fullName, email: form.email, password: form.password });
+      const res = await signUpWithEmail({ fullName: form.fullName, email: form.email, password: form.password });
+      // Record the referral. This only works if signup returns a session; otherwise it is recorded at first login.
+      const code = refCode || (() => { try { return localStorage.getItem('referral_code') || ''; } catch { return ''; } })();
+      if (code && res?.user?.id) {
+        try { await supabase.from('referrals').insert({ referrer_code: code, referred_user_id: res.user.id }); } catch {}
+      }
       setSuccess(true);
       showToast('Account created! Check your email to confirm.', 'success');
       setTimeout(() => router.push('/auth/login'), 3000);
@@ -164,6 +178,11 @@ export default function Register() {
             <h2 style={{ fontFamily: 'Cinzel Decorative, serif', fontSize: 22, fontWeight: 700, color: '#fff', marginBottom: 6, textAlign: 'center' }}>Join the Table</h2>
             <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, textAlign: 'center', marginBottom: 28 }}>Create your Casinoze account and start playing</p>
 
+            {refCode && (
+              <div style={{ margin: '0 0 18px', padding: '12px 16px', borderRadius: 12, background: 'rgba(251,191,36,.1)', border: '1px solid rgba(251,191,36,.35)', color: '#fbbf24', fontSize: 13, fontWeight: 700, textAlign: 'center' }}>
+                🎁 You were referred! <span style={{ opacity: .75, fontWeight: 600 }}>Code: {refCode}</span>
+              </div>
+            )}
             <form onSubmit={handleSubmit} noValidate>
               {/* Full Name */}
               <div style={{ marginBottom: 16 }}>
