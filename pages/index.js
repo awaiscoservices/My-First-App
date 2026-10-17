@@ -3,349 +3,10 @@ import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import Logo from '../components/ui/Logo'
 import { FAQS } from '../lib/siteContent'
+import { GAME_CATALOG } from '../lib/gameCatalog'
 
 // ─── GAME DATA with real brand colors & SVG logos ──────────────────────────
-const GAMES = [
-  {
-    name: 'Orion Stars',
-    hot: true, bonus: 15,
-    bg: 'linear-gradient(135deg,#0d0d2b,#1a1a4e)',
-    accent: '#00d4ff',
-    logo: `<svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
-      <defs><linearGradient id="og1" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#00d4ff"/><stop offset="100%" stop-color="#7b2fff"/></linearGradient></defs>
-      <text x="100" y="38" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="22" font-weight="900" fill="url(#og1)">ORION</text>
-      <text x="100" y="62" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="18" font-weight="900" fill="#ffffff">STARS</text>
-      <polygon points="100,4 104,14 115,14 106,20 109,31 100,25 91,31 94,20 85,14 96,14" fill="#00d4ff" opacity="0.9"/>
-    </svg>`,
-  },
-  {
-    name: 'Fire Kirin',
-    hot: true, bonus: 10,
-    bg: 'linear-gradient(135deg,#1a0500,#3d0f00)',
-    accent: '#ff6b00',
-    logo: `<svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
-      <defs><linearGradient id="fk1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ff9500"/><stop offset="100%" stop-color="#ff2d00"/></linearGradient></defs>
-      <text x="100" y="36" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="20" font-weight="900" fill="url(#fk1)">FIRE</text>
-      <text x="100" y="62" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="20" font-weight="900" fill="#ffcc00">KIRIN</text>
-      <path d="M90,8 Q100,2 110,8 Q105,18 100,14 Q95,18 90,8Z" fill="#ff6b00"/>
-      <path d="M95,10 Q100,5 105,10 Q102,17 100,15 Q98,17 95,10Z" fill="#ffcc00"/>
-    </svg>`,
-  },
-  {
-    name: 'Milky Way',
-    hot: false, bonus: 10,
-    bg: 'linear-gradient(135deg,#0a001f,#1a0050)',
-    accent: '#fcd34d',
-    logo: `<svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
-      <defs><linearGradient id="mw1" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#e879f9"/><stop offset="50%" stop-color="#fcd34d"/><stop offset="100%" stop-color="#94a3b8"/></linearGradient></defs>
-      <ellipse cx="100" cy="42" rx="80" ry="18" fill="url(#mw1)" opacity="0.15"/>
-      <text x="100" y="36" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="19" font-weight="900" fill="url(#mw1)">MILKY</text>
-      <text x="100" y="62" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="19" font-weight="900" fill="#ffffff">WAYS</text>
-    </svg>`,
-  },
-  {
-    name: 'Ultra Panda',
-    hot: true, bonus: 10,
-    bg: 'linear-gradient(135deg,#001a00,#003300)',
-    accent: '#00ff88',
-    logo: `<svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
-      <defs><linearGradient id="up1" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#00ff88"/><stop offset="100%" stop-color="#00ccff"/></linearGradient></defs>
-      <circle cx="75" cy="38" r="12" fill="#111" stroke="#fff" stroke-width="2"/>
-      <circle cx="125" cy="38" r="12" fill="#111" stroke="#fff" stroke-width="2"/>
-      <circle cx="75" cy="38" r="5" fill="#fff"/>
-      <circle cx="125" cy="38" r="5" fill="#fff"/>
-      <text x="100" y="68" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="13" font-weight="900" fill="url(#up1)">ULTRA PANDA</text>
-    </svg>`,
-  },
-  {
-    name: 'VBLink',
-    hot: true, bonus: 10,
-    bg: 'linear-gradient(135deg,#0d001a,#2d0050)',
-    accent: '#bf00ff',
-    logo: `<svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
-      <defs><linearGradient id="vb1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#bf00ff"/><stop offset="100%" stop-color="#6600cc"/></linearGradient></defs>
-      <rect x="20" y="15" width="160" height="50" rx="10" fill="url(#vb1)" opacity="0.2"/>
-      <text x="100" y="50" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="32" font-weight="900" fill="url(#vb1)" letter-spacing="2">VBLink</text>
-    </svg>`,
-  },
-  {
-    name: 'Egame',
-    hot: false, bonus: 16,
-    bg: 'linear-gradient(135deg,#001428,#002856)',
-    accent: '#ffd700',
-    logo: `<svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
-      <defs><linearGradient id="eg1" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#ffd700"/><stop offset="100%" stop-color="#ff8c00"/></linearGradient></defs>
-      <polygon points="100,8 120,35 108,35 108,72 92,72 92,35 80,35" fill="url(#eg1)" opacity="0.9"/>
-      <text x="100" y="75" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="14" font-weight="900" fill="#ffd700">EGAME</text>
-    </svg>`,
-  },
-  {
-    name: 'Juwa',
-    hot: true, bonus: 10,
-    bg: 'linear-gradient(135deg,#1a0a00,#3d2000)',
-    accent: '#ffaa00',
-    logo: `<svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
-      <defs><linearGradient id="jw1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ffaa00"/><stop offset="100%" stop-color="#ff6600"/></linearGradient></defs>
-      <text x="100" y="56" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="42" font-weight="900" fill="url(#jw1)" letter-spacing="4">JUWA</text>
-      <rect x="30" y="62" width="140" height="3" rx="1.5" fill="url(#jw1)" opacity="0.6"/>
-    </svg>`,
-  },
-  {
-    name: 'Game Vault',
-    hot: true, bonus: 10,
-    bg: 'linear-gradient(135deg,#0d0d00,#1a1a00)',
-    accent: '#ffd700',
-    logo: `<svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
-      <defs><linearGradient id="gv1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ffd700"/><stop offset="100%" stop-color="#b8860b"/></linearGradient></defs>
-      <rect x="70" y="10" width="60" height="45" rx="6" fill="none" stroke="url(#gv1)" stroke-width="3"/>
-      <circle cx="100" cy="32" r="10" fill="none" stroke="url(#gv1)" stroke-width="2.5"/>
-      <circle cx="100" cy="32" r="4" fill="url(#gv1)"/>
-      <text x="100" y="72" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="13" font-weight="900" fill="url(#gv1)">GAME VAULT</text>
-    </svg>`,
-  },
-  {
-    name: 'Vegas Sweeps',
-    hot: true, bonus: 10,
-    bg: 'linear-gradient(135deg,#1a0000,#3d0000)',
-    accent: '#ff4444',
-    logo: `<svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
-      <defs><linearGradient id="vs1" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#ff4444"/><stop offset="50%" stop-color="#ff8800"/><stop offset="100%" stop-color="#ffcc00"/></linearGradient></defs>
-      <text x="100" y="36" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="18" font-weight="900" fill="url(#vs1)">VEGAS</text>
-      <text x="100" y="62" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="14" font-weight="900" fill="#ffffff" opacity="0.85">SWEEPS</text>
-    </svg>`,
-  },
-  {
-    name: 'Yolo777',
-    hot: false, bonus: 10,
-    bg: 'linear-gradient(135deg,#0d001a,#1a0033)',
-    accent: '#ff00ff',
-    logo: `<svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
-      <defs><linearGradient id="yl1" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#ff00ff"/><stop offset="100%" stop-color="#aa00ff"/></linearGradient></defs>
-      <text x="100" y="38" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="24" font-weight="900" fill="url(#yl1)">YOLO</text>
-      <text x="100" y="64" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="20" font-weight="900" fill="#ffcc00" letter-spacing="6">777</text>
-    </svg>`,
-  },
-  {
-    name: 'Game Room',
-    hot: true, bonus: 10,
-    bg: 'linear-gradient(135deg,#001400,#002800)',
-    accent: '#00cc44',
-    logo: `<svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
-      <defs><linearGradient id="gr1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00cc44"/><stop offset="100%" stop-color="#007722"/></linearGradient></defs>
-      <rect x="25" y="20" width="150" height="45" rx="8" fill="none" stroke="url(#gr1)" stroke-width="2.5"/>
-      <circle cx="60" cy="42" r="8" fill="none" stroke="url(#gr1)" stroke-width="2"/>
-      <rect x="80" y="38" width="5" height="12" rx="2" fill="url(#gr1)"/>
-      <rect x="90" y="34" width="5" height="16" rx="2" fill="url(#gr1)"/>
-      <rect x="100" y="30" width="5" height="20" rx="2" fill="url(#gr1)"/>
-      <text x="100" y="76" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="11" font-weight="900" fill="url(#gr1)">GAME ROOM</text>
-    </svg>`,
-  },
-  {
-    name: 'Blue Dragon',
-    hot: false, bonus: 10,
-    bg: 'linear-gradient(135deg,#001428,#002856)',
-    accent: '#00aaff',
-    logo: `<svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
-      <defs><linearGradient id="bd1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00aaff"/><stop offset="100%" stop-color="#0044cc"/></linearGradient></defs>
-      <path d="M50,55 Q70,20 100,15 Q130,20 150,55 Q130,45 100,48 Q70,45 50,55Z" fill="url(#bd1)" opacity="0.8"/>
-      <path d="M100,15 L110,30 L100,28 L90,30 Z" fill="#00ddff"/>
-      <text x="100" y="74" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="13" font-weight="900" fill="url(#bd1)">BLUE DRAGON</text>
-    </svg>`,
-  },
-  {
-    name: 'Mr All In One',
-    hot: true, bonus: 10,
-    bg: 'linear-gradient(135deg,#0a0a0a,#1a1a00)',
-    accent: '#ffdd00',
-    logo: `<svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
-      <defs><linearGradient id="ma1" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#ffdd00"/><stop offset="100%" stop-color="#ff8800"/></linearGradient></defs>
-      <text x="100" y="30" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="12" font-weight="900" fill="url(#ma1)">MR. ALL</text>
-      <text x="100" y="50" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="12" font-weight="900" fill="#ffffff">IN ONE</text>
-      <text x="100" y="70" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="9" font-weight="700" fill="url(#ma1)" opacity="0.7">ONLINE</text>
-    </svg>`,
-  },
-  {
-    name: 'Golden Treasure',
-    hot: false, bonus: 10,
-    bg: 'linear-gradient(135deg,#1a1000,#332200)',
-    accent: '#ffd700',
-    logo: `<svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
-      <defs><linearGradient id="gt1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ffd700"/><stop offset="50%" stop-color="#ffaa00"/><stop offset="100%" stop-color="#cc8800"/></linearGradient></defs>
-      <polygon points="100,5 108,28 132,28 114,43 121,66 100,52 79,66 86,43 68,28 92,28" fill="url(#gt1)" opacity="0.9"/>
-      <text x="100" y="78" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="10" font-weight="900" fill="url(#gt1)">GOLDEN TREASURE</text>
-    </svg>`,
-  },
-  {
-    name: 'Cash Machine',
-    hot: false, bonus: 10,
-    bg: 'linear-gradient(135deg,#001a00,#004400)',
-    accent: '#00ff44',
-    logo: `<svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
-      <defs><linearGradient id="cm1" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#00ff44"/><stop offset="100%" stop-color="#00aa22"/></linearGradient></defs>
-      <text x="100" y="36" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="16" font-weight="900" fill="url(#cm1)">CASH</text>
-      <text x="100" y="60" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="14" font-weight="900" fill="#ffffff">MACHINE</text>
-      <text x="100" y="4" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="10" font-weight="900" fill="#00ff44" opacity="0.7">$$$</text>
-    </svg>`,
-  },
-  {
-    name: 'River Sweep',
-    hot: false, bonus: 10,
-    bg: 'linear-gradient(135deg,#001428,#003366)',
-    accent: '#00ccff',
-    logo: `<svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
-      <defs><linearGradient id="rs1" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#00ccff"/><stop offset="100%" stop-color="#0088cc"/></linearGradient></defs>
-      <path d="M20,50 Q50,30 80,45 Q110,60 140,40 Q165,25 180,35" fill="none" stroke="url(#rs1)" stroke-width="4" opacity="0.7"/>
-      <text x="100" y="30" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="14" font-weight="900" fill="url(#rs1)">RIVER</text>
-      <text x="100" y="72" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="14" font-weight="900" fill="#ffffff">SWEEP</text>
-    </svg>`,
-  },
-  {
-    name: 'Panda Master',
-    hot: false, bonus: 10,
-    bg: 'linear-gradient(135deg,#001a00,#003300)',
-    accent: '#66ff88',
-    logo: `<svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
-      <defs><linearGradient id="pm1" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#66ff88"/><stop offset="100%" stop-color="#00cc44"/></linearGradient></defs>
-      <circle cx="100" cy="32" r="22" fill="#111" stroke="url(#pm1)" stroke-width="2.5"/>
-      <circle cx="88" cy="26" r="8" fill="#333"/>
-      <circle cx="112" cy="26" r="8" fill="#333"/>
-      <circle cx="92" cy="34" r="5" fill="#fff"/>
-      <circle cx="108" cy="34" r="5" fill="#fff"/>
-      <text x="100" y="72" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="12" font-weight="900" fill="url(#pm1)">PANDA MASTER</text>
-    </svg>`,
-  },
-  {
-    name: 'Cash Vault',
-    hot: false, bonus: 10,
-    bg: 'linear-gradient(135deg,#0d1a00,#1a3300)',
-    accent: '#88ff00',
-    logo: `<svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
-      <defs><linearGradient id="cv1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#88ff00"/><stop offset="100%" stop-color="#44aa00"/></linearGradient></defs>
-      <rect x="65" y="10" width="70" height="55" rx="8" fill="none" stroke="url(#cv1)" stroke-width="3"/>
-      <circle cx="100" cy="37" r="12" fill="none" stroke="url(#cv1)" stroke-width="2.5"/>
-      <text x="100" y="42" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="12" font-weight="900" fill="url(#cv1)">$</text>
-      <text x="100" y="76" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="11" font-weight="900" fill="url(#cv1)">CASH VAULT</text>
-    </svg>`,
-  },
-  {
-    name: 'Lucky Stars',
-    hot: false, bonus: 10,
-    bg: 'linear-gradient(135deg,#0d0d1a,#1a1a3d)',
-    accent: '#ffdd00',
-    logo: `<svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
-      <defs><linearGradient id="ls1" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#ffdd00"/><stop offset="100%" stop-color="#ff8800"/></linearGradient></defs>
-      <polygon points="55,42 58,33 65,33 59,38 62,48 55,42" fill="#ffdd00"/>
-      <polygon points="100,8 104,20 117,20 107,27 111,39 100,32 89,39 93,27 83,20 96,20" fill="url(#ls1)"/>
-      <polygon points="145,42 142,33 135,33 141,38 138,48 145,42" fill="#ffdd00"/>
-      <text x="100" y="62" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="13" font-weight="900" fill="url(#ls1)">LUCKY STARS</text>
-    </svg>`,
-  },
-  {
-    name: 'Mafia City',
-    hot: false, bonus: 10,
-    bg: 'linear-gradient(135deg,#0d0000,#1a0000)',
-    accent: '#cc0000',
-    logo: `<svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
-      <defs><linearGradient id="mc1" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#cc0000"/><stop offset="100%" stop-color="#880000"/></linearGradient></defs>
-      <text x="100" y="36" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="20" font-weight="900" fill="url(#mc1)">MAFIA</text>
-      <text x="100" y="62" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="20" font-weight="900" fill="#ffffff">CITY</text>
-    </svg>`,
-  },
-  {
-    name: 'Royal Casino',
-    hot: false, bonus: 10,
-    bg: 'linear-gradient(135deg,#1a1400,#332a00)',
-    accent: '#daa520',
-    logo: `<svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
-      <defs><linearGradient id="rc1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ffd700"/><stop offset="100%" stop-color="#daa520"/></linearGradient></defs>
-      <polygon points="100,5 107,18 121,18 110,27 114,40 100,32 86,40 90,27 79,18 93,18" fill="url(#rc1)"/>
-      <text x="100" y="58" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="13" font-weight="900" fill="url(#rc1)">ROYAL</text>
-      <text x="100" y="74" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="11" font-weight="900" fill="#ffffff" opacity="0.8">CASINO</text>
-    </svg>`,
-  },
-  {
-    name: 'Big Winner',
-    hot: false, bonus: 10,
-    bg: 'linear-gradient(135deg,#001400,#002800)',
-    accent: '#00ff88',
-    logo: `<svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
-      <defs><linearGradient id="bw1" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#00ff88"/><stop offset="100%" stop-color="#00ccff"/></linearGradient></defs>
-      <text x="100" y="35" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="18" font-weight="900" fill="url(#bw1)">BIG</text>
-      <text x="100" y="62" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="18" font-weight="900" fill="#ffffff">WINNER</text>
-      <path d="M60,20 L70,8 L80,20 Z" fill="#ffdd00"/>
-      <path d="M100,20 L110,8 L120,20 Z" fill="#ffdd00"/>
-      <path d="M120,20 L130,8 L140,20 Z" fill="#ffdd00"/>
-    </svg>`,
-  },
-  {
-    name: 'Cash Frenzy',
-    hot: false, bonus: 10,
-    bg: 'linear-gradient(135deg,#001a00,#003300)',
-    accent: '#00ff44',
-    logo: `<svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
-      <defs><linearGradient id="cf1" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#00ff44"/><stop offset="100%" stop-color="#ffcc00"/></linearGradient></defs>
-      <text x="100" y="36" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="18" font-weight="900" fill="url(#cf1)">CASH</text>
-      <text x="100" y="62" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="16" font-weight="900" fill="#ffffff">FRENZY</text>
-    </svg>`,
-  },
-  {
-    name: 'Winstar',
-    hot: false, bonus: 10,
-    bg: 'linear-gradient(135deg,#0d0d28,#1a1a50)',
-    accent: '#6677ff',
-    logo: `<svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
-      <defs><linearGradient id="ws1" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#6677ff"/><stop offset="100%" stop-color="#aa44ff"/></linearGradient></defs>
-      <polygon points="100,6 104,18 117,18 107,26 111,38 100,30 89,38 93,26 83,18 96,18" fill="url(#ws1)" opacity="0.9"/>
-      <text x="100" y="62" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="18" font-weight="900" fill="url(#ws1)">WINSTAR</text>
-    </svg>`,
-  },
-  {
-    name: 'Vegas Luck',
-    hot: false, bonus: 10,
-    bg: 'linear-gradient(135deg,#1a0000,#330000)',
-    accent: '#ff6644',
-    logo: `<svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
-      <defs><linearGradient id="vl1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ff6644"/><stop offset="100%" stop-color="#ffaa00"/></linearGradient></defs>
-      <text x="100" y="36" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="18" font-weight="900" fill="url(#vl1)">VEGAS</text>
-      <text x="100" y="62" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="18" font-weight="900" fill="#ffffff">LUCK</text>
-    </svg>`,
-  },
-  {
-    name: 'Gem Slots',
-    hot: false, bonus: 10,
-    bg: 'linear-gradient(135deg,#001428,#002856)',
-    accent: '#00eeff',
-    logo: `<svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
-      <defs><linearGradient id="gs1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00eeff"/><stop offset="100%" stop-color="#aa00ff"/></linearGradient></defs>
-      <polygon points="100,8 118,22 118,48 100,62 82,48 82,22" fill="none" stroke="url(#gs1)" stroke-width="2.5"/>
-      <polygon points="100,16 112,26 112,44 100,54 88,44 88,26" fill="url(#gs1)" opacity="0.3"/>
-      <text x="100" y="76" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="12" font-weight="900" fill="url(#gs1)">GEM SLOTS</text>
-    </svg>`,
-  },
-  {
-    name: 'Ace',
-    hot: false, bonus: 10,
-    bg: 'linear-gradient(135deg,#0d0d0d,#1a1a1a)',
-    accent: '#ffffff',
-    logo: `<svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
-      <defs><linearGradient id="ac1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#aaaaaa"/></linearGradient></defs>
-      <rect x="65" y="8" width="70" height="58" rx="8" fill="none" stroke="url(#ac1)" stroke-width="2.5"/>
-      <text x="100" y="52" text-anchor="middle" font-family="Georgia,serif" font-size="38" font-weight="900" fill="url(#ac1)">A</text>
-      <text x="74" y="26" text-anchor="middle" font-family="Georgia,serif" font-size="14" fill="#cc0000">♠</text>
-    </svg>`,
-  },
-  {
-    name: 'Juwa 2.0',
-    hot: true, bonus: 10,
-    bg: 'linear-gradient(135deg,#1a0a00,#3d2000)',
-    accent: '#ff8800',
-    logo: `<svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
-      <defs><linearGradient id="j2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ffaa00"/><stop offset="100%" stop-color="#ff4400"/></linearGradient></defs>
-      <text x="90" y="50" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="32" font-weight="900" fill="url(#j2)">JUWA</text>
-      <text x="160" y="35" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="18" font-weight="900" fill="#00eeff">2.0</text>
-    </svg>`,
-  },
-]
+const GAMES = GAME_CATALOG   // the 23 games live in lib/gameCatalog.js
 
 // ═══════════════════════════════════════════════════════════════════
 //  EDIT HERE. Only put things in this block that are TRUE for your business.
@@ -355,8 +16,6 @@ const SITE = {
   signupBonus: '',      // e.g. '100% first-deposit bonus'  → shows in the top bar and the hero badge
   playersOnline: null,  // a REAL number, e.g. 312            → shows "312 PLAYERS ONLINE" in the top bar
   heroBanner: '',       // e.g. '/images/banners/hero.jpg'  (file in public/images/banners/) — '' keeps the default background
-  gameImages: [],       // game logos you uploaded to public/images/games/, by lowercase name without spaces,
-                        // e.g. ['firekirin','orionstars','milkyway']  →  uses /images/games/firekirin.png etc.
   reviews: [],          // REAL player reviews, e.g. [{ name:'Jay G.', tag:'Fire Kirin', stars:5, text:'…' }]
                         // (the Reviews section and its menu link are hidden while this is empty)
 }
@@ -439,49 +98,20 @@ function LiveBar(){
   )
 }
 
-const gameSlug=(name)=>name.toLowerCase().replace(/[^a-z0-9]/g,'')
-
-function GameLogo({game}){
-  const slug=gameSlug(game.name)
-  const[failed,setFailed]=useState(false)
-  if(SITE.gameImages.includes(slug)&&!failed){
-    return <img src={`/images/games/${slug}.png`} alt={game.name} onError={()=>setFailed(true)} style={{width:'85%',height:100,objectFit:'contain',position:'relative',zIndex:1,filter:'drop-shadow(0 4px 12px rgba(0,0,0,.5))'}}/>
-  }
-  return <div style={{width:'85%',height:80,position:'relative',zIndex:1}} dangerouslySetInnerHTML={{__html:game.logo}}/>
-}
-
 function GameCard({game,index}){
-  const[hov,setHov]=useState(false)
+  const[failed,setFailed]=useState(false)
   return(
-    <div onMouseEnter={()=>setHov(true)} onMouseLeave={()=>setHov(false)} style={{
-      position:'relative',
-      background:hov?game.bg.replace('135deg','150deg'):'rgba(255,255,255,.03)',
-      border:`1px solid ${hov?game.accent+'99':'rgba(255,255,255,.08)'}`,
-      borderRadius:18,overflow:'hidden',cursor:'pointer',
-      transition:'all .25s ease',
-      transform:hov?'translateY(-8px) scale(1.03)':'none',
-      boxShadow:hov?`0 24px 60px rgba(0,0,0,.6), 0 0 40px ${game.accent}33`:'0 4px 16px rgba(0,0,0,.3)',
-    }}>
-      {/* Bonus badge */}
-      <div style={{position:'absolute',top:10,left:10,background:'rgba(16,185,129,.9)',color:'#fff',fontSize:9,fontWeight:800,letterSpacing:'.06em',padding:'3px 8px',borderRadius:99,zIndex:2}}>
-        {game.bonus}% BONUS
+    <Link href="/auth/register" className="gtile" aria-label={`${game.name} — join to play`}
+      style={{'--i':index,'--g1':game.tint[0],'--g2':game.tint[1],'--accent':game.accent,'--glow':game.accent+'66'}}>
+      {game.bonus>0&&<span className="gtile-badge gtile-bonus">{game.bonus}%</span>}
+      {game.hot&&<span className="gtile-badge gtile-hot">🔥 HOT</span>}
+      <div className="gtile-art">
+        {failed
+          ?<span style={{fontSize:42}}>🎮</span>
+          :<img src={game.src} alt={game.name} loading={index<12?'eager':'lazy'} onError={()=>setFailed(true)}/>}
       </div>
-      {/* Hot badge */}
-      {game.hot&&<div style={{position:'absolute',top:10,right:10,background:'linear-gradient(135deg,#ef4444,#f97316)',color:'#fff',fontSize:9,fontWeight:800,padding:'3px 8px',borderRadius:99,zIndex:2}}>🔥 HOT</div>}
-
-      {/* Game background */}
-      <div style={{height:140,background:game.bg,position:'relative',display:'flex',alignItems:'center',justifyContent:'center'}}>
-        {/* Glow orb behind logo */}
-        <div style={{position:'absolute',inset:0,background:`radial-gradient(ellipse at 50% 50%, ${game.accent}22 0%, transparent 70%)`,transition:'opacity .25s',opacity:hov?1:.5}}/>
-        <GameLogo game={game}/>
-      </div>
-
-      {/* Name bar */}
-      <div style={{padding:'12px 14px',background:'rgba(0,0,0,.4)',borderTop:`1px solid ${game.accent}33`,display:'flex',alignItems:'center',justifyContent:'space-between'}}>
-        <span style={{fontSize:11,fontWeight:800,letterSpacing:'.08em',textTransform:'uppercase',color:hov?'#fff':'rgba(255,255,255,.7)',transition:'color .2s'}}>{game.name}</span>
-        {hov&&<span style={{fontSize:10,color:game.accent,fontWeight:700}}>PLAY →</span>}
-      </div>
-    </div>
+      <div className="gtile-bar"><span className="gtile-play">▶</span><span className="gtile-name">{game.name}</span></div>
+    </Link>
   )
 }
 
@@ -574,9 +204,33 @@ export default function Home(){
           .btn-outline{display:inline-flex;align-items:center;gap:8px;padding:14px 36px;background:rgba(255,255,255,.04);border:1.5px solid rgba(251,191,36,.45);color:#fff;font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;border-radius:14px;text-decoration:none;letter-spacing:.04em;cursor:pointer;transition:all .2s;backdrop-filter:blur(12px)}
           .btn-outline:hover{background:rgba(251,191,36,.18);border-color:rgba(251,191,36,.85);transform:translateY(-3px);box-shadow:0 0 28px rgba(251,191,36,.3)}
           .section-tag{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;padding:5px 16px;border-radius:99px;margin-bottom:16px}
-          .game-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(170px,100%),1fr));gap:16px}
+          .game-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(190px,46%),1fr));gap:18px;padding-top:14px}
+          .gtile{position:relative;display:block;text-decoration:none;color:#fff;border-radius:18px;overflow:hidden;cursor:pointer;
+            background:linear-gradient(165deg,var(--g1) 0%,var(--g2) 62%,#0a1222 100%);border:1px solid rgba(255,255,255,.09);
+            box-shadow:0 6px 20px rgba(0,0,0,.4);animation:tileIn .55s ease backwards;animation-delay:calc(var(--i)*45ms);
+            transition:transform .3s cubic-bezier(.2,.9,.3,1.35),box-shadow .3s,border-color .3s;will-change:transform;-webkit-tap-highlight-color:transparent}
+          .gtile::after{content:'';position:absolute;top:0;left:-70%;width:45%;height:100%;pointer-events:none;
+            background:linear-gradient(105deg,transparent,rgba(255,255,255,.26),transparent);transform:skewX(-18deg);transition:left .75s ease}
+          .gtile-art{aspect-ratio:1/1.02;display:flex;align-items:center;justify-content:center;padding:20px 16px 8px}
+          .gtile-art img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 10px 16px rgba(0,0,0,.55));transition:transform .4s cubic-bezier(.2,.9,.3,1.35)}
+          .gtile-bar{display:flex;align-items:center;gap:8px;padding:13px 14px;background:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.62));
+            border-top:1px solid rgba(255,255,255,.08);font-size:12px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:rgba(255,255,255,.85)}
+          .gtile-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+          .gtile-play{font-size:9px;color:var(--accent);transition:transform .3s;flex-shrink:0}
+          .gtile-badge{position:absolute;top:0;z-index:2;font-size:10px;font-weight:800;padding:4px 9px;color:#fff}
+          .gtile-bonus{right:0;background:#e5484d;border-bottom-left-radius:10px}
+          .gtile-hot{left:0;background:linear-gradient(135deg,#ef4444,#f97316);border-bottom-right-radius:10px}
+          .gtile:hover,.gtile:focus-visible,.gtile:active{transform:translateY(-12px) scale(1.07);z-index:5;border-color:var(--accent);outline:none;
+            box-shadow:0 28px 50px rgba(0,0,0,.65),0 0 0 1px var(--accent),0 0 40px var(--glow)}
+          .gtile:hover::after,.gtile:focus-visible::after,.gtile:active::after{left:135%}
+          .gtile:hover .gtile-art img,.gtile:focus-visible .gtile-art img,.gtile:active .gtile-art img{animation:gfloat 2.2s ease-in-out infinite}
+          .gtile:hover .gtile-play{transform:translateX(3px)}
+          @keyframes tileIn{from{opacity:0;transform:translateY(22px) scale(.96)}to{opacity:1;transform:none}}
+          @keyframes gfloat{0%,100%{transform:scale(1.13) translateY(0) rotate(-1deg)}50%{transform:scale(1.17) translateY(-6px) rotate(1deg)}}
+          @media(prefers-reduced-motion:reduce){.gtile{animation:none}.gtile:hover,.gtile:active{transform:none}.gtile:hover .gtile-art img{animation:none}}
           @media(max-width:768px){
-            .game-grid{grid-template-columns:repeat(auto-fill,minmax(min(140px,100%),1fr));gap:12px}
+            .game-grid{grid-template-columns:repeat(2,1fr);gap:12px}
+            .gtile-bar{font-size:11px;padding:11px 10px}
             .hero-btns{flex-direction:column;align-items:center}
             .stats-bar>div{border-right:none!important;border-bottom:1px solid rgba(255,255,255,.06)}
             .about-grid{grid-template-columns:1fr!important}
@@ -709,12 +363,14 @@ export default function Home(){
           <div style={{textAlign:'center',marginBottom:56}}>
             <div className="section-tag" style={{background:'rgba(245,158,11,.12)',color:'#f59e0b',border:'1px solid rgba(245,158,11,.3)'}}>Epic Arcade Games</div>
             <h2 style={{fontFamily:"'Cinzel',serif",fontSize:'clamp(26px,4.5vw,54px)',fontWeight:700,marginBottom:14}}>Play & Level Up Gaming</h2>
-            <p style={{color:'rgba(255,255,255,.4)',fontSize:16,marginBottom:32,fontWeight:400}}>One wallet. Every game. Credits delivered automatically after deposit approval.</p>
+            <p style={{color:'rgba(255,255,255,.4)',fontSize:16,marginBottom:32,fontWeight:400}}>One wallet. Every game room.</p>
+            {GAMES.some(g=>g.hot)&&(
             <div style={{display:'inline-flex',gap:0,background:'rgba(255,255,255,.05)',border:'1px solid rgba(255,255,255,.1)',borderRadius:12,padding:4}}>
               {[['all','All Games'],['hot','🔥 Hot Games']].map(([key,label])=>(
                 <button key={key} onClick={()=>setGameFilter(key)} style={{padding:'9px 28px',borderRadius:9,border:'none',cursor:'pointer',fontFamily:"'Outfit',sans-serif",fontSize:13,fontWeight:700,background:gameFilter===key?'linear-gradient(135deg,#f59e0b,#fbbf24)':'transparent',color:gameFilter===key?'#fff':'rgba(255,255,255,.5)',transition:'all .2s'}}>{label}</button>
               ))}
             </div>
+            )}
           </div>
           <div className="game-grid">
             {filteredGames.map((g,i)=><GameCard key={g.name} game={g} index={i}/>)}

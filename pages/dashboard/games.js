@@ -4,6 +4,7 @@ import { useRouter } from 'next/router'
 import { supabase } from '../../lib/supabase'
 import PlayerLayout from '../../components/layout/PlayerLayout'
 import StatusBadge from '../../components/ui/StatusBadge'
+import GameIcon from '../../components/ui/GameIcon'
 
 function GameCard({ game, myAccount, onRequest, requesting }) {
   const [hov, setHov] = useState(false)
@@ -41,8 +42,8 @@ function GameCard({ game, myAccount, onRequest, requesting }) {
         </div>
 
         {/* Game icon area */}
-        <div style={{ width: 64, height: 64, borderRadius: 16, background: `linear-gradient(135deg,${color}22,${color}08)`, border: `1px solid ${color}44`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, marginBottom: 14, boxShadow: hov ? `0 0 20px ${color}33` : 'none', transition: 'box-shadow .25s' }}>
-          🎮
+        <div style={{ width: 64, height: 64, borderRadius: 16, background: `linear-gradient(135deg,${color}22,${color}08)`, border: `1px solid ${color}44`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, overflow: 'hidden', marginBottom: 14, boxShadow: hov ? `0 0 20px ${color}33` : 'none', transition: 'box-shadow .25s' }}>
+          <GameIcon name={game.name} slug={game.slug} logoUrl={game.logo_url} size={50} />
         </div>
 
         {/* Name + description */}
