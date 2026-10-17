@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import DashboardLayout from '../../components/layout/DashboardLayout'
+import PlayerLayout from '../../components/layout/PlayerLayout'
 import { supabase } from '../../lib/supabase'
 
 const gold = '#fbbf24'; const green = '#22c55e'; const red = '#ef4444'; const purple = '#a855f7'; const blue = '#3b82f6'
@@ -93,7 +93,7 @@ export default function TransactionsPage() {
   const rows = getRows()
 
   return (
-    <DashboardLayout>
+    <PlayerLayout>
       <div style={{ fontFamily: 'Outfit, sans-serif', color: '#fff', maxWidth: 720, margin: '0 auto' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
           <div>
@@ -187,6 +187,6 @@ export default function TransactionsPage() {
           </div>
         )}
       </div>
-    </DashboardLayout>
+    </PlayerLayout>
   )
 }
