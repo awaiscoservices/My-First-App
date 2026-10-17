@@ -1,85 +1,92 @@
-import { useState, useEffect } from 'react';
-import AdminLayout from '../../components/layout/AdminLayout';
-import { supabase } from '../../lib/supabase';
+import { useState, useEffect } from 'react'
+import AdminLayout from '../../components/layout/AdminLayout'
+import { supabase } from '../../lib/supabase'
+
+const gold = '#fbbf24'; const red = '#ef4444'
+const EMPTY = { id: null, name: '', min_xp: 0, color: '#fbbf24', icon: '⭐', perks: '' }
 
 export default function AdminLevels() {
-  const [levels, setLevels] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [editing, setEditing] = useState(null);
-  const [form, setForm] = useState({});
-  const [submitting, setSubmitting] = useState(false);
-  const [toast, setToast] = useState(null);
+  const [levels, setLevels] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [editing, setEditing] = useState(null)
+  const [saving, setSaving] = useState(false)
+  const [msg, setMsg] = useState('')
+  const [token, setToken] = useState(null)
 
-  const fetchLevels = async () => {
-    setLoading(true);
-    const { data } = await supabase.from('player_levels').select('*').order('level_number');
-    setLevels(data || []);
-    setLoading(false);
-  };
-  useEffect(() => { fetchLevels(); }, []);
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => { setToken(session?.access_token); fetchLevels(session?.access_token) })
+  }, [])
 
-  const showToast = (msg, t='success') => { setToast({ msg, type: t }); setTimeout(() => setToast(null), 4000); };
+  const fetchLevels = async (tok) => {
+    setLoading(true)
+    const res = await fetch('/api/admin/levels/list', { headers: { Authorization: `Bearer ${tok || token}` } })
+    if (res.ok) { const d = await res.json(); setLevels(d.rows || []) }
+    setLoading(false)
+  }
 
-  const startEdit = (lv) => { setEditing(lv.id); setForm({ name: lv.name, min_xp: lv.min_xp, bonus_rate_percent: lv.bonus_rate_percent, color: lv.color||'#fbbf24' }); };
-  const cancelEdit = () => { setEditing(null); setForm({}); };
-
-  const handleSave = async (levelId) => {
-    setSubmitting(true);
-    try {
-      const res = await fetch('/api/admin/levels/upsert', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ level_id: levelId, ...form, min_xp: parseInt(form.min_xp)||0, bonus_rate_percent: parseFloat(form.bonus_rate_percent)||0 }) });
-      const d = await res.json();
-      if (!res.ok) throw new Error(d.error||'Failed');
-      showToast('Level updated');
-      setEditing(null); fetchLevels();
-    } catch (e) { showToast(e.message,'error'); }
-    finally { setSubmitting(false); }
-  };
+  const save = async () => {
+    setSaving(true); setMsg('')
+    const res = await fetch('/api/admin/levels/save', {
+      method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify(editing),
+    })
+    const d = await res.json()
+    setSaving(false)
+    if (res.ok) { setEditing(null); fetchLevels() }
+    else setMsg(d.error || 'Failed')
+  }
 
   return (
     <AdminLayout>
-      <div style={{ padding: 24 }}>
-        <h1 style={{ fontFamily: 'Cinzel,serif', fontSize: 26, color: '#fbbf24', margin: '0 0 24px' }}>VIP Levels</h1>
+      <div style={{ fontFamily: 'Outfit, sans-serif', color: '#fff' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: gold, margin: 0 }}>⭐ Player Levels</h1>
+          <button onClick={() => setEditing(EMPTY)} style={{ padding: '9px 18px', borderRadius: 8, background: `linear-gradient(135deg, #b45309, ${gold})`, border: 'none', color: '#000', fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: 'Outfit, sans-serif' }}>+ Add Level</button>
+        </div>
 
-        {loading ? <div style={{ textAlign: 'center', padding: 60, color: '#94a3b8' }}>Loading…</div>
-        : (
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
-              <thead><tr style={{ borderBottom: '1px solid rgba(251,191,36,0.2)' }}>
-                {['Level','Name','Min XP','Bonus Rate','Color','Actions'].map(h => (
-                  <th key={h} style={{ padding: '10px 12px', textAlign: 'left', color: '#94a3b8', fontWeight: 600, whiteSpace: 'nowrap' }}>{h}</th>
-                ))}
-              </tr></thead>
-              <tbody>
-                {levels.map((lv,i) => editing===lv.id ? (
-                  <tr key={lv.id} style={{ borderBottom: '1px solid rgba(251,191,36,0.15)', background: 'rgba(251,191,36,0.04)' }}>
-                    <td style={{ padding: '10px 12px', color: '#fbbf24', fontWeight: 700 }}>#{lv.level_number}</td>
-                    <td style={{ padding: '10px 12px' }}><input value={form.name} onChange={e=>setForm(f=>({...f,name:e.target.value}))} style={{ padding: '7px 10px', borderRadius: 6, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.08)', color: '#e2e8f0', width: 140 }} /></td>
-                    <td style={{ padding: '10px 12px' }}><input type="number" value={form.min_xp} onChange={e=>setForm(f=>({...f,min_xp:e.target.value}))} style={{ padding: '7px 10px', borderRadius: 6, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.08)', color: '#e2e8f0', width: 100 }} /></td>
-                    <td style={{ padding: '10px 12px' }}><input type="number" step="0.1" value={form.bonus_rate_percent} onChange={e=>setForm(f=>({...f,bonus_rate_percent:e.target.value}))} style={{ padding: '7px 10px', borderRadius: 6, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.08)', color: '#e2e8f0', width: 80 }} /></td>
-                    <td style={{ padding: '10px 12px' }}><input type="color" value={form.color} onChange={e=>setForm(f=>({...f,color:e.target.value}))} style={{ width: 40, height: 32, borderRadius: 6, border: 'none', background: 'none', cursor: 'pointer' }} /></td>
-                    <td style={{ padding: '10px 12px' }}>
-                      <div style={{ display: 'flex', gap: 6 }}>
-                        <button onClick={() => handleSave(lv.id)} disabled={submitting} style={{ padding: '5px 12px', borderRadius: 6, border: 'none', cursor: 'pointer', background: '#4ade80', color: '#0f172a', fontWeight: 700, fontSize: 12 }}>Save</button>
-                        <button onClick={cancelEdit} style={{ padding: '5px 12px', borderRadius: 6, border: '1px solid rgba(255,255,255,0.1)', background: 'transparent', color: '#94a3b8', cursor: 'pointer', fontSize: 12 }}>Cancel</button>
-                      </div>
-                    </td>
-                  </tr>
-                ) : (
-                  <tr key={lv.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: i%2===0?'rgba(255,255,255,0.02)':'transparent' }}>
-                    <td style={{ padding: '10px 12px', color: '#fbbf24', fontWeight: 700 }}>#{lv.level_number}</td>
-                    <td style={{ padding: '10px 12px', color: '#e2e8f0', fontWeight: 600 }}>{lv.name}</td>
-                    <td style={{ padding: '10px 12px', color: '#94a3b8' }}>{(lv.min_xp||0).toLocaleString()} XP</td>
-                    <td style={{ padding: '10px 12px', color: '#94a3b8' }}>{lv.bonus_rate_percent}%</td>
-                    <td style={{ padding: '10px 12px' }}><div style={{ width: 24, height: 24, borderRadius: 6, background: lv.color||'#fbbf24' }} /></td>
-                    <td style={{ padding: '10px 12px' }}><button onClick={() => startEdit(lv)} style={{ padding: '5px 12px', borderRadius: 6, border: '1px solid rgba(255,255,255,0.1)', background: 'transparent', color: '#e2e8f0', cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>Edit</button></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        {loading ? <div style={{ textAlign: 'center', padding: '60px 0', color: 'rgba(255,255,255,0.3)' }}>Loading…</div> : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {levels.map((l, i) => (
+              <div key={l.id} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '16px 20px', background: 'rgba(255,255,255,0.03)', border: `1px solid ${l.color || gold}30`, borderRadius: 12 }}>
+                <div style={{ fontSize: 28 }}>{l.icon || '⭐'}</div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 700, fontSize: 16, color: l.color || gold }}>{l.name}</div>
+                  <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>Min XP: {l.min_xp?.toLocaleString()}</div>
+                  {l.perks && <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>{l.perks}</div>}
+                </div>
+                <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', background: 'rgba(255,255,255,0.05)', padding: '4px 8px', borderRadius: 6 }}>Level {i + 1}</div>
+                <button onClick={() => setEditing({ ...l })} style={{ padding: '6px 14px', borderRadius: 6, background: 'rgba(251,191,36,0.1)', border: '1px solid rgba(251,191,36,0.2)', color: gold, fontSize: 12, cursor: 'pointer', fontFamily: 'Outfit, sans-serif' }}>Edit</button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {editing && (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setEditing(null)}>
+            <div style={{ background: '#0d0a1a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 14, padding: 28, width: 420, maxWidth: '95vw' }} onClick={e => e.stopPropagation()}>
+              <h3 style={{ color: gold, fontFamily: 'Outfit, sans-serif', marginBottom: 20 }}>{editing.id ? 'Edit Level' : 'Add Level'}</h3>
+              {[
+                { label: 'Level Name *', key: 'name', type: 'text' },
+                { label: 'Min XP Required *', key: 'min_xp', type: 'number' },
+                { label: 'Icon (emoji)', key: 'icon', type: 'text' },
+                { label: 'Color (hex)', key: 'color', type: 'text' },
+                { label: 'Perks description', key: 'perks', type: 'text' },
+              ].map(f => (
+                <div key={f.key} style={{ marginBottom: 14 }}>
+                  <label style={{ display: 'block', fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 5, textTransform: 'uppercase' }}>{f.label}</label>
+                  <input type={f.type} value={editing[f.key] || ''} onChange={e => setEditing(p => ({ ...p, [f.key]: e.target.value }))}
+                    style={{ width: '100%', padding: '10px 12px', borderRadius: 8, boxSizing: 'border-box', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)', color: '#fff', fontSize: 13, fontFamily: 'Outfit, sans-serif', outline: 'none' }} />
+                </div>
+              ))}
+              {msg && <p style={{ color: red, fontSize: 12, marginBottom: 12 }}>{msg}</p>}
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button onClick={save} disabled={saving} style={{ flex: 1, padding: '10px', borderRadius: 8, background: `linear-gradient(135deg, #b45309, ${gold})`, border: 'none', color: '#000', fontWeight: 700, cursor: 'pointer', fontFamily: 'Outfit, sans-serif', fontSize: 13 }}>{saving ? 'Saving…' : 'Save Level'}</button>
+                <button onClick={() => setEditing(null)} style={{ padding: '10px 16px', borderRadius: 8, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', fontFamily: 'Outfit, sans-serif', fontSize: 13 }}>Cancel</button>
+              </div>
+            </div>
           </div>
         )}
       </div>
-      {toast && <div style={{ position: 'fixed', bottom: 24, right: 24, padding: '12px 20px', borderRadius: 10, fontWeight: 600, fontSize: 14, zIndex: 2000, background: toast.type==='error'?'#f87171':'#4ade80', color: '#0f172a' }}>{toast.msg}</div>}
     </AdminLayout>
-  );
+  )
 }

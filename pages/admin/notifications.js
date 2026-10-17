@@ -1,107 +1,78 @@
-import { useState, useEffect } from 'react';
-import AdminLayout from '../../components/layout/AdminLayout';
-import { supabase } from '../../lib/supabase';
+import { useState, useEffect } from 'react'
+import AdminLayout from '../../components/layout/AdminLayout'
+import { supabase } from '../../lib/supabase'
+
+const gold = '#fbbf24'; const green = '#22c55e'; const red = '#ef4444'; const purple = '#a855f7'
 
 export default function AdminNotifications() {
-  const [form, setForm] = useState({ title: '', message: '', target: 'all', min_level: 1, send_at: '' });
-  const [history, setHistory] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
-  const [toast, setToast] = useState(null);
+  const [form, setForm] = useState({ title: '', message: '', target: 'all' })
+  const [sending, setSending] = useState(false)
+  const [result, setResult] = useState(null)
+  const [error, setError] = useState('')
 
-  const fetchHistory = async () => {
-    setLoading(true);
-    const { data } = await supabase.from('audit_logs').select('id, action, details, created_at, performed_by').eq('action', 'notification_broadcast').order('created_at', { ascending: false }).limit(50);
-    setHistory(data || []);
-    setLoading(false);
-  };
-  useEffect(() => { fetchHistory(); }, []);
-
-  const showToast = (msg, t='success') => { setToast({ msg, type: t }); setTimeout(() => setToast(null), 4000); };
-
-  const handleSend = async () => {
-    if (!form.title.trim() || !form.message.trim()) { showToast('Title and message required','error'); return; }
-    setSubmitting(true);
-    try {
-      const res = await fetch('/api/admin/notifications/send', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) });
-      const d = await res.json();
-      if (!res.ok) throw new Error(d.error||'Failed');
-      showToast(d.sent_count != null ? `Sent to ${d.sent_count} players` : 'Notification queued');
-      setForm({ title: '', message: '', target: 'all', min_level: 1, send_at: '' });
-      fetchHistory();
-    } catch (e) { showToast(e.message,'error'); }
-    finally { setSubmitting(false); }
-  };
-
-  const fmtDate = d => d ? new Date(d).toLocaleString() : '—';
+  const send = async () => {
+    if (!form.title.trim() || !form.message.trim()) { setError('Title and message required'); return }
+    setSending(true); setError(''); setResult(null)
+    const { data: { session } } = await supabase.auth.getSession()
+    const res = await fetch('/api/admin/notifications/broadcast', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+      body: JSON.stringify(form),
+    })
+    const data = await res.json()
+    setSending(false)
+    if (res.ok) { setResult(data); setForm(f => ({ ...f, title: '', message: '' })) }
+    else setError(data.error || 'Failed')
+  }
 
   return (
     <AdminLayout>
-      <div style={{ padding: 24 }}>
-        <h1 style={{ fontFamily: 'Cinzel,serif', fontSize: 26, color: '#fbbf24', margin: '0 0 24px' }}>Broadcast Notifications</h1>
+      <div style={{ fontFamily: 'Outfit, sans-serif', color: '#fff', maxWidth: 600 }}>
+        <h1 style={{ fontSize: 22, fontWeight: 700, color: gold, marginBottom: 8 }}>📣 Broadcast Notification</h1>
+        <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginBottom: 28 }}>Send a push notification to all or active players.</p>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '420px 1fr', gap: 20 }}>
-          {/* Compose form */}
-          <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: 12, border: '1px solid rgba(255,255,255,0.06)', padding: 22 }}>
-            <div style={{ color: '#e2e8f0', fontWeight: 700, marginBottom: 18, fontSize: 15 }}>Compose</div>
+        {result && (
+          <div style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: 10, padding: '14px 18px', marginBottom: 20 }}>
+            <p style={{ color: green, fontSize: 13, margin: 0 }}>✅ Broadcast sent to <strong>{result.sent}</strong> players.</p>
+          </div>
+        )}
 
-            <div style={{ marginBottom: 14 }}>
-              <label style={{ display: 'block', color: '#94a3b8', fontSize: 13, marginBottom: 6 }}>Title</label>
-              <input value={form.title} onChange={e=>setForm(f=>({...f,title:e.target.value}))} placeholder="Notification title…" style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: '#e2e8f0', fontSize: 14, boxSizing: 'border-box' }} />
+        <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: 28 }}>
+          <div style={{ marginBottom: 18 }}>
+            <label style={{ display: 'block', fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Target Audience</label>
+            <div style={{ display: 'flex', gap: 10 }}>
+              {[{ value: 'all', label: '🌐 All Players' }, { value: 'active', label: '✅ Active Only' }].map(t => (
+                <div key={t.value} onClick={() => setForm(f => ({ ...f, target: t.value }))} style={{ flex: 1, padding: '12px 16px', borderRadius: 10, cursor: 'pointer', textAlign: 'center', fontSize: 13, fontWeight: 500,
+                  background: form.target === t.value ? 'rgba(251,191,36,0.1)' : 'rgba(255,255,255,0.03)',
+                  border: `1.5px solid ${form.target === t.value ? 'rgba(251,191,36,0.4)' : 'rgba(255,255,255,0.08)'}`,
+                  color: form.target === t.value ? gold : 'rgba(255,255,255,0.5)',
+                }}>
+                  {t.label}
+                </div>
+              ))}
             </div>
-
-            <div style={{ marginBottom: 14 }}>
-              <label style={{ display: 'block', color: '#94a3b8', fontSize: 13, marginBottom: 6 }}>Message</label>
-              <textarea value={form.message} onChange={e=>setForm(f=>({...f,message:e.target.value}))} rows={4} placeholder="Notification body…" style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: '#e2e8f0', fontSize: 14, resize: 'vertical', boxSizing: 'border-box' }} />
-            </div>
-
-            <div style={{ marginBottom: 14 }}>
-              <label style={{ display: 'block', color: '#94a3b8', fontSize: 13, marginBottom: 6 }}>Target Audience</label>
-              <select value={form.target} onChange={e=>setForm(f=>({...f,target:e.target.value}))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.1)', background: '#1e293b', color: '#e2e8f0', fontSize: 14 }}>
-                <option value="all">All Players</option>
-                <option value="vip">VIP Players</option>
-                <option value="level_plus">Level and Above</option>
-              </select>
-            </div>
-
-            {form.target === 'level_plus' && (
-              <div style={{ marginBottom: 14 }}>
-                <label style={{ display: 'block', color: '#94a3b8', fontSize: 13, marginBottom: 6 }}>Minimum Level</label>
-                <input type="number" min="1" max="10" value={form.min_level} onChange={e=>setForm(f=>({...f,min_level:parseInt(e.target.value)||1}))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: '#e2e8f0', fontSize: 14, boxSizing: 'border-box' }} />
-              </div>
-            )}
-
-            <div style={{ marginBottom: 20 }}>
-              <label style={{ display: 'block', color: '#94a3b8', fontSize: 13, marginBottom: 6 }}>Schedule (leave blank to send now)</label>
-              <input type="datetime-local" value={form.send_at} onChange={e=>setForm(f=>({...f,send_at:e.target.value}))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.1)', background: '#1e293b', color: '#e2e8f0', fontSize: 14 }} />
-            </div>
-
-            <button onClick={handleSend} disabled={submitting} style={{ width: '100%', padding: 13, borderRadius: 8, border: 'none', cursor: submitting?'not-allowed':'pointer', fontWeight: 700, fontSize: 15, background: '#fbbf24', color: '#0f172a', opacity: submitting?0.7:1 }}>{submitting?'Sending…':form.send_at?'Schedule Notification':'Send Now'}</button>
           </div>
 
-          {/* History */}
-          <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: 12, border: '1px solid rgba(255,255,255,0.06)', padding: 22 }}>
-            <div style={{ color: '#e2e8f0', fontWeight: 700, marginBottom: 18, fontSize: 15 }}>Sent History</div>
-            {loading ? <div style={{ color: '#94a3b8', textAlign: 'center', padding: 40 }}>Loading…</div>
-            : history.length === 0 ? <div style={{ color: '#64748b', textAlign: 'center', padding: 40 }}>No notifications sent yet</div>
-            : history.map(h => (
-              <div key={h.id} style={{ marginBottom: 10, padding: '12px 14px', borderRadius: 8, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                  <span style={{ color: '#e2e8f0', fontWeight: 600, fontSize: 14 }}>{h.title}</span>
-                  <span style={{ color: '#64748b', fontSize: 12, whiteSpace: 'nowrap', marginLeft: 10 }}>{fmtDate(h.created_at)}</span>
-                </div>
-                <div style={{ color: '#94a3b8', fontSize: 13, marginBottom: 6 }}>{h.message}</div>
-                <div style={{ display: 'flex', gap: 10 }}>
-                  <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 20, background: 'rgba(255,255,255,0.06)', color: '#64748b', textTransform: 'capitalize' }}>{h.target}</span>
-                  {h.sent_count != null && <span style={{ fontSize: 11, color: '#4ade80' }}>✓ {h.sent_count} recipients</span>}
-                  {h.send_at && new Date(h.send_at) > new Date() && <span style={{ fontSize: 11, color: '#fbbf24' }}>⏰ Scheduled {fmtDate(h.send_at)}</span>}
-                </div>
-              </div>
-            ))}
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ display: 'block', fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Title *</label>
+            <input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="e.g. 🎁 New Promotion Live!" maxLength={80}
+              style={{ width: '100%', padding: '12px 14px', borderRadius: 10, boxSizing: 'border-box', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)', color: '#fff', fontSize: 14, fontFamily: 'Outfit, sans-serif', outline: 'none' }} />
           </div>
+
+          <div style={{ marginBottom: 24 }}>
+            <label style={{ display: 'block', fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Message *</label>
+            <textarea value={form.message} onChange={e => setForm(f => ({ ...f, message: e.target.value }))} placeholder="Your message to players…" rows={4} maxLength={500}
+              style={{ width: '100%', padding: '12px 14px', borderRadius: 10, boxSizing: 'border-box', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)', color: '#fff', fontSize: 14, fontFamily: 'Outfit, sans-serif', outline: 'none', resize: 'vertical' }} />
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.25)', marginTop: 4, textAlign: 'right' }}>{form.message.length}/500</div>
+          </div>
+
+          {error && <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 8, padding: '10px 14px', marginBottom: 16, color: red, fontSize: 13 }}>⚠ {error}</div>}
+
+          <button onClick={send} disabled={sending} style={{ width: '100%', padding: '13px', borderRadius: 10, border: 'none', background: sending ? 'rgba(251,191,36,0.2)' : `linear-gradient(135deg, #b45309, ${gold})`, color: sending ? 'rgba(255,255,255,0.4)' : '#000', fontSize: 15, fontWeight: 700, cursor: sending ? 'not-allowed' : 'pointer', fontFamily: 'Outfit, sans-serif' }}>
+            {sending ? 'Sending…' : `📣 Send to ${form.target === 'all' ? 'All' : 'Active'} Players`}
+          </button>
         </div>
       </div>
-      {toast && <div style={{ position: 'fixed', bottom: 24, right: 24, padding: '12px 20px', borderRadius: 10, fontWeight: 600, fontSize: 14, zIndex: 2000, background: toast.type==='error'?'#f87171':'#4ade80', color: '#0f172a' }}>{toast.msg}</div>}
     </AdminLayout>
-  );
+  )
 }

@@ -1,119 +1,134 @@
-import { useEffect, useState } from 'react'
-import Head from 'next/head'
-import { supabase } from '../../lib/supabase'
+import { useState, useEffect } from 'react'
 import AdminLayout from '../../components/layout/AdminLayout'
+import { StatusPill } from '../../components/admin/DataTable'
+import { supabase } from '../../lib/supabase'
 
-const STAFF_ROLES = ['super_admin', 'finance', 'game_ops', 'support', 'kyc_agent', 'risk', 'reporting', 'marketing']
+const gold = '#fbbf24'; const green = '#22c55e'; const red = '#ef4444'
+const ROLES = ['super_admin', 'finance', 'game_ops', 'support', 'kyc_agent', 'risk', 'reporting', 'marketing']
+function fmtDate(d) { return d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—' }
 
-export default function StaffAdmin() {
+export default function AdminStaff() {
   const [staff, setStaff] = useState([])
   const [loading, setLoading] = useState(true)
-  const [form, setForm] = useState({ email: '', role: 'support' })
+  const [showInvite, setShowInvite] = useState(false)
+  const [form, setForm] = useState({ email: '', full_name: '', role: 'support' })
   const [saving, setSaving] = useState(false)
-  const [error, setError] = useState(null)
-  const [success, setSuccess] = useState(null)
+  const [msg, setMsg] = useState('')
+  const [tempPwd, setTempPwd] = useState(null)
+  const [token, setToken] = useState(null)
 
-  async function load() {
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => { setToken(session?.access_token); fetchStaff(session?.access_token) })
+  }, [])
+
+  const fetchStaff = async (tok) => {
     setLoading(true)
-    const { data } = await supabase
-      .from('profiles')
-      .select('id, full_name, email, role, created_at')
-      .in('role', STAFF_ROLES)
-      .order('created_at', { ascending: false })
-    setStaff(data || [])
+    const res = await fetch('/api/admin/staff/list', { headers: { Authorization: `Bearer ${tok || token}` } })
+    if (res.ok) { const d = await res.json(); setStaff(d.rows || []) }
     setLoading(false)
   }
 
-  useEffect(() => { load() }, [])
-
-  async function invite(e) {
-    e.preventDefault(); setError(null); setSuccess(null)
-    if (!form.email.trim() || !form.role) { setError('Email and role required'); return }
-    setSaving(true)
-    const { data: { session } } = await supabase.auth.getSession()
-    const res = await fetch('/api/admin/staff/action', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
-      body: JSON.stringify({ action: 'invite', email: form.email, role: form.role })
+  const invite = async () => {
+    setSaving(true); setMsg('')
+    const res = await fetch('/api/admin/staff/save', {
+      method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ action: 'invite', ...form }),
     })
-    const json = await res.json()
+    const d = await res.json()
     setSaving(false)
-    if (!res.ok) { setError(json.error); return }
-    setSuccess(`Invitation sent to ${form.email}`)
-    setForm({ email: '', role: 'support' })
-    load()
+    if (res.ok) { setTempPwd(d.temp_password); setShowInvite(false); setForm({ email: '', full_name: '', role: 'support' }); fetchStaff() }
+    else setMsg(d.error || 'Failed')
   }
 
-  async function changeRole(target_user_id, role) {
+  const changeRole = async (id, role) => {
     const { data: { session } } = await supabase.auth.getSession()
-    const res = await fetch('/api/admin/staff/action', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
-      body: JSON.stringify({ action: 'update_role', target_user_id, role })
+    await fetch('/api/admin/staff/save', {
+      method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+      body: JSON.stringify({ action: 'update_role', staff_id: id, role }),
     })
-    const json = await res.json()
-    if (!res.ok) { alert(json.error); return }
-    load()
+    fetchStaff()
   }
 
-  const inp = { background: '#0f172a', border: '1px solid #475569', borderRadius: 8, padding: '10px 14px', color: '#f1f5f9', width: '100%' }
+  const deactivate = async (id) => {
+    if (!confirm('Deactivate this staff member?')) return
+    const { data: { session } } = await supabase.auth.getSession()
+    await fetch('/api/admin/staff/save', {
+      method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+      body: JSON.stringify({ action: 'deactivate', staff_id: id }),
+    })
+    fetchStaff()
+  }
 
   return (
     <AdminLayout>
-      <Head><title>Staff — Admin</title></Head>
-      <div style={{ padding: '24px 32px', maxWidth: 900 }}>
-        <h1 style={{ color: '#fbbf24', fontFamily: 'Cinzel, serif', fontSize: 26, marginBottom: 24 }}>Staff Management</h1>
-
-        <div style={{ background: '#1e293b', border: '1px solid #334155', borderRadius: 12, padding: 24, marginBottom: 32 }}>
-          <h2 style={{ color: '#e2e8f0', fontSize: 15, fontWeight: 700, marginBottom: 14 }}>Invite Staff Member</h2>
-          <form onSubmit={invite} style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'flex-end' }}>
-            <div style={{ flex: 2, minWidth: 200 }}>
-              <label style={{ color: '#94a3b8', fontSize: 13, display: 'block', marginBottom: 6 }}>Email</label>
-              <input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} style={inp} placeholder="staff@example.com" required />
-            </div>
-            <div style={{ flex: 1, minWidth: 160 }}>
-              <label style={{ color: '#94a3b8', fontSize: 13, display: 'block', marginBottom: 6 }}>Role</label>
-              <select value={form.role} onChange={e => setForm(f => ({ ...f, role: e.target.value }))} style={inp}>
-                {STAFF_ROLES.map(r => <option key={r} value={r}>{r}</option>)}
-              </select>
-            </div>
-            <button type="submit" disabled={saving} style={{ background: '#fbbf24', color: '#0f172a', border: 'none', borderRadius: 8, padding: '10px 24px', fontWeight: 700, cursor: 'pointer', height: 44 }}>
-              {saving ? 'Inviting…' : 'Send Invite'}
-            </button>
-          </form>
-          {error && <div style={{ color: '#f87171', fontSize: 14, marginTop: 10 }}>{error}</div>}
-          {success && <div style={{ color: '#86efac', fontSize: 14, marginTop: 10 }}>{success}</div>}
+      <div style={{ fontFamily: 'Outfit, sans-serif', color: '#fff' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: gold, margin: 0 }}>👥 Staff Management</h1>
+          <button onClick={() => setShowInvite(true)} style={{ padding: '9px 18px', borderRadius: 8, background: `linear-gradient(135deg, #b45309, ${gold})`, border: 'none', color: '#000', fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: 'Outfit, sans-serif' }}>+ Invite Staff</button>
         </div>
 
-        {loading ? <div style={{ color: '#94a3b8' }}>Loading…</div> : (
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
-              <thead>
-                <tr style={{ borderBottom: '1px solid #334155' }}>
-                  {['Name', 'Email', 'Role', 'Change Role'].map(h => (
-                    <th key={h} style={{ textAlign: 'left', padding: '10px 12px', color: '#94a3b8', fontWeight: 600 }}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
+        {tempPwd && (
+          <div style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: 10, padding: '14px 18px', marginBottom: 20 }}>
+            <p style={{ color: green, fontSize: 13, margin: 0 }}>✅ Staff invited! Temporary password: <strong style={{ fontFamily: 'monospace', fontSize: 15 }}>{tempPwd}</strong> — share this securely.</p>
+            <button onClick={() => setTempPwd(null)} style={{ marginTop: 8, background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: 12 }}>Dismiss</button>
+          </div>
+        )}
+
+        {loading ? <div style={{ textAlign: 'center', padding: '60px 0', color: 'rgba(255,255,255,0.3)' }}>Loading…</div> : (
+          <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, overflow: 'hidden' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+              <thead><tr style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+                {['Name', 'Email', 'Role', 'Status', 'Joined', ''].map(h => (
+                  <th key={h} style={{ padding: '12px 16px', textAlign: 'left', color: 'rgba(255,255,255,0.4)', fontWeight: 500, fontSize: 11, textTransform: 'uppercase' }}>{h}</th>
+                ))}
+              </tr></thead>
               <tbody>
                 {staff.map(s => (
-                  <tr key={s.id} style={{ borderBottom: '1px solid #1e293b' }}>
-                    <td style={{ padding: '10px 12px', color: '#f1f5f9', fontWeight: 600 }}>{s.full_name || '—'}</td>
-                    <td style={{ padding: '10px 12px', color: '#94a3b8' }}>{s.email}</td>
-                    <td style={{ padding: '10px 12px' }}>
-                      <span style={{ background: '#1e3a5f', color: '#93c5fd', fontSize: 12, fontWeight: 700, padding: '3px 10px', borderRadius: 20 }}>{s.role}</span>
-                    </td>
-                    <td style={{ padding: '10px 12px' }}>
-                      <select defaultValue={s.role} onChange={e => changeRole(s.id, e.target.value)}
-                        style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: 6, padding: '6px 10px', color: '#f1f5f9', fontSize: 13 }}>
-                        {STAFF_ROLES.map(r => <option key={r} value={r}>{r}</option>)}
+                  <tr key={s.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                    <td style={{ padding: '12px 16px', fontWeight: 600 }}>{s.full_name}</td>
+                    <td style={{ padding: '12px 16px', color: 'rgba(255,255,255,0.5)' }}>{s.email}</td>
+                    <td style={{ padding: '12px 16px' }}>
+                      <select value={s.role} onChange={e => changeRole(s.id, e.target.value)} style={{ padding: '4px 8px', borderRadius: 6, background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', color: gold, fontSize: 12, cursor: 'pointer', fontFamily: 'Outfit, sans-serif', outline: 'none' }}>
+                        {ROLES.map(r => <option key={r} value={r} style={{ background: '#0d0a1a' }}>{r}</option>)}
                       </select>
+                    </td>
+                    <td style={{ padding: '12px 16px' }}><StatusPill status={s.status} /></td>
+                    <td style={{ padding: '12px 16px', color: 'rgba(255,255,255,0.4)' }}>{fmtDate(s.created_at)}</td>
+                    <td style={{ padding: '12px 16px' }}>
+                      {s.status !== 'suspended' && (
+                        <button onClick={() => deactivate(s.id)} style={{ padding: '5px 10px', borderRadius: 6, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: red, fontSize: 11, cursor: 'pointer', fontFamily: 'Outfit, sans-serif' }}>Deactivate</button>
+                      )}
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-            {staff.length === 0 && <div style={{ color: '#64748b', padding: 20 }}>No staff members yet.</div>}
+          </div>
+        )}
+
+        {showInvite && (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setShowInvite(false)}>
+            <div style={{ background: '#0d0a1a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 14, padding: 28, width: 420, maxWidth: '95vw' }} onClick={e => e.stopPropagation()}>
+              <h3 style={{ color: gold, fontFamily: 'Outfit, sans-serif', marginBottom: 20 }}>Invite Staff Member</h3>
+              {[{ label: 'Email *', key: 'email', type: 'email' }, { label: 'Full Name', key: 'full_name', type: 'text' }].map(f => (
+                <div key={f.key} style={{ marginBottom: 14 }}>
+                  <label style={{ display: 'block', fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 5, textTransform: 'uppercase' }}>{f.label}</label>
+                  <input type={f.type} value={form[f.key]} onChange={e => setForm(p => ({ ...p, [f.key]: e.target.value }))}
+                    style={{ width: '100%', padding: '10px 12px', borderRadius: 8, boxSizing: 'border-box', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)', color: '#fff', fontSize: 13, fontFamily: 'Outfit, sans-serif', outline: 'none' }} />
+                </div>
+              ))}
+              <div style={{ marginBottom: 18 }}>
+                <label style={{ display: 'block', fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 5, textTransform: 'uppercase' }}>Role *</label>
+                <select value={form.role} onChange={e => setForm(p => ({ ...p, role: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)', color: '#fff', fontSize: 13, fontFamily: 'Outfit, sans-serif', outline: 'none' }}>
+                  {ROLES.filter(r => r !== 'super_admin').map(r => <option key={r} value={r} style={{ background: '#0d0a1a' }}>{r}</option>)}
+                </select>
+              </div>
+              {msg && <p style={{ color: red, fontSize: 12, marginBottom: 12 }}>{msg}</p>}
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button onClick={invite} disabled={saving} style={{ flex: 1, padding: '10px', borderRadius: 8, background: `linear-gradient(135deg, #b45309, ${gold})`, border: 'none', color: '#000', fontWeight: 700, cursor: 'pointer', fontFamily: 'Outfit, sans-serif', fontSize: 13 }}>{saving ? 'Inviting…' : 'Send Invite'}</button>
+                <button onClick={() => setShowInvite(false)} style={{ padding: '10px 16px', borderRadius: 8, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', fontFamily: 'Outfit, sans-serif', fontSize: 13 }}>Cancel</button>
+              </div>
+            </div>
           </div>
         )}
       </div>
