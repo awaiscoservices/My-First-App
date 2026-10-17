@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import DashboardLayout from '../../components/layout/DashboardLayout'
+import PlayerLayout from '../../components/layout/PlayerLayout'
 import { supabase } from '../../lib/supabase'
 
 const gold = '#fbbf24'; const green = '#22c55e'; const red = '#ef4444'; const purple = '#a855f7'
@@ -99,13 +99,13 @@ export default function ProfilePage() {
   }
 
   if (loading) return (
-    <DashboardLayout>
+    <PlayerLayout>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', color: 'rgba(255,255,255,0.3)', fontFamily: 'Outfit, sans-serif' }}>Loading…</div>
-    </DashboardLayout>
+    </PlayerLayout>
   )
 
   return (
-    <DashboardLayout>
+    <PlayerLayout>
       <div style={{ fontFamily: 'Outfit, sans-serif', color: '#fff', maxWidth: 640, margin: '0 auto' }}>
         <h1 style={{ fontSize: 22, fontWeight: 700, color: gold, marginBottom: 24 }}>👤 My Profile</h1>
 
@@ -216,6 +216,6 @@ export default function ProfilePage() {
           </button>
         </Section>
       </div>
-    </DashboardLayout>
+    </PlayerLayout>
   )
 }
