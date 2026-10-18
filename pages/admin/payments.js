@@ -1,182 +1,210 @@
-import { useState, useEffect } from 'react'
-import AdminLayout from '../../components/layout/AdminLayout'
+import { useEffect, useState } from 'react'
+import Head from 'next/head'
 import { supabase } from '../../lib/supabase'
+import AdminLayout from '../../components/layout/AdminLayout'
+import StatusBadge from '../../components/ui/StatusBadge'
 
-const gold = '#fbbf24'; const green = '#22c55e'; const red = '#ef4444'
-const fmt = c => '$' + (c / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })
+const fmt = c => c != null ? '$' + (c / 100).toLocaleString('en-US', { minimumFractionDigits: 2 }) : '—'
 
-const EMPTY_FORM = { name: '', type: 'bank_transfer', icon: '', description: '', instructions: '', account_details: '', min_deposit_cents: '', max_deposit_cents: '', default_bonus_pct: '0', is_active: true, is_auto: false, requires_proof: false, requires_reference: false, sort_order: '0' }
-const TYPES = ['bank_transfer', 'crypto', 'cashapp', 'venmo', 'zelle', 'paypal', 'other']
-
-export default function AdminPayments() {
-  const [methods, setMethods] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [modal, setModal] = useState(null) // null | 'add' | row obj
-  const [form, setForm] = useState(EMPTY_FORM)
+function MethodModal({ method, onClose, onSave }) {
+  const isNew = !method
+  const [form, setForm] = useState({
+    name: method?.name || '',
+    type: method?.type || 'bank_transfer',
+    min_amount_cents: method?.min_amount_cents ? (method.min_amount_cents / 100).toFixed(2) : '',
+    max_amount_cents: method?.max_amount_cents ? (method.max_amount_cents / 100).toFixed(2) : '',
+    fee_percent: method?.fee_percent || '',
+    fee_fixed_cents: method?.fee_fixed_cents ? (method.fee_fixed_cents / 100).toFixed(2) : '',
+    processing_time: method?.processing_time || '',
+    is_active: method?.is_active ?? true,
+    supports_deposit: method?.supports_deposit ?? true,
+    supports_withdrawal: method?.supports_withdrawal ?? true,
+  })
   const [saving, setSaving] = useState(false)
-  const [msg, setMsg] = useState('')
-  const [token, setToken] = useState(null)
+  const [error, setError] = useState('')
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => { setToken(session?.access_token); fetchMethods(session?.access_token) })
-  }, [])
-
-  const fetchMethods = async (tok) => {
-    setLoading(true)
-    const res = await fetch('/api/admin/payments/list', { headers: { Authorization: `Bearer ${tok || token}` } })
-    if (res.ok) { const d = await res.json(); setMethods(d.rows || []) }
-    setLoading(false)
-  }
-
-  const openAdd = () => { setForm(EMPTY_FORM); setMsg(''); setModal('add') }
-  const openEdit = (row) => {
-    setForm({
-      id: row.id, name: row.name || '', type: row.type || 'bank_transfer', icon: row.icon || '',
-      description: row.description || '', instructions: row.instructions || '', account_details: row.account_details || '',
-      min_deposit_cents: row.min_deposit_cents ? String(row.min_deposit_cents / 100) : '',
-      max_deposit_cents: row.max_deposit_cents ? String(row.max_deposit_cents / 100) : '',
-      default_bonus_pct: String(row.default_bonus_pct || 0), is_active: row.is_active ?? true,
-      is_auto: row.is_auto ?? false, requires_proof: row.requires_proof ?? false,
-      requires_reference: row.requires_reference ?? false, sort_order: String(row.sort_order || 0),
-    })
-    setMsg(''); setModal(row)
-  }
-
-  const save = async () => {
-    if (!form.name.trim()) { setMsg('Name is required'); return }
-    setSaving(true); setMsg('')
-    const payload = {
+  async function submit() {
+    if (!form.name.trim()) { setError('Method name is required'); return }
+    setSaving(true); setError('')
+    const body = {
       ...form,
-      min_deposit_cents: form.min_deposit_cents ? Math.round(parseFloat(form.min_deposit_cents) * 100) : null,
-      max_deposit_cents: form.max_deposit_cents ? Math.round(parseFloat(form.max_deposit_cents) * 100) : null,
-      default_bonus_pct: parseFloat(form.default_bonus_pct) || 0,
-      sort_order: parseInt(form.sort_order) || 0,
+      min_amount_cents: form.min_amount_cents ? Math.round(parseFloat(form.min_amount_cents) * 100) : null,
+      max_amount_cents: form.max_amount_cents ? Math.round(parseFloat(form.max_amount_cents) * 100) : null,
+      fee_percent: form.fee_percent ? parseFloat(form.fee_percent) : 0,
+      fee_fixed_cents: form.fee_fixed_cents ? Math.round(parseFloat(form.fee_fixed_cents) * 100) : 0,
     }
-    const res = await fetch('/api/admin/payments/save', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      body: JSON.stringify(payload),
-    })
-    const d = await res.json()
-    setSaving(false)
-    if (res.ok) { setModal(null); fetchMethods() }
-    else setMsg(d.error || 'Failed')
+    const result = await onSave(method?.id, body)
+    if (result?.error) { setError(result.error); setSaving(false) }
+    else onClose()
   }
 
-  const F = ({ label, fkey, type = 'text', placeholder = '' }) => (
-    <div style={{ marginBottom: 14 }}>
-      <label style={{ display: 'block', fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 5, textTransform: 'uppercase' }}>{label}</label>
-      <input type={type} value={form[fkey]} onChange={e => setForm(p => ({ ...p, [fkey]: e.target.value }))} placeholder={placeholder}
-        style={{ width: '100%', padding: '9px 12px', borderRadius: 8, boxSizing: 'border-box', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)', color: '#fff', fontSize: 13, fontFamily: 'Outfit, sans-serif', outline: 'none' }} />
-    </div>
-  )
-
-  const Toggle = ({ label, fkey }) => (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-      <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)' }}>{label}</span>
-      <div onClick={() => setForm(p => ({ ...p, [fkey]: !p[fkey] }))} style={{ width: 40, height: 22, borderRadius: 11, cursor: 'pointer', position: 'relative', background: form[fkey] ? gold : 'rgba(255,255,255,0.12)', transition: 'background 0.2s' }}>
-        <div style={{ position: 'absolute', top: 3, left: form[fkey] ? 21 : 3, width: 16, height: 16, borderRadius: '50%', background: '#fff', transition: 'left 0.2s' }} />
-      </div>
+  const Toggle = ({ field, label }) => (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+      <button onClick={() => setForm(p => ({ ...p, [field]: !p[field] }))} style={{ width: 40, height: 22, borderRadius: 99, border: 'none', cursor: 'pointer', background: form[field] ? '#22c55e' : 'rgba(255,255,255,.15)', position: 'relative', transition: 'background .2s' }}>
+        <div style={{ width: 16, height: 16, borderRadius: '50%', background: '#fff', position: 'absolute', top: 3, left: form[field] ? 21 : 3, transition: 'left .2s' }} />
+      </button>
+      <span style={{ fontSize: 13, color: form[field] ? '#22c55e' : 'rgba(255,255,255,.35)' }}>{label}</span>
     </div>
   )
 
   return (
-    <AdminLayout>
-      <div style={{ fontFamily: 'Outfit, sans-serif', color: '#fff' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-          <div>
-            <h1 style={{ fontSize: 22, fontWeight: 700, color: gold, margin: 0 }}>💳 Deposit Methods</h1>
-            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', margin: '4px 0 0' }}>Configure how players can deposit funds.</p>
-          </div>
-          <button onClick={openAdd} style={{ padding: '9px 18px', borderRadius: 8, background: `linear-gradient(135deg, #b45309, ${gold})`, border: 'none', color: '#000', fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: 'Outfit, sans-serif' }}>+ Add Method</button>
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.8)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }} onClick={onClose}>
+      <div style={{ background: '#0e1a2e', border: '1px solid rgba(251,191,36,.3)', borderRadius: 20, padding: 32, width: '100%', maxWidth: 520, maxHeight: '88vh', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+          <h2 style={{ fontFamily: "'Cinzel',serif", fontSize: 18, fontWeight: 700, color: '#fff' }}>{isNew ? 'Add Payment Method' : 'Edit Payment Method'}</h2>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,.5)', fontSize: 20, cursor: 'pointer' }}>✕</button>
         </div>
-
-        {loading ? (
-          <div style={{ textAlign: 'center', padding: '60px 0', color: 'rgba(255,255,255,0.3)' }}>Loading…</div>
-        ) : methods.length === 0 ? (
-          <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: '40px 24px', textAlign: 'center', color: 'rgba(255,255,255,0.3)' }}>No deposit methods yet. Add one above.</div>
-        ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 14 }}>
-            {methods.map(m => (
-              <div key={m.id} style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${m.is_active ? 'rgba(251,191,36,0.2)' : 'rgba(255,255,255,0.06)'}`, borderRadius: 12, padding: 18, position: 'relative' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
-                  <div>
-                    <div style={{ fontWeight: 700, fontSize: 15 }}>{m.icon} {m.name}</div>
-                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', marginTop: 2, textTransform: 'uppercase' }}>{m.type}</div>
-                  </div>
-                  <span style={{ fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 20, background: m.is_active ? 'rgba(34,197,94,0.1)' : 'rgba(255,255,255,0.05)', color: m.is_active ? green : 'rgba(255,255,255,0.3)', border: `1px solid ${m.is_active ? 'rgba(34,197,94,0.2)' : 'rgba(255,255,255,0.06)'}` }}>
-                    {m.is_active ? 'Active' : 'Inactive'}
-                  </span>
-                </div>
-                {m.description && <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', margin: '0 0 10px', lineHeight: 1.4 }}>{m.description}</p>}
-                <div style={{ display: 'flex', gap: 12, fontSize: 11, color: 'rgba(255,255,255,0.35)', marginBottom: 12 }}>
-                  {m.min_deposit_cents && <span>Min: {fmt(m.min_deposit_cents)}</span>}
-                  {m.max_deposit_cents && <span>Max: {fmt(m.max_deposit_cents)}</span>}
-                  {m.default_bonus_pct > 0 && <span style={{ color: green }}>+{m.default_bonus_pct}% bonus</span>}
-                </div>
-                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 12 }}>
-                  {m.is_auto && <span style={{ fontSize: 10, padding: '2px 7px', borderRadius: 20, background: 'rgba(168,85,247,0.1)', border: '1px solid rgba(168,85,247,0.2)', color: '#a855f7' }}>Auto</span>}
-                  {m.requires_proof && <span style={{ fontSize: 10, padding: '2px 7px', borderRadius: 20, background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.15)', color: 'rgba(251,191,36,0.7)' }}>Needs Proof</span>}
-                  {m.requires_reference && <span style={{ fontSize: 10, padding: '2px 7px', borderRadius: 20, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.4)' }}>Needs Ref</span>}
-                </div>
-                <button onClick={() => openEdit(m)} style={{ width: '100%', padding: '8px', borderRadius: 8, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)', fontSize: 12, cursor: 'pointer', fontFamily: 'Outfit, sans-serif' }}>Edit</button>
-              </div>
-            ))}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+          <div style={{ gridColumn: '1/-1' }}>
+            <label style={{ display: 'block', fontSize: 11, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,.45)', marginBottom: 6 }}>Method Name</label>
+            <input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} placeholder="e.g. Bank Transfer"
+              style={{ width: '100%', padding: '11px 14px', background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.12)', borderRadius: 10, color: '#fff', fontSize: 13, fontFamily: "'Outfit',sans-serif", outline: 'none', boxSizing: 'border-box' }} />
           </div>
-        )}
+          <div style={{ gridColumn: '1/-1' }}>
+            <label style={{ display: 'block', fontSize: 11, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,.45)', marginBottom: 6 }}>Type</label>
+            <select value={form.type} onChange={e => setForm(p => ({ ...p, type: e.target.value }))}
+              style={{ width: '100%', padding: '11px 14px', background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.12)', borderRadius: 10, color: '#fff', fontSize: 13, fontFamily: "'Outfit',sans-serif", outline: 'none' }}>
+              {['bank_transfer', 'crypto', 'card', 'ewallet', 'cash'].map(t => <option key={t} value={t} style={{ background: '#0e1a2e' }}>{t.replace(/_/g, ' ')}</option>)}
+            </select>
+          </div>
+          {[['min_amount_cents', 'Min Amount ($)'], ['max_amount_cents', 'Max Amount ($)'], ['fee_percent', 'Fee %'], ['fee_fixed_cents', 'Fixed Fee ($)']].map(([key, label]) => (
+            <div key={key}>
+              <label style={{ display: 'block', fontSize: 11, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,.45)', marginBottom: 6 }}>{label}</label>
+              <input type="number" min="0" step="0.01" value={form[key]} onChange={e => setForm(p => ({ ...p, [key]: e.target.value }))} placeholder="0"
+                style={{ width: '100%', padding: '11px 14px', background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.12)', borderRadius: 10, color: '#fff', fontSize: 13, fontFamily: "'Outfit',sans-serif", outline: 'none', boxSizing: 'border-box' }} />
+            </div>
+          ))}
+          <div style={{ gridColumn: '1/-1' }}>
+            <label style={{ display: 'block', fontSize: 11, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,.45)', marginBottom: 6 }}>Processing Time</label>
+            <input value={form.processing_time} onChange={e => setForm(p => ({ ...p, processing_time: e.target.value }))} placeholder="e.g. 1-3 business days"
+              style={{ width: '100%', padding: '11px 14px', background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.12)', borderRadius: 10, color: '#fff', fontSize: 13, fontFamily: "'Outfit',sans-serif", outline: 'none', boxSizing: 'border-box' }} />
+          </div>
+          <Toggle field="is_active" label="Active" />
+          <Toggle field="supports_deposit" label="Deposits" />
+          <Toggle field="supports_withdrawal" label="Withdrawals" />
+        </div>
+        {error && <div style={{ marginTop: 14, padding: '10px 14px', background: 'rgba(239,68,68,.1)', border: '1px solid rgba(239,68,68,.3)', borderRadius: 10, color: '#f87171', fontSize: 13 }}>⚠ {error}</div>}
+        <div style={{ display: 'flex', gap: 10, marginTop: 24 }}>
+          <button onClick={submit} disabled={saving} style={{ flex: 1, padding: '11px', background: 'linear-gradient(135deg,#fbbf24,#f59e0b)', border: 'none', borderRadius: 10, color: '#050505', fontSize: 13, fontWeight: 800, cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>{saving ? 'Saving…' : isNew ? 'Add Method' : 'Save'}</button>
+          <button onClick={onClose} style={{ padding: '11px 16px', background: 'rgba(255,255,255,.05)', border: '1px solid rgba(255,255,255,.1)', borderRadius: 10, color: 'rgba(255,255,255,.4)', fontSize: 13, cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>Cancel</button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default function AdminPayments() {
+  const [rows, setRows] = useState([])
+  const [filter, setFilter] = useState('all')
+  const [search, setSearch] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [selected, setSelected] = useState(undefined)
+  const [toast, setToast] = useState(null)
+
+  useEffect(() => { load() }, [filter])
+
+  function showToast(msg, type = 'success') { setToast({ msg, type }); setTimeout(() => setToast(null), 4000) }
+
+  async function load() {
+    setLoading(true)
+    let q = supabase.from('payment_methods').select('*').order('name')
+    if (filter === 'active') q = q.eq('is_active', true)
+    if (filter === 'inactive') q = q.eq('is_active', false)
+    const { data } = await q
+    setRows(data || [])
+    setLoading(false)
+  }
+
+  async function handleSave(id, form) {
+    const { data: { session } } = await supabase.auth.getSession()
+    const res = await fetch('/api/admin/payments/' + (id ? 'update' : 'create'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+      body: JSON.stringify(id ? { method_id: id, ...form } : form),
+    })
+    const d = await res.json()
+    if (!res.ok) return { error: d.error }
+    showToast(id ? 'Method updated' : 'Method added')
+    load()
+    return {}
+  }
+
+  const TYPE_COLOR = { bank_transfer: '#06b6d4', crypto: '#a855f7', card: '#fbbf24', ewallet: '#22c55e', cash: '#f97316' }
+
+  const filtered = rows.filter(r => {
+    if (filter === 'deposits') return r.supports_deposit
+    if (filter === 'withdrawals') return r.supports_withdrawal
+    const s = search.toLowerCase()
+    return !search || r.name?.toLowerCase().includes(s) || r.type?.toLowerCase().includes(s)
+  })
+
+  return (
+    <AdminLayout>
+      <Head><title>Payment Methods — Admin</title></Head>
+      {toast && <div style={{ position: 'fixed', top: 16, left: '50%', transform: 'translateX(-50%)', zIndex: 9999, background: toast.type === 'error' ? 'rgba(239,68,68,.95)' : 'rgba(34,197,94,.95)', borderRadius: 12, padding: '12px 24px', color: '#fff', fontSize: 14, fontWeight: 600, fontFamily: "'Outfit',sans-serif", whiteSpace: 'nowrap', boxShadow: '0 8px 32px rgba(0,0,0,.5)' }}>{toast.msg}</div>}
+      {selected !== undefined && <MethodModal method={selected || null} onClose={() => setSelected(undefined)} onSave={handleSave} />}
+
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
+        <div>
+          <h1 style={{ fontFamily: "'Cinzel',serif", fontSize: 22, fontWeight: 700, color: '#fff', marginBottom: 4 }}>Payment Methods</h1>
+          <p style={{ color: 'rgba(255,255,255,.35)', fontSize: 13 }}>Manage deposit and withdrawal channels</p>
+        </div>
+        <button onClick={() => setSelected(null)} style={{ padding: '10px 20px', background: 'linear-gradient(135deg,#fbbf24,#f59e0b)', border: 'none', borderRadius: 10, color: '#050505', fontSize: 13, fontWeight: 800, cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>+ Add Method</button>
       </div>
 
-      {modal !== null && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }} onClick={() => setModal(null)}>
-          <div style={{ background: '#0d0a1a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 14, padding: 28, width: 500, maxWidth: '100%', maxHeight: '90vh', overflowY: 'auto', fontFamily: 'Outfit, sans-serif' }} onClick={e => e.stopPropagation()}>
-            <h3 style={{ color: gold, margin: '0 0 20px' }}>{modal === 'add' ? 'Add Deposit Method' : `Edit: ${form.name}`}</h3>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 14px' }}>
-              <div style={{ gridColumn: '1 / -1' }}><F label="Name *" fkey="name" placeholder="e.g. Cash App" /></div>
-              <div>
-                <label style={{ display: 'block', fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 5, textTransform: 'uppercase' }}>Type</label>
-                <select value={form.type} onChange={e => setForm(p => ({ ...p, type: e.target.value }))} style={{ width: '100%', padding: '9px 12px', borderRadius: 8, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)', color: '#fff', fontSize: 13, fontFamily: 'Outfit, sans-serif', outline: 'none', marginBottom: 14 }}>
-                  {TYPES.map(t => <option key={t} value={t} style={{ background: '#0d0a1a' }}>{t}</option>)}
-                </select>
-              </div>
-              <F label="Icon (emoji)" fkey="icon" placeholder="💳" />
-              <F label="Min Deposit ($)" fkey="min_deposit_cents" type="number" placeholder="5.00" />
-              <F label="Max Deposit ($)" fkey="max_deposit_cents" type="number" placeholder="5000.00" />
-              <F label="Bonus %" fkey="default_bonus_pct" type="number" placeholder="0" />
-              <F label="Sort Order" fkey="sort_order" type="number" placeholder="0" />
-            </div>
-
-            <div style={{ marginBottom: 14 }}>
-              <label style={{ display: 'block', fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 5, textTransform: 'uppercase' }}>Description</label>
-              <textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} rows={2} placeholder="Short player-facing description…"
-                style={{ width: '100%', padding: '9px 12px', borderRadius: 8, boxSizing: 'border-box', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)', color: '#fff', fontSize: 13, fontFamily: 'Outfit, sans-serif', outline: 'none', resize: 'vertical' }} />
-            </div>
-            <div style={{ marginBottom: 14 }}>
-              <label style={{ display: 'block', fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 5, textTransform: 'uppercase' }}>Instructions (shown to player)</label>
-              <textarea value={form.instructions} onChange={e => setForm(p => ({ ...p, instructions: e.target.value }))} rows={3} placeholder="Step-by-step deposit instructions…"
-                style={{ width: '100%', padding: '9px 12px', borderRadius: 8, boxSizing: 'border-box', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)', color: '#fff', fontSize: 13, fontFamily: 'Outfit, sans-serif', outline: 'none', resize: 'vertical' }} />
-            </div>
-            <div style={{ marginBottom: 18 }}>
-              <label style={{ display: 'block', fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 5, textTransform: 'uppercase' }}>Account Details (shown to player)</label>
-              <textarea value={form.account_details} onChange={e => setForm(p => ({ ...p, account_details: e.target.value }))} rows={2} placeholder="e.g. $casinoze on CashApp"
-                style={{ width: '100%', padding: '9px 12px', borderRadius: 8, boxSizing: 'border-box', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)', color: '#fff', fontSize: 13, fontFamily: 'Outfit, sans-serif', outline: 'none', resize: 'vertical' }} />
-            </div>
-
-            <div style={{ marginBottom: 20 }}>
-              <Toggle label="Active (visible to players)" fkey="is_active" />
-              <Toggle label="Auto-approve deposits" fkey="is_auto" />
-              <Toggle label="Requires proof of payment" fkey="requires_proof" />
-              <Toggle label="Requires reference number" fkey="requires_reference" />
-            </div>
-
-            {msg && <div style={{ color: red, fontSize: 12, marginBottom: 12 }}>⚠ {msg}</div>}
-            <div style={{ display: 'flex', gap: 8 }}>
-              <button onClick={save} disabled={saving} style={{ flex: 1, padding: '11px', borderRadius: 8, background: `linear-gradient(135deg, #b45309, ${gold})`, border: 'none', color: '#000', fontWeight: 700, cursor: 'pointer', fontFamily: 'Outfit, sans-serif', fontSize: 13 }}>{saving ? 'Saving…' : 'Save Method'}</button>
-              <button onClick={() => setModal(null)} style={{ padding: '11px 16px', borderRadius: 8, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', fontFamily: 'Outfit, sans-serif', fontSize: 13 }}>Cancel</button>
-            </div>
-          </div>
+      <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: 4, background: 'rgba(255,255,255,.04)', padding: 4, borderRadius: 10 }}>
+          {['all', 'active', 'inactive', 'deposits', 'withdrawals'].map(s => (
+            <button key={s} onClick={() => setFilter(s)} style={{ padding: '7px 14px', borderRadius: 8, border: 'none', cursor: 'pointer', fontFamily: "'Outfit',sans-serif", fontSize: 12, fontWeight: 700, background: filter === s ? 'rgba(251,191,36,.7)' : 'transparent', color: filter === s ? '#fff' : 'rgba(255,255,255,.4)', textTransform: 'capitalize', transition: 'all .15s' }}>{s}</button>
+          ))}
         </div>
-      )}
+        <input type="text" placeholder="Search method…" value={search} onChange={e => setSearch(e.target.value)}
+          style={{ padding: '9px 14px', background: 'rgba(255,255,255,.05)', border: '1px solid rgba(255,255,255,.1)', borderRadius: 10, color: '#fff', fontSize: 13, fontFamily: "'Outfit',sans-serif", outline: 'none', minWidth: 220 }} />
+      </div>
+
+      <div style={{ background: 'rgba(255,255,255,.02)', border: '1px solid rgba(255,255,255,.07)', borderRadius: 16, overflow: 'hidden' }}>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr style={{ background: 'rgba(255,255,255,.04)' }}>
+                {['Method', 'Type', 'Min / Max', 'Fee', 'Processing', 'Channels', 'Status', 'Actions'].map(h => (
+                  <th key={h} style={{ padding: '11px 14px', textAlign: 'left', fontSize: 10, fontWeight: 800, letterSpacing: '.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,.35)', whiteSpace: 'nowrap' }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? <tr><td colSpan={8} style={{ padding: 40, textAlign: 'center', color: 'rgba(255,255,255,.3)' }}>Loading…</td></tr>
+              : filtered.length === 0 ? <tr><td colSpan={8} style={{ padding: 40, textAlign: 'center', color: 'rgba(255,255,255,.3)' }}>No methods found</td></tr>
+              : filtered.map(r => {
+                const tc = TYPE_COLOR[r.type] || '#fbbf24'
+                return (
+                  <tr key={r.id} style={{ borderTop: '1px solid rgba(255,255,255,.04)' }}
+                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,.02)'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                    <td style={{ padding: '12px 14px', fontSize: 13, fontWeight: 700, color: '#fff' }}>{r.name}</td>
+                    <td style={{ padding: '12px 14px' }}>
+                      <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 99, background: tc + '22', color: tc, textTransform: 'capitalize' }}>{r.type?.replace(/_/g, ' ')}</span>
+                    </td>
+                    <td style={{ padding: '12px 14px', fontSize: 11, color: 'rgba(255,255,255,.5)', whiteSpace: 'nowrap' }}>{fmt(r.min_amount_cents)} — {r.max_amount_cents ? fmt(r.max_amount_cents) : '∞'}</td>
+                    <td style={{ padding: '12px 14px', fontSize: 12, color: '#fbbf24' }}>{r.fee_percent ? r.fee_percent + '%' : ''}{r.fee_percent && r.fee_fixed_cents ? ' + ' : ''}{r.fee_fixed_cents ? fmt(r.fee_fixed_cents) : ''}{!r.fee_percent && !r.fee_fixed_cents ? 'Free' : ''}</td>
+                    <td style={{ padding: '12px 14px', fontSize: 11, color: 'rgba(255,255,255,.4)' }}>{r.processing_time || '—'}</td>
+                    <td style={{ padding: '12px 14px' }}>
+                      <div style={{ display: 'flex', gap: 4 }}>
+                        {r.supports_deposit && <span style={{ fontSize: 9, fontWeight: 800, padding: '2px 6px', borderRadius: 99, background: 'rgba(34,197,94,.15)', color: '#22c55e' }}>DEP</span>}
+                        {r.supports_withdrawal && <span style={{ fontSize: 9, fontWeight: 800, padding: '2px 6px', borderRadius: 99, background: 'rgba(168,85,247,.15)', color: '#a855f7' }}>WD</span>}
+                      </div>
+                    </td>
+                    <td style={{ padding: '12px 14px' }}><StatusBadge status={r.is_active ? 'active' : 'inactive'} size="xs" /></td>
+                    <td style={{ padding: '12px 14px' }}>
+                      <button onClick={() => setSelected(r)} style={{ padding: '6px 12px', background: 'rgba(251,191,36,.15)', border: '1px solid rgba(251,191,36,.3)', borderRadius: 8, color: '#fbbf24', fontSize: 11, fontWeight: 800, cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>Edit</button>
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </AdminLayout>
   )
 }

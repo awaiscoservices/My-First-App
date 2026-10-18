@@ -1,127 +1,172 @@
-import { useState } from 'react'
-import AdminLayout from '../../components/layout/AdminLayout'
-import DataTable, { StatusPill } from '../../components/admin/DataTable'
+import { useEffect, useState } from 'react'
+import Head from 'next/head'
 import { supabase } from '../../lib/supabase'
+import AdminLayout from '../../components/layout/AdminLayout'
+import StatusBadge from '../../components/ui/StatusBadge'
 
-const gold = '#fbbf24'; const green = '#22c55e'; const red = '#ef4444'; const purple = '#a855f7'
-const fmt = (cents) => '$' + (cents / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+const fmt = c => '$' + (c / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })
+const fmtDate = d => d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'
+
+function AdjustModal({ wallet, onClose, onSave }) {
+  const [type, setType] = useState('credit')
+  const [amount, setAmount] = useState('')
+  const [bucket, setBucket] = useState('cash')
+  const [reason, setReason] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+
+  async function submit() {
+    const cents = Math.round(parseFloat(amount) * 100)
+    if (!cents || cents <= 0) { setError('Enter a valid amount'); return }
+    if (!reason.trim()) { setError('Reason is required for audit'); return }
+    setSaving(true); setError('')
+    const result = await onSave(wallet.user_id, { type, amount_cents: cents, bucket, reason })
+    if (result?.error) { setError(result.error); setSaving(false) }
+    else onClose()
+  }
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.8)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }} onClick={onClose}>
+      <div style={{ background: '#0e1a2e', border: '1px solid rgba(251,191,36,.3)', borderRadius: 20, padding: 32, width: '100%', maxWidth: 460 }} onClick={e => e.stopPropagation()}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+          <h2 style={{ fontFamily: "'Cinzel',serif", fontSize: 18, fontWeight: 700, color: '#fff' }}>Wallet Adjustment</h2>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,.5)', fontSize: 20, cursor: 'pointer' }}>✕</button>
+        </div>
+        <div style={{ background: 'rgba(251,191,36,.08)', border: '1px solid rgba(251,191,36,.2)', borderRadius: 12, padding: '12px 16px', marginBottom: 20 }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>{wallet.profiles?.full_name}</div>
+          <div style={{ fontSize: 11, color: 'rgba(255,255,255,.5)' }}>{wallet.profiles?.email}</div>
+          <div style={{ display: 'flex', gap: 16, marginTop: 8 }}>
+            <div><div style={{ fontSize: 10, color: 'rgba(255,255,255,.35)', marginBottom: 2 }}>CASH</div><div style={{ fontSize: 13, fontWeight: 700, color: '#22c55e' }}>{fmt(wallet.balance_cents || 0)}</div></div>
+            <div><div style={{ fontSize: 10, color: 'rgba(255,255,255,.35)', marginBottom: 2 }}>BONUS</div><div style={{ fontSize: 13, fontWeight: 700, color: '#a855f7' }}>{fmt(wallet.bonus_cents || 0)}</div></div>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+          {['credit', 'debit'].map(t => (
+            <button key={t} onClick={() => setType(t)} style={{ flex: 1, padding: '10px', borderRadius: 10, border: `1px solid ${type === t ? (t === 'credit' ? '#22c55e' : '#ef4444') : 'rgba(255,255,255,.1)'}`, background: type === t ? (t === 'credit' ? 'rgba(34,197,94,.15)' : 'rgba(239,68,68,.15)') : 'transparent', color: type === t ? (t === 'credit' ? '#22c55e' : '#ef4444') : 'rgba(255,255,255,.35)', fontSize: 12, fontWeight: 800, cursor: 'pointer', fontFamily: "'Outfit',sans-serif", textTransform: 'uppercase', letterSpacing: '.05em' }}>{t === 'credit' ? '+ Credit' : '− Debit'}</button>
+          ))}
+        </div>
+
+        <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+          {['cash', 'bonus'].map(b => (
+            <button key={b} onClick={() => setBucket(b)} style={{ flex: 1, padding: '8px', borderRadius: 10, border: `1px solid ${bucket === b ? '#fbbf24' : 'rgba(255,255,255,.1)'}`, background: bucket === b ? 'rgba(251,191,36,.1)' : 'transparent', color: bucket === b ? '#fbbf24' : 'rgba(255,255,255,.35)', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: "'Outfit',sans-serif", textTransform: 'capitalize' }}>{b}</button>
+          ))}
+        </div>
+
+        <div style={{ marginBottom: 14 }}>
+          <label style={{ display: 'block', fontSize: 11, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,.45)', marginBottom: 6 }}>Amount (USD)</label>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ color: 'rgba(255,255,255,.4)', fontSize: 18, fontWeight: 700 }}>$</span>
+            <input type="number" min="0" step="0.01" value={amount} onChange={e => setAmount(e.target.value)} placeholder="0.00"
+              style={{ flex: 1, padding: '10px 14px', background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.12)', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, fontFamily: "'Outfit',sans-serif", outline: 'none' }} />
+          </div>
+        </div>
+
+        <div style={{ marginBottom: 20 }}>
+          <label style={{ display: 'block', fontSize: 11, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,.45)', marginBottom: 6 }}>Reason <span style={{ color: '#ef4444' }}>*</span></label>
+          <textarea value={reason} onChange={e => setReason(e.target.value)} rows={2} placeholder="Required — audit log entry…"
+            style={{ width: '100%', padding: '11px 14px', background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.12)', borderRadius: 10, color: '#fff', fontSize: 13, fontFamily: "'Outfit',sans-serif", outline: 'none', resize: 'none', boxSizing: 'border-box' }} />
+        </div>
+
+        {error && <div style={{ marginBottom: 14, padding: '10px 14px', background: 'rgba(239,68,68,.1)', border: '1px solid rgba(239,68,68,.3)', borderRadius: 10, color: '#f87171', fontSize: 13 }}>⚠ {error}</div>}
+        <div style={{ display: 'flex', gap: 10 }}>
+          <button onClick={submit} disabled={saving} style={{ flex: 1, padding: '11px', background: type === 'credit' ? 'linear-gradient(135deg,#22c55e,#16a34a)' : 'linear-gradient(135deg,#ef4444,#dc2626)', border: 'none', borderRadius: 10, color: '#fff', fontSize: 13, fontWeight: 800, cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>{saving ? 'Saving…' : `Apply ${type === 'credit' ? 'Credit' : 'Debit'}`}</button>
+          <button onClick={onClose} style={{ padding: '11px 16px', background: 'rgba(255,255,255,.05)', border: '1px solid rgba(255,255,255,.1)', borderRadius: 10, color: 'rgba(255,255,255,.4)', fontSize: 13, cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>Cancel</button>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export default function AdminWallets() {
+  const [rows, setRows] = useState([])
+  const [search, setSearch] = useState('')
+  const [loading, setLoading] = useState(true)
   const [selected, setSelected] = useState(null)
-  const [adjForm, setAdjForm] = useState({ amount_dollars: '', reason: '', direction: 'credit' })
-  const [saving, setSaving] = useState(false)
-  const [msg, setMsg] = useState('')
-  const [token, setToken] = useState(null)
+  const [toast, setToast] = useState(null)
 
-  useState(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => setToken(session?.access_token))
-  })
+  useEffect(() => { load() }, [])
 
-  const openAdj = (row) => { setSelected(row); setAdjForm({ amount_dollars: '', reason: '', direction: 'credit' }); setMsg('') }
+  function showToast(msg, type = 'success') { setToast({ msg, type }); setTimeout(() => setToast(null), 4000) }
 
-  const submitAdj = async () => {
-    if (!adjForm.amount_dollars || !adjForm.reason.trim()) { setMsg('Amount and reason required'); return }
-    const cents = Math.round(parseFloat(adjForm.amount_dollars) * 100)
-    if (isNaN(cents) || cents <= 0) { setMsg('Invalid amount'); return }
-    setSaving(true); setMsg('')
+  async function load() {
+    setLoading(true)
+    const { data } = await supabase.from('wallets').select('*, profiles!wallets_user_id_fkey(full_name,email,status)').order('balance_cents', { ascending: false }).limit(100)
+    setRows(data || [])
+    setLoading(false)
+  }
+
+  async function handleSave(userId, body) {
     const { data: { session } } = await supabase.auth.getSession()
     const res = await fetch('/api/admin/wallets/adjust', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
-      body: JSON.stringify({ user_id: selected.user_id, amount_cents: cents, direction: adjForm.direction, reason: adjForm.reason }),
+      body: JSON.stringify({ user_id: userId, ...body }),
     })
     const d = await res.json()
-    setSaving(false)
-    if (res.ok) { setSelected(null) }
-    else setMsg(d.error || 'Failed')
+    if (!res.ok) return { error: d.error }
+    showToast('Wallet adjusted')
+    load()
+    return {}
   }
+
+  const filtered = rows.filter(r => {
+    if (!search) return true
+    const s = search.toLowerCase()
+    return r.profiles?.full_name?.toLowerCase().includes(s) || r.profiles?.email?.toLowerCase().includes(s)
+  })
 
   return (
     <AdminLayout>
-      <DataTable
-        title="💰 Player Wallets"
-        endpoint="/api/admin/wallets/list"
-        searchPlaceholder="Search by player name or email…"
-        rowMapper={r => ({
-          id: r.id,
-          user_id: r.user_id,
-          player: r.profiles?.full_name || '—',
-          email: r.profiles?.email || '—',
-          cash_balance: r.cash_balance_cents ?? 0,
-          bonus_balance: r.bonus_balance_cents ?? 0,
-          total_deposited: r.total_deposited_cents ?? 0,
-          total_withdrawn: r.total_withdrawn_cents ?? 0,
-          status: r.profiles?.status || 'active',
-          updated: r.updated_at,
-        })}
-        columns={[
-          { key: 'player', label: 'Player', fontWeight: 600 },
-          { key: 'email', label: 'Email', color: 'rgba(255,255,255,0.45)', fontSize: 12 },
-          {
-            key: 'cash_balance', label: 'Cash Balance', render: r => (
-              <span style={{ color: r.cash_balance > 0 ? green : 'rgba(255,255,255,0.4)', fontWeight: 600 }}>{fmt(r.cash_balance)}</span>
-            )
-          },
-          {
-            key: 'bonus_balance', label: 'Bonus Balance', render: r => (
-              <span style={{ color: r.bonus_balance > 0 ? purple : 'rgba(255,255,255,0.4)' }}>{fmt(r.bonus_balance)}</span>
-            )
-          },
-          { key: 'total_deposited', label: 'Total Deposited', render: r => <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12 }}>{fmt(r.total_deposited)}</span> },
-          { key: 'status', label: 'Status', render: r => <StatusPill status={r.status} /> },
-        ]}
-        renderActions={row => (
-          <button onClick={() => openAdj(row)} style={{ padding: '5px 10px', borderRadius: 6, background: 'rgba(251,191,36,0.1)', border: '1px solid rgba(251,191,36,0.25)', color: gold, fontSize: 11, cursor: 'pointer', fontFamily: 'Outfit, sans-serif', whiteSpace: 'nowrap' }}>
-            Adjust
-          </button>
-        )}
-        emptyMsg="No wallets found."
-      />
+      <Head><title>Wallets — Admin</title></Head>
+      {toast && <div style={{ position: 'fixed', top: 16, left: '50%', transform: 'translateX(-50%)', zIndex: 9999, background: toast.type === 'error' ? 'rgba(239,68,68,.95)' : 'rgba(34,197,94,.95)', borderRadius: 12, padding: '12px 24px', color: '#fff', fontSize: 14, fontWeight: 600, fontFamily: "'Outfit',sans-serif", whiteSpace: 'nowrap', boxShadow: '0 8px 32px rgba(0,0,0,.5)' }}>{toast.msg}</div>}
+      {selected && <AdjustModal wallet={selected} onClose={() => setSelected(null)} onSave={handleSave} />}
 
-      {selected && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setSelected(null)}>
-          <div style={{ background: '#0d0a1a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 14, padding: 28, width: 420, maxWidth: '95vw', fontFamily: 'Outfit, sans-serif' }} onClick={e => e.stopPropagation()}>
-            <h3 style={{ color: gold, margin: '0 0 6px' }}>Wallet Adjustment</h3>
-            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', margin: '0 0 20px' }}>
-              {selected.player} — Cash: <span style={{ color: green }}>{fmt(selected.cash_balance)}</span>
-            </p>
+      <div style={{ marginBottom: 20 }}>
+        <h1 style={{ fontFamily: "'Cinzel',serif", fontSize: 22, fontWeight: 700, color: '#fff', marginBottom: 4 }}>Wallets</h1>
+        <p style={{ color: 'rgba(255,255,255,.35)', fontSize: 13 }}>View player balances and apply manual adjustments</p>
+      </div>
 
-            <div style={{ marginBottom: 14 }}>
-              <label style={{ display: 'block', fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 6, textTransform: 'uppercase' }}>Direction</label>
-              <div style={{ display: 'flex', gap: 8 }}>
-                {[{ v: 'credit', label: '+ Credit', c: green }, { v: 'debit', label: '− Debit', c: red }].map(d => (
-                  <div key={d.v} onClick={() => setAdjForm(f => ({ ...f, direction: d.v }))} style={{ flex: 1, padding: '9px', textAlign: 'center', borderRadius: 8, cursor: 'pointer', fontSize: 13, fontWeight: 600,
-                    background: adjForm.direction === d.v ? `rgba(${d.v === 'credit' ? '34,197,94' : '239,68,68'},0.1)` : 'rgba(255,255,255,0.03)',
-                    border: `1.5px solid ${adjForm.direction === d.v ? d.c : 'rgba(255,255,255,0.08)'}`,
-                    color: adjForm.direction === d.v ? d.c : 'rgba(255,255,255,0.4)',
-                  }}>{d.label}</div>
+      <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' }}>
+        <input type="text" placeholder="Search player or email…" value={search} onChange={e => setSearch(e.target.value)}
+          style={{ padding: '9px 14px', background: 'rgba(255,255,255,.05)', border: '1px solid rgba(255,255,255,.1)', borderRadius: 10, color: '#fff', fontSize: 13, fontFamily: "'Outfit',sans-serif", outline: 'none', minWidth: 280 }} />
+      </div>
+
+      <div style={{ background: 'rgba(255,255,255,.02)', border: '1px solid rgba(255,255,255,.07)', borderRadius: 16, overflow: 'hidden' }}>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr style={{ background: 'rgba(255,255,255,.04)' }}>
+                {['Player', 'Cash Balance', 'Bonus Balance', 'Total', 'Status', 'Updated', 'Actions'].map(h => (
+                  <th key={h} style={{ padding: '11px 14px', textAlign: 'left', fontSize: 10, fontWeight: 800, letterSpacing: '.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,.35)', whiteSpace: 'nowrap' }}>{h}</th>
                 ))}
-              </div>
-            </div>
-
-            <div style={{ marginBottom: 14 }}>
-              <label style={{ display: 'block', fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 6, textTransform: 'uppercase' }}>Amount (USD) *</label>
-              <input type="number" min="0.01" step="0.01" value={adjForm.amount_dollars} onChange={e => setAdjForm(f => ({ ...f, amount_dollars: e.target.value }))} placeholder="0.00"
-                style={{ width: '100%', padding: '10px 12px', borderRadius: 8, boxSizing: 'border-box', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)', color: '#fff', fontSize: 14, fontFamily: 'Outfit, sans-serif', outline: 'none' }} />
-            </div>
-
-            <div style={{ marginBottom: 20 }}>
-              <label style={{ display: 'block', fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 6, textTransform: 'uppercase' }}>Reason *</label>
-              <textarea value={adjForm.reason} onChange={e => setAdjForm(f => ({ ...f, reason: e.target.value }))} placeholder="Reason for adjustment…" rows={3} maxLength={500}
-                style={{ width: '100%', padding: '10px 12px', borderRadius: 8, boxSizing: 'border-box', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)', color: '#fff', fontSize: 13, fontFamily: 'Outfit, sans-serif', outline: 'none', resize: 'vertical' }} />
-            </div>
-
-            {msg && <div style={{ color: red, fontSize: 12, marginBottom: 12 }}>⚠ {msg}</div>}
-
-            <div style={{ display: 'flex', gap: 8 }}>
-              <button onClick={submitAdj} disabled={saving} style={{ flex: 1, padding: '11px', borderRadius: 8, background: `linear-gradient(135deg, #b45309, ${gold})`, border: 'none', color: '#000', fontWeight: 700, cursor: 'pointer', fontFamily: 'Outfit, sans-serif', fontSize: 13 }}>
-                {saving ? 'Saving…' : 'Apply Adjustment'}
-              </button>
-              <button onClick={() => setSelected(null)} style={{ padding: '11px 16px', borderRadius: 8, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', fontFamily: 'Outfit, sans-serif', fontSize: 13 }}>Cancel</button>
-            </div>
-          </div>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? <tr><td colSpan={7} style={{ padding: 40, textAlign: 'center', color: 'rgba(255,255,255,.3)' }}>Loading…</td></tr>
+              : filtered.length === 0 ? <tr><td colSpan={7} style={{ padding: 40, textAlign: 'center', color: 'rgba(255,255,255,.3)' }}>No wallets found</td></tr>
+              : filtered.map(r => (
+                <tr key={r.id} style={{ borderTop: '1px solid rgba(255,255,255,.04)' }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,.02)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                  <td style={{ padding: '12px 14px' }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>{r.profiles?.full_name}</div>
+                    <div style={{ fontSize: 10, color: 'rgba(255,255,255,.4)' }}>{r.profiles?.email}</div>
+                  </td>
+                  <td style={{ padding: '12px 14px', fontSize: 13, fontWeight: 700, color: '#22c55e' }}>{fmt(r.balance_cents || 0)}</td>
+                  <td style={{ padding: '12px 14px', fontSize: 13, fontWeight: 700, color: '#a855f7' }}>{fmt(r.bonus_cents || 0)}</td>
+                  <td style={{ padding: '12px 14px', fontSize: 13, fontWeight: 700, color: '#fbbf24' }}>{fmt((r.balance_cents || 0) + (r.bonus_cents || 0))}</td>
+                  <td style={{ padding: '12px 14px' }}><StatusBadge status={r.profiles?.status || 'active'} size="xs" /></td>
+                  <td style={{ padding: '12px 14px', fontSize: 11, color: 'rgba(255,255,255,.35)', whiteSpace: 'nowrap' }}>{fmtDate(r.updated_at)}</td>
+                  <td style={{ padding: '12px 14px' }}>
+                    <button onClick={() => setSelected(r)} style={{ padding: '6px 14px', background: 'rgba(251,191,36,.15)', border: '1px solid rgba(251,191,36,.3)', borderRadius: 8, color: '#fbbf24', fontSize: 11, fontWeight: 800, cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>Adjust</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-      )}
+      </div>
     </AdminLayout>
   )
 }

@@ -1,92 +1,157 @@
-import { useState } from 'react'
-import AdminLayout from '../../components/layout/AdminLayout'
-import DataTable, { StatusPill } from '../../components/admin/DataTable'
+import { useEffect, useState } from 'react'
+import Head from 'next/head'
 import { supabase } from '../../lib/supabase'
+import AdminLayout from '../../components/layout/AdminLayout'
+import StatusBadge from '../../components/ui/StatusBadge'
 
-const gold = '#fbbf24'; const green = '#22c55e'; const red = '#ef4444'
+const fmtDate = d => d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'
 
-function fmtDate(d) { return d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—' }
-
-function KYCActions({ row, refresh }) {
-  const [open, setOpen] = useState(false)
+function ReviewModal({ kyc, onClose, onAction }) {
   const [notes, setNotes] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [msg, setMsg] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
 
-  if (row.status !== 'pending' && row.status !== 'under_review') return <StatusPill status={row.status} />
-
-  const act = async (action) => {
-    if (action === 'reject' && !notes.trim()) { setMsg('Reason required'); return }
-    setLoading(true)
-    const { data: { session } } = await supabase.auth.getSession()
-    const res = await fetch('/api/admin/kyc/action', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
-      body: JSON.stringify({ kyc_id: row.id, action, notes }),
-    })
-    const data = await res.json()
-    setLoading(false)
-    if (res.ok) { setOpen(false); setNotes(''); refresh() }
-    else setMsg(data.error || 'Failed')
+  async function submit(action) {
+    setSaving(true); setError('')
+    const result = await onAction(kyc.id, action, notes)
+    if (result?.error) { setError(result.error); setSaving(false) }
+    else onClose()
   }
 
   return (
-    <>
-      <button onClick={() => setOpen(true)} style={{ padding: '5px 12px', borderRadius: 6, background: 'rgba(251,191,36,0.1)', border: '1px solid rgba(251,191,36,0.3)', color: gold, fontSize: 12, cursor: 'pointer', fontFamily: 'Outfit, sans-serif' }}>Review</button>
-      {open && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setOpen(false)}>
-          <div style={{ background: '#0d0a1a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 14, padding: 28, width: 400, maxWidth: '95vw' }} onClick={e => e.stopPropagation()}>
-            <h3 style={{ color: gold, fontFamily: 'Outfit, sans-serif', marginBottom: 8 }}>Review KYC</h3>
-            <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 13, marginBottom: 16 }}>
-              <strong style={{ color: '#fff' }}>{row.player_name}</strong> — {row.document_type || 'Document'}
-            </p>
-            <textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Notes / rejection reason…" rows={3} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, boxSizing: 'border-box', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)', color: '#fff', fontSize: 13, fontFamily: 'Outfit, sans-serif', resize: 'vertical', outline: 'none' }} />
-            {msg && <p style={{ color: red, fontSize: 12, marginTop: 6 }}>{msg}</p>}
-            <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
-              <button onClick={() => act('approve')} disabled={loading} style={{ flex: 1, padding: '10px', borderRadius: 8, background: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.3)', color: green, fontWeight: 600, cursor: 'pointer', fontFamily: 'Outfit, sans-serif', fontSize: 13 }}>✓ Approve</button>
-              <button onClick={() => act('reject')} disabled={loading} style={{ flex: 1, padding: '10px', borderRadius: 8, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: red, fontWeight: 600, cursor: 'pointer', fontFamily: 'Outfit, sans-serif', fontSize: 13 }}>✗ Reject</button>
-              <button onClick={() => setOpen(false)} style={{ padding: '10px 14px', borderRadius: 8, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', fontFamily: 'Outfit, sans-serif', fontSize: 13 }}>Cancel</button>
-            </div>
-          </div>
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.8)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }} onClick={onClose}>
+      <div style={{ background: '#0e1a2e', border: '1px solid rgba(251,191,36,.3)', borderRadius: 20, padding: 32, width: '100%', maxWidth: 520 }} onClick={e => e.stopPropagation()}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+          <h2 style={{ fontFamily: "'Cinzel',serif", fontSize: 18, fontWeight: 700, color: '#fff' }}>KYC Review</h2>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,.5)', fontSize: 20, cursor: 'pointer' }}>✕</button>
         </div>
-      )}
-    </>
+        <div style={{ background: 'rgba(251,191,36,.08)', border: '1px solid rgba(251,191,36,.2)', borderRadius: 12, padding: '12px 16px', marginBottom: 20 }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: '#fff', marginBottom: 4 }}>{kyc.profiles?.full_name}</div>
+          <div style={{ fontSize: 11, color: 'rgba(255,255,255,.5)' }}>{kyc.profiles?.email}</div>
+          <div style={{ fontSize: 11, color: '#fbbf24', marginTop: 4 }}>Type: {kyc.document_type?.replace(/_/g, ' ')}</div>
+          <div style={{ fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 2 }}>Submitted: {fmtDate(kyc.created_at)}</div>
+        </div>
+
+        {/* Document images */}
+        {(kyc.front_url || kyc.back_url || kyc.selfie_url) && (
+          <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
+            {[['Front', kyc.front_url], ['Back', kyc.back_url], ['Selfie', kyc.selfie_url]].filter(([, u]) => u).map(([label, url]) => (
+              <a key={label} href={url} target="_blank" rel="noreferrer" style={{ flex: 1, minWidth: 100, padding: '10px', background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.1)', borderRadius: 10, color: '#fbbf24', fontSize: 12, fontWeight: 700, textAlign: 'center', textDecoration: 'none' }}>📄 {label} ↗</a>
+            ))}
+          </div>
+        )}
+
+        <div style={{ marginBottom: 20 }}>
+          <label style={{ display: 'block', fontSize: 11, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,.45)', marginBottom: 6 }}>Review Notes</label>
+          <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={2} placeholder="Verification note or rejection reason…"
+            style={{ width: '100%', padding: '11px 14px', background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.12)', borderRadius: 10, color: '#fff', fontSize: 13, fontFamily: "'Outfit',sans-serif", outline: 'none', resize: 'none', boxSizing: 'border-box' }} />
+        </div>
+        {error && <div style={{ marginBottom: 14, padding: '10px 14px', background: 'rgba(239,68,68,.1)', border: '1px solid rgba(239,68,68,.3)', borderRadius: 10, color: '#f87171', fontSize: 13 }}>⚠ {error}</div>}
+        <div style={{ display: 'flex', gap: 10 }}>
+          <button onClick={() => submit('approve')} disabled={saving} style={{ flex: 1, padding: '11px', background: 'linear-gradient(135deg,#22c55e,#16a34a)', border: 'none', borderRadius: 10, color: '#fff', fontSize: 13, fontWeight: 800, cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>✅ Verify</button>
+          <button onClick={() => submit('reject')} disabled={saving} style={{ flex: 1, padding: '11px', background: 'rgba(239,68,68,.15)', border: '1px solid rgba(239,68,68,.3)', borderRadius: 10, color: '#f87171', fontSize: 13, fontWeight: 800, cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>❌ Reject</button>
+          <button onClick={onClose} style={{ padding: '11px 16px', background: 'rgba(255,255,255,.05)', border: '1px solid rgba(255,255,255,.1)', borderRadius: 10, color: 'rgba(255,255,255,.4)', fontSize: 13, cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>Cancel</button>
+        </div>
+      </div>
+    </div>
   )
 }
 
 export default function AdminKYC() {
+  const [rows, setRows] = useState([])
+  const [filter, setFilter] = useState('pending')
+  const [search, setSearch] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [selected, setSelected] = useState(null)
+  const [toast, setToast] = useState(null)
+
+  useEffect(() => { load() }, [filter])
+
+  function showToast(msg, type = 'success') { setToast({ msg, type }); setTimeout(() => setToast(null), 4000) }
+
+  async function load() {
+    setLoading(true)
+    let q = supabase.from('kyc_submissions').select('*, profiles!kyc_submissions_user_id_fkey(full_name,email)').order('created_at', { ascending: false }).limit(100)
+    if (filter !== 'all') q = q.eq('status', filter)
+    const { data } = await q
+    setRows(data || [])
+    setLoading(false)
+  }
+
+  async function handleAction(id, action, notes) {
+    const { data: { session } } = await supabase.auth.getSession()
+    const res = await fetch('/api/admin/kyc/action', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+      body: JSON.stringify({ kyc_id: id, action, notes }),
+    })
+    const d = await res.json()
+    if (!res.ok) return { error: d.error }
+    showToast(`KYC ${action === 'approve' ? 'verified' : 'rejected'}`)
+    load()
+    return {}
+  }
+
+  const filtered = rows.filter(r => {
+    if (!search) return true
+    const s = search.toLowerCase()
+    return r.profiles?.full_name?.toLowerCase().includes(s) || r.profiles?.email?.toLowerCase().includes(s)
+  })
+
   return (
     <AdminLayout>
-      <DataTable
-        title="🪪 KYC Verification"
-        endpoint="/api/admin/kyc/list"
-        searchPlaceholder="Search by player name…"
-        filterOptions={[
-          { value: 'pending', label: 'Pending' },
-          { value: 'under_review', label: 'Under Review' },
-          { value: 'verified', label: 'Verified' },
-          { value: 'rejected', label: 'Rejected' },
-        ]}
-        rowMapper={r => ({
-          id: r.id,
-          player_name: r.profiles?.full_name || '—',
-          email: r.profiles?.email || '—',
-          document_type: r.document_type || '—',
-          status: r.status,
-          submitted_at: fmtDate(r.submitted_at),
-          reviewed_at: fmtDate(r.reviewed_at),
-        })}
-        columns={[
-          { key: 'player_name', label: 'Player' },
-          { key: 'email', label: 'Email', color: 'rgba(255,255,255,0.5)' },
-          { key: 'document_type', label: 'Document' },
-          { key: 'status', label: 'Status', render: r => <StatusPill status={r.status} /> },
-          { key: 'submitted_at', label: 'Submitted', color: 'rgba(255,255,255,0.5)' },
-          { key: 'reviewed_at', label: 'Reviewed', color: 'rgba(255,255,255,0.5)' },
-        ]}
-        renderActions={(row, refresh) => <KYCActions row={row} refresh={refresh} />}
-        emptyMsg="No KYC submissions found."
-      />
+      <Head><title>KYC — Admin</title></Head>
+      {toast && <div style={{ position: 'fixed', top: 16, left: '50%', transform: 'translateX(-50%)', zIndex: 9999, background: toast.type === 'error' ? 'rgba(239,68,68,.95)' : 'rgba(34,197,94,.95)', borderRadius: 12, padding: '12px 24px', color: '#fff', fontSize: 14, fontWeight: 600, fontFamily: "'Outfit',sans-serif", whiteSpace: 'nowrap', boxShadow: '0 8px 32px rgba(0,0,0,.5)' }}>{toast.msg}</div>}
+      {selected && <ReviewModal kyc={selected} onClose={() => setSelected(null)} onAction={handleAction} />}
+
+      <div style={{ marginBottom: 20 }}>
+        <h1 style={{ fontFamily: "'Cinzel',serif", fontSize: 22, fontWeight: 700, color: '#fff', marginBottom: 4 }}>KYC Verification</h1>
+        <p style={{ color: 'rgba(255,255,255,.35)', fontSize: 13 }}>Review player identity documents</p>
+      </div>
+
+      <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: 4, background: 'rgba(255,255,255,.04)', padding: 4, borderRadius: 10 }}>
+          {['all', 'pending', 'approved', 'rejected'].map(s => (
+            <button key={s} onClick={() => setFilter(s)} style={{ padding: '7px 16px', borderRadius: 8, border: 'none', cursor: 'pointer', fontFamily: "'Outfit',sans-serif", fontSize: 12, fontWeight: 700, background: filter === s ? 'rgba(251,191,36,.7)' : 'transparent', color: filter === s ? '#fff' : 'rgba(255,255,255,.4)', textTransform: 'capitalize', transition: 'all .15s' }}>{s}</button>
+          ))}
+        </div>
+        <input type="text" placeholder="Search player or email…" value={search} onChange={e => setSearch(e.target.value)}
+          style={{ padding: '9px 14px', background: 'rgba(255,255,255,.05)', border: '1px solid rgba(255,255,255,.1)', borderRadius: 10, color: '#fff', fontSize: 13, fontFamily: "'Outfit',sans-serif", outline: 'none', minWidth: 240 }} />
+      </div>
+
+      <div style={{ background: 'rgba(255,255,255,.02)', border: '1px solid rgba(255,255,255,.07)', borderRadius: 16, overflow: 'hidden' }}>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr style={{ background: 'rgba(255,255,255,.04)' }}>
+                {['Player', 'Document Type', 'Status', 'Submitted', 'Actions'].map(h => (
+                  <th key={h} style={{ padding: '11px 14px', textAlign: 'left', fontSize: 10, fontWeight: 800, letterSpacing: '.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,.35)', whiteSpace: 'nowrap' }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? <tr><td colSpan={5} style={{ padding: 40, textAlign: 'center', color: 'rgba(255,255,255,.3)' }}>Loading…</td></tr>
+              : filtered.length === 0 ? <tr><td colSpan={5} style={{ padding: 40, textAlign: 'center', color: 'rgba(255,255,255,.3)' }}>{filter === 'pending' ? '✅ No pending KYC submissions!' : 'No KYC submissions found'}</td></tr>
+              : filtered.map(r => (
+                <tr key={r.id} style={{ borderTop: '1px solid rgba(255,255,255,.04)' }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,.02)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                  <td style={{ padding: '12px 14px' }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>{r.profiles?.full_name}</div>
+                    <div style={{ fontSize: 10, color: 'rgba(255,255,255,.4)' }}>{r.profiles?.email}</div>
+                  </td>
+                  <td style={{ padding: '12px 14px', fontSize: 12, color: '#fbbf24', fontWeight: 600, textTransform: 'capitalize' }}>{r.document_type?.replace(/_/g, ' ')}</td>
+                  <td style={{ padding: '12px 14px' }}><StatusBadge status={r.status} size="xs" /></td>
+                  <td style={{ padding: '12px 14px', fontSize: 11, color: 'rgba(255,255,255,.35)', whiteSpace: 'nowrap' }}>{fmtDate(r.created_at)}</td>
+                  <td style={{ padding: '12px 14px' }}>
+                    {r.status === 'pending' && <button onClick={() => setSelected(r)} style={{ padding: '6px 12px', background: 'linear-gradient(135deg,#fbbf24,#f59e0b)', border: 'none', borderRadius: 8, color: '#050505', fontSize: 11, fontWeight: 800, cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>Review</button>}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </AdminLayout>
   )
 }

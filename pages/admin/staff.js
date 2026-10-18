@@ -1,136 +1,161 @@
-import { useState, useEffect } from 'react'
-import AdminLayout from '../../components/layout/AdminLayout'
-import { StatusPill } from '../../components/admin/DataTable'
+import { useEffect, useState } from 'react'
+import Head from 'next/head'
 import { supabase } from '../../lib/supabase'
+import AdminLayout from '../../components/layout/AdminLayout'
+import StatusBadge from '../../components/ui/StatusBadge'
 
-const gold = '#fbbf24'; const green = '#22c55e'; const red = '#ef4444'
+const fmtDate = d => d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'
+
 const ROLES = ['super_admin', 'finance', 'game_ops', 'support', 'kyc_agent', 'risk', 'reporting', 'marketing']
-function fmtDate(d) { return d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—' }
 
-export default function AdminStaff() {
-  const [staff, setStaff] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [showInvite, setShowInvite] = useState(false)
-  const [form, setForm] = useState({ email: '', full_name: '', role: 'support' })
+function StaffModal({ member, onClose, onSave }) {
+  const isNew = !member
+  const [form, setForm] = useState({
+    email: member?.email || '',
+    full_name: member?.full_name || '',
+    role: member?.role || 'support',
+  })
   const [saving, setSaving] = useState(false)
-  const [msg, setMsg] = useState('')
-  const [tempPwd, setTempPwd] = useState(null)
-  const [token, setToken] = useState(null)
+  const [error, setError] = useState('')
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => { setToken(session?.access_token); fetchStaff(session?.access_token) })
-  }, [])
-
-  const fetchStaff = async (tok) => {
-    setLoading(true)
-    const res = await fetch('/api/admin/staff/list', { headers: { Authorization: `Bearer ${tok || token}` } })
-    if (res.ok) { const d = await res.json(); setStaff(d.rows || []) }
-    setLoading(false)
-  }
-
-  const invite = async () => {
-    setSaving(true); setMsg('')
-    const res = await fetch('/api/admin/staff/save', {
-      method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ action: 'invite', ...form }),
-    })
-    const d = await res.json()
-    setSaving(false)
-    if (res.ok) { setTempPwd(d.temp_password); setShowInvite(false); setForm({ email: '', full_name: '', role: 'support' }); fetchStaff() }
-    else setMsg(d.error || 'Failed')
-  }
-
-  const changeRole = async (id, role) => {
-    const { data: { session } } = await supabase.auth.getSession()
-    await fetch('/api/admin/staff/save', {
-      method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
-      body: JSON.stringify({ action: 'update_role', staff_id: id, role }),
-    })
-    fetchStaff()
-  }
-
-  const deactivate = async (id) => {
-    if (!confirm('Deactivate this staff member?')) return
-    const { data: { session } } = await supabase.auth.getSession()
-    await fetch('/api/admin/staff/save', {
-      method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
-      body: JSON.stringify({ action: 'deactivate', staff_id: id }),
-    })
-    fetchStaff()
+  async function submit() {
+    if (!form.email.trim() || !form.full_name.trim()) { setError('Email and name are required'); return }
+    setSaving(true); setError('')
+    const result = await onSave(member?.id, form)
+    if (result?.error) { setError(result.error); setSaving(false) }
+    else onClose()
   }
 
   return (
-    <AdminLayout>
-      <div style={{ fontFamily: 'Outfit, sans-serif', color: '#fff' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-          <h1 style={{ fontSize: 22, fontWeight: 700, color: gold, margin: 0 }}>👥 Staff Management</h1>
-          <button onClick={() => setShowInvite(true)} style={{ padding: '9px 18px', borderRadius: 8, background: `linear-gradient(135deg, #b45309, ${gold})`, border: 'none', color: '#000', fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: 'Outfit, sans-serif' }}>+ Invite Staff</button>
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.8)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }} onClick={onClose}>
+      <div style={{ background: '#0e1a2e', border: '1px solid rgba(251,191,36,.3)', borderRadius: 20, padding: 32, width: '100%', maxWidth: 460 }} onClick={e => e.stopPropagation()}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+          <h2 style={{ fontFamily: "'Cinzel',serif", fontSize: 18, fontWeight: 700, color: '#fff' }}>{isNew ? 'Invite Staff' : 'Edit Staff'}</h2>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,.5)', fontSize: 20, cursor: 'pointer' }}>✕</button>
         </div>
-
-        {tempPwd && (
-          <div style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: 10, padding: '14px 18px', marginBottom: 20 }}>
-            <p style={{ color: green, fontSize: 13, margin: 0 }}>✅ Staff invited! Temporary password: <strong style={{ fontFamily: 'monospace', fontSize: 15 }}>{tempPwd}</strong> — share this securely.</p>
-            <button onClick={() => setTempPwd(null)} style={{ marginTop: 8, background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: 12 }}>Dismiss</button>
-          </div>
-        )}
-
-        {loading ? <div style={{ textAlign: 'center', padding: '60px 0', color: 'rgba(255,255,255,0.3)' }}>Loading…</div> : (
-          <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, overflow: 'hidden' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-              <thead><tr style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
-                {['Name', 'Email', 'Role', 'Status', 'Joined', ''].map(h => (
-                  <th key={h} style={{ padding: '12px 16px', textAlign: 'left', color: 'rgba(255,255,255,0.4)', fontWeight: 500, fontSize: 11, textTransform: 'uppercase' }}>{h}</th>
-                ))}
-              </tr></thead>
-              <tbody>
-                {staff.map(s => (
-                  <tr key={s.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                    <td style={{ padding: '12px 16px', fontWeight: 600 }}>{s.full_name}</td>
-                    <td style={{ padding: '12px 16px', color: 'rgba(255,255,255,0.5)' }}>{s.email}</td>
-                    <td style={{ padding: '12px 16px' }}>
-                      <select value={s.role} onChange={e => changeRole(s.id, e.target.value)} style={{ padding: '4px 8px', borderRadius: 6, background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', color: gold, fontSize: 12, cursor: 'pointer', fontFamily: 'Outfit, sans-serif', outline: 'none' }}>
-                        {ROLES.map(r => <option key={r} value={r} style={{ background: '#0d0a1a' }}>{r}</option>)}
-                      </select>
-                    </td>
-                    <td style={{ padding: '12px 16px' }}><StatusPill status={s.status} /></td>
-                    <td style={{ padding: '12px 16px', color: 'rgba(255,255,255,0.4)' }}>{fmtDate(s.created_at)}</td>
-                    <td style={{ padding: '12px 16px' }}>
-                      {s.status !== 'suspended' && (
-                        <button onClick={() => deactivate(s.id)} style={{ padding: '5px 10px', borderRadius: 6, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: red, fontSize: 11, cursor: 'pointer', fontFamily: 'Outfit, sans-serif' }}>Deactivate</button>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {showInvite && (
-          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setShowInvite(false)}>
-            <div style={{ background: '#0d0a1a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 14, padding: 28, width: 420, maxWidth: '95vw' }} onClick={e => e.stopPropagation()}>
-              <h3 style={{ color: gold, fontFamily: 'Outfit, sans-serif', marginBottom: 20 }}>Invite Staff Member</h3>
-              {[{ label: 'Email *', key: 'email', type: 'email' }, { label: 'Full Name', key: 'full_name', type: 'text' }].map(f => (
-                <div key={f.key} style={{ marginBottom: 14 }}>
-                  <label style={{ display: 'block', fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 5, textTransform: 'uppercase' }}>{f.label}</label>
-                  <input type={f.type} value={form[f.key]} onChange={e => setForm(p => ({ ...p, [f.key]: e.target.value }))}
-                    style={{ width: '100%', padding: '10px 12px', borderRadius: 8, boxSizing: 'border-box', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)', color: '#fff', fontSize: 13, fontFamily: 'Outfit, sans-serif', outline: 'none' }} />
-                </div>
-              ))}
-              <div style={{ marginBottom: 18 }}>
-                <label style={{ display: 'block', fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 5, textTransform: 'uppercase' }}>Role *</label>
-                <select value={form.role} onChange={e => setForm(p => ({ ...p, role: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)', color: '#fff', fontSize: 13, fontFamily: 'Outfit, sans-serif', outline: 'none' }}>
-                  {ROLES.filter(r => r !== 'super_admin').map(r => <option key={r} value={r} style={{ background: '#0d0a1a' }}>{r}</option>)}
-                </select>
-              </div>
-              {msg && <p style={{ color: red, fontSize: 12, marginBottom: 12 }}>{msg}</p>}
-              <div style={{ display: 'flex', gap: 8 }}>
-                <button onClick={invite} disabled={saving} style={{ flex: 1, padding: '10px', borderRadius: 8, background: `linear-gradient(135deg, #b45309, ${gold})`, border: 'none', color: '#000', fontWeight: 700, cursor: 'pointer', fontFamily: 'Outfit, sans-serif', fontSize: 13 }}>{saving ? 'Inviting…' : 'Send Invite'}</button>
-                <button onClick={() => setShowInvite(false)} style={{ padding: '10px 16px', borderRadius: 8, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', fontFamily: 'Outfit, sans-serif', fontSize: 13 }}>Cancel</button>
-              </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {[{ key: 'full_name', label: 'Full Name', placeholder: 'Staff member name', type: 'text' }, { key: 'email', label: 'Email', placeholder: 'staff@casinoze.com', type: 'email' }].map(f => (
+            <div key={f.key}>
+              <label style={{ display: 'block', fontSize: 11, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,.45)', marginBottom: 6 }}>{f.label}</label>
+              <input type={f.type} placeholder={f.placeholder} value={form[f.key]} onChange={e => setForm(p => ({ ...p, [f.key]: e.target.value }))} disabled={!isNew && f.key === 'email'}
+                style={{ width: '100%', padding: '11px 14px', background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.12)', borderRadius: 10, color: '#fff', fontSize: 13, fontFamily: "'Outfit',sans-serif", outline: 'none', boxSizing: 'border-box', opacity: !isNew && f.key === 'email' ? 0.5 : 1 }} />
             </div>
+          ))}
+          <div>
+            <label style={{ display: 'block', fontSize: 11, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,.45)', marginBottom: 6 }}>Role</label>
+            <select value={form.role} onChange={e => setForm(p => ({ ...p, role: e.target.value }))}
+              style={{ width: '100%', padding: '11px 14px', background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.12)', borderRadius: 10, color: '#fff', fontSize: 13, fontFamily: "'Outfit',sans-serif", outline: 'none' }}>
+              {ROLES.map(r => <option key={r} value={r} style={{ background: '#0e1a2e' }}>{r.replace(/_/g, ' ')}</option>)}
+            </select>
           </div>
-        )}
+        </div>
+        {error && <div style={{ marginTop: 14, padding: '10px 14px', background: 'rgba(239,68,68,.1)', border: '1px solid rgba(239,68,68,.3)', borderRadius: 10, color: '#f87171', fontSize: 13 }}>⚠ {error}</div>}
+        <div style={{ display: 'flex', gap: 10, marginTop: 24 }}>
+          <button onClick={submit} disabled={saving} style={{ flex: 1, padding: '11px', background: 'linear-gradient(135deg,#fbbf24,#f59e0b)', border: 'none', borderRadius: 10, color: '#050505', fontSize: 13, fontWeight: 800, cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>{saving ? 'Saving…' : isNew ? 'Send Invite' : 'Save Changes'}</button>
+          <button onClick={onClose} style={{ padding: '11px 16px', background: 'rgba(255,255,255,.05)', border: '1px solid rgba(255,255,255,.1)', borderRadius: 10, color: 'rgba(255,255,255,.4)', fontSize: 13, cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>Cancel</button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default function AdminStaff() {
+  const [rows, setRows] = useState([])
+  const [filter, setFilter] = useState('all')
+  const [search, setSearch] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [selected, setSelected] = useState(undefined)
+  const [toast, setToast] = useState(null)
+
+  useEffect(() => { load() }, [filter])
+
+  function showToast(msg, type = 'success') { setToast({ msg, type }); setTimeout(() => setToast(null), 4000) }
+
+  async function load() {
+    setLoading(true)
+    let q = supabase.from('staff_members').select('*').order('created_at', { ascending: false })
+    if (filter !== 'all') q = q.eq('role', filter)
+    const { data } = await q
+    setRows(data || [])
+    setLoading(false)
+  }
+
+  async function handleSave(id, form) {
+    const { data: { session } } = await supabase.auth.getSession()
+    const res = await fetch('/api/admin/staff/' + (id ? 'update' : 'invite'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+      body: JSON.stringify(id ? { staff_id: id, ...form } : form),
+    })
+    const d = await res.json()
+    if (!res.ok) return { error: d.error }
+    showToast(id ? 'Staff updated' : 'Invite sent')
+    load()
+    return {}
+  }
+
+  const filtered = rows.filter(r => {
+    if (!search) return true
+    const s = search.toLowerCase()
+    return r.full_name?.toLowerCase().includes(s) || r.email?.toLowerCase().includes(s) || r.role?.toLowerCase().includes(s)
+  })
+
+  return (
+    <AdminLayout>
+      <Head><title>Staff — Admin</title></Head>
+      {toast && <div style={{ position: 'fixed', top: 16, left: '50%', transform: 'translateX(-50%)', zIndex: 9999, background: toast.type === 'error' ? 'rgba(239,68,68,.95)' : 'rgba(34,197,94,.95)', borderRadius: 12, padding: '12px 24px', color: '#fff', fontSize: 14, fontWeight: 600, fontFamily: "'Outfit',sans-serif", whiteSpace: 'nowrap', boxShadow: '0 8px 32px rgba(0,0,0,.5)' }}>{toast.msg}</div>}
+      {selected !== undefined && <StaffModal member={selected || null} onClose={() => setSelected(undefined)} onSave={handleSave} />}
+
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
+        <div>
+          <h1 style={{ fontFamily: "'Cinzel',serif", fontSize: 22, fontWeight: 700, color: '#fff', marginBottom: 4 }}>Staff</h1>
+          <p style={{ color: 'rgba(255,255,255,.35)', fontSize: 13 }}>Manage admin team members and roles</p>
+        </div>
+        <button onClick={() => setSelected(null)} style={{ padding: '10px 20px', background: 'linear-gradient(135deg,#fbbf24,#f59e0b)', border: 'none', borderRadius: 10, color: '#050505', fontSize: 13, fontWeight: 800, cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>+ Invite Staff</button>
+      </div>
+
+      <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: 4, background: 'rgba(255,255,255,.04)', padding: 4, borderRadius: 10, flexWrap: 'wrap' }}>
+          {['all', ...ROLES].map(s => (
+            <button key={s} onClick={() => setFilter(s)} style={{ padding: '7px 12px', borderRadius: 8, border: 'none', cursor: 'pointer', fontFamily: "'Outfit',sans-serif", fontSize: 11, fontWeight: 700, background: filter === s ? 'rgba(251,191,36,.7)' : 'transparent', color: filter === s ? '#fff' : 'rgba(255,255,255,.4)', textTransform: 'capitalize', transition: 'all .15s' }}>{s.replace(/_/g, ' ')}</button>
+          ))}
+        </div>
+        <input type="text" placeholder="Search name, email, role…" value={search} onChange={e => setSearch(e.target.value)}
+          style={{ padding: '9px 14px', background: 'rgba(255,255,255,.05)', border: '1px solid rgba(255,255,255,.1)', borderRadius: 10, color: '#fff', fontSize: 13, fontFamily: "'Outfit',sans-serif", outline: 'none', minWidth: 220 }} />
+      </div>
+
+      <div style={{ background: 'rgba(255,255,255,.02)', border: '1px solid rgba(255,255,255,.07)', borderRadius: 16, overflow: 'hidden' }}>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr style={{ background: 'rgba(255,255,255,.04)' }}>
+                {['Name', 'Email', 'Role', 'Status', 'Joined', 'Actions'].map(h => (
+                  <th key={h} style={{ padding: '11px 14px', textAlign: 'left', fontSize: 10, fontWeight: 800, letterSpacing: '.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,.35)', whiteSpace: 'nowrap' }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? <tr><td colSpan={6} style={{ padding: 40, textAlign: 'center', color: 'rgba(255,255,255,.3)' }}>Loading…</td></tr>
+              : filtered.length === 0 ? <tr><td colSpan={6} style={{ padding: 40, textAlign: 'center', color: 'rgba(255,255,255,.3)' }}>No staff found</td></tr>
+              : filtered.map(r => (
+                <tr key={r.id} style={{ borderTop: '1px solid rgba(255,255,255,.04)' }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,.02)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                  <td style={{ padding: '12px 14px', fontSize: 13, fontWeight: 700, color: '#fff' }}>{r.full_name}</td>
+                  <td style={{ padding: '12px 14px', fontSize: 12, color: 'rgba(255,255,255,.5)' }}>{r.email}</td>
+                  <td style={{ padding: '12px 14px' }}>
+                    <span style={{ fontSize: 10, fontWeight: 800, padding: '3px 9px', borderRadius: 99, background: 'rgba(168,85,247,.15)', color: '#a855f7', textTransform: 'uppercase', letterSpacing: '.04em' }}>{r.role?.replace(/_/g, ' ')}</span>
+                  </td>
+                  <td style={{ padding: '12px 14px' }}><StatusBadge status={r.status || 'active'} size="xs" /></td>
+                  <td style={{ padding: '12px 14px', fontSize: 11, color: 'rgba(255,255,255,.35)', whiteSpace: 'nowrap' }}>{fmtDate(r.created_at)}</td>
+                  <td style={{ padding: '12px 14px' }}>
+                    <button onClick={() => setSelected(r)} style={{ padding: '6px 12px', background: 'rgba(251,191,36,.15)', border: '1px solid rgba(251,191,36,.3)', borderRadius: 8, color: '#fbbf24', fontSize: 11, fontWeight: 800, cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>Edit</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </AdminLayout>
   )
