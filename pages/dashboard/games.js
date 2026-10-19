@@ -47,7 +47,7 @@ function GameCard({ game, myAccount, onRequest, requesting }) {
         </div>
 
         {/* Name + description */}
-        <div style={{ fontSize: 16, fontWeight: 800, color: '#fff', marginBottom: 6, fontFamily: "'Cinzel', serif" }}>{game.name}</div>
+        <div style={{ fontSize: 16, fontWeight: 800, color: '#fff', marginBottom: 6, fontFamily: "'Fraunces', serif" }}>{game.name}</div>
         {game.description && <div style={{ fontSize: 12, color: 'rgba(255,255,255,.4)', lineHeight: 1.6, marginBottom: 14 }}>{game.description}</div>}
 
         {/* Rules */}
@@ -182,7 +182,7 @@ export default function GamesPage() {
 
       {/* Header */}
       <div style={{ marginBottom: 28 }}>
-        <h1 style={{ fontFamily: "'Cinzel', serif", fontSize: 'clamp(20px,3vw,28px)', fontWeight: 700, color: '#fff', marginBottom: 4 }}>Game Rooms</h1>
+        <h1 style={{ fontFamily: "'Fraunces', serif", fontSize: 'clamp(20px,3vw,28px)', fontWeight: 700, color: '#fff', marginBottom: 4 }}>Game Rooms</h1>
         <p style={{ color: 'rgba(255,255,255,.4)', fontSize: 14 }}>Request an account in any game room. Our team will set it up for you.</p>
       </div>
 
