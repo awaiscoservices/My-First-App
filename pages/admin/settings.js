@@ -18,8 +18,14 @@ export default function AdminSettings() {
 
   async function load() {
     setLoading(true)
-    const { data } = await supabase.from('platform_settings').select('*').single()
-    if (data) setSettings(data)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const res = await fetch('/api/admin/settings/get', {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      })
+      const d = await res.json()
+      if (d.settings || d.id) setSettings(d.settings || d)
+    } catch (e) { console.error('Failed to load settings', e) }
     setLoading(false)
   }
 

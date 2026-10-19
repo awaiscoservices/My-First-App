@@ -94,14 +94,20 @@ export default function AdminLevels() {
 
   async function load() {
     setLoading(true)
-    const { data } = await supabase.from('vip_levels').select('*').order('rank')
-    setRows(data || [])
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const res = await fetch('/api/admin/levels/list', {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      })
+      const d = await res.json()
+      setRows(d.rows || d.levels || [])
+    } catch (e) { console.error('Failed to load levels', e); setRows([]) }
     setLoading(false)
   }
 
   async function handleSave(id, form) {
     const { data: { session } } = await supabase.auth.getSession()
-    const res = await fetch('/api/admin/levels/' + (id ? 'update' : 'create'), {
+    const res = await fetch('/api/admin/levels/upsert', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
       body: JSON.stringify(id ? { level_id: id, ...form } : form),

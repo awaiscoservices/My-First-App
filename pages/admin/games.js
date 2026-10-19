@@ -77,17 +77,21 @@ export default function AdminGames() {
 
   async function load() {
     setLoading(true)
-    let q = supabase.from('game_panels').select('*').order('name')
-    if (filter === 'active') q = q.eq('is_active', true)
-    if (filter === 'inactive') q = q.eq('is_active', false)
-    const { data } = await q
-    setRows(data || [])
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const params = new URLSearchParams({ is_active: filter === 'active' ? 'true' : filter === 'inactive' ? 'false' : '' })
+      const res = await fetch(`/api/admin/games/list?${params}`, {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      })
+      const d = await res.json()
+      setRows(d.rows || d.games || [])
+    } catch (e) { console.error('Failed to load games', e); setRows([]) }
     setLoading(false)
   }
 
   async function handleSave(id, form) {
     const { data: { session } } = await supabase.auth.getSession()
-    const res = await fetch('/api/admin/games/' + (id ? 'update' : 'create'), {
+    const res = await fetch('/api/admin/games/upsert', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
       body: JSON.stringify(id ? { game_id: id, ...form } : form),

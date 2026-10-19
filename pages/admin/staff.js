@@ -73,16 +73,21 @@ export default function AdminStaff() {
 
   async function load() {
     setLoading(true)
-    let q = supabase.from('staff_members').select('*').order('created_at', { ascending: false })
-    if (filter !== 'all') q = q.eq('role', filter)
-    const { data } = await q
-    setRows(data || [])
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const params = new URLSearchParams({ role: filter !== 'all' ? filter : '', limit: '100' })
+      const res = await fetch(`/api/admin/staff/list?${params}`, {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      })
+      const d = await res.json()
+      setRows(d.rows || d.staff || [])
+    } catch (e) { console.error('Failed to load staff', e); setRows([]) }
     setLoading(false)
   }
 
   async function handleSave(id, form) {
     const { data: { session } } = await supabase.auth.getSession()
-    const res = await fetch('/api/admin/staff/' + (id ? 'update' : 'invite'), {
+    const res = await fetch('/api/admin/staff/save', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
       body: JSON.stringify(id ? { staff_id: id, ...form } : form),

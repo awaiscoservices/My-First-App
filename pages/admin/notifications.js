@@ -84,12 +84,15 @@ export default function AdminNotifications() {
 
   async function load() {
     setLoading(true)
-    let q = supabase.from('notifications')
-      .select('*, sender:profiles!notifications_sender_id_fkey(full_name), recipient:profiles!notifications_user_id_fkey(full_name,email)')
-      .order('created_at', { ascending: false }).limit(200)
-    if (filter !== 'all') q = q.eq('type', filter)
-    const { data } = await q
-    setRows(data || [])
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const params = new URLSearchParams({ type: filter !== 'all' ? filter : '', limit: '200' })
+      const res = await fetch(`/api/admin/notifications/list?${params}`, {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      })
+      const d = await res.json()
+      setRows(d.rows || d.notifications || [])
+    } catch (e) { console.error('Failed to load notifications', e); setRows([]) }
     setLoading(false)
   }
 

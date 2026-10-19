@@ -21,12 +21,15 @@ export default function AdminAdjustments() {
 
   async function load() {
     setLoading(true)
-    let q = supabase.from('wallet_adjustments')
-      .select('*, profiles!wallet_adjustments_user_id_fkey(full_name,email), admin:profiles!wallet_adjustments_admin_id_fkey(full_name)')
-      .order('created_at', { ascending: false }).limit(200)
-    if (filter !== 'all') q = q.eq('type', filter)
-    const { data } = await q
-    setRows(data || [])
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const params = new URLSearchParams({ type: filter !== 'all' ? filter : '', limit: '200' })
+      const res = await fetch(`/api/admin/adjustments/list?${params}`, {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      })
+      const d = await res.json()
+      setRows(d.rows || d.adjustments || [])
+    } catch (e) { console.error('Failed to load adjustments', e); setRows([]) }
     setLoading(false)
   }
 

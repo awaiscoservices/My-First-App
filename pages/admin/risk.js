@@ -66,10 +66,15 @@ export default function AdminRisk() {
 
   async function load() {
     setLoading(true)
-    let q = supabase.from('risk_flags').select('*, profiles!risk_flags_user_id_fkey(full_name,email)').order('created_at', { ascending: false }).limit(100)
-    if (filter !== 'all') q = q.eq('status', filter)
-    const { data } = await q
-    setRows(data || [])
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const params = new URLSearchParams({ limit: '100' })
+      const res = await fetch(`/api/admin/risk/list?${params}`, {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      })
+      const d = await res.json()
+      setRows(d.rows || [])
+    } catch (e) { console.error('Failed to load risk flags', e); setRows([]) }
     setLoading(false)
   }
 

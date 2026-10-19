@@ -107,11 +107,15 @@ export default function AdminPayments() {
 
   async function load() {
     setLoading(true)
-    let q = supabase.from('payment_methods').select('*').order('name')
-    if (filter === 'active') q = q.eq('is_active', true)
-    if (filter === 'inactive') q = q.eq('is_active', false)
-    const { data } = await q
-    setRows(data || [])
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const params = new URLSearchParams({ is_active: filter === 'active' ? 'true' : filter === 'inactive' ? 'false' : '' })
+      const res = await fetch(`/api/admin/payments/list?${params}`, {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      })
+      const d = await res.json()
+      setRows(d.rows || d.methods || [])
+    } catch (e) { console.error('Failed to load payment methods', e); setRows([]) }
     setLoading(false)
   }
 

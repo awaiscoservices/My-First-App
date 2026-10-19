@@ -116,17 +116,21 @@ export default function AdminPromotions() {
 
   async function load() {
     setLoading(true)
-    let q = supabase.from('promotions').select('*').order('created_at', { ascending: false })
-    if (filter === 'active') q = q.eq('is_active', true)
-    if (filter === 'inactive') q = q.eq('is_active', false)
-    const { data } = await q
-    setRows(data || [])
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const params = new URLSearchParams({ is_active: filter === 'active' ? 'true' : filter === 'inactive' ? 'false' : '' })
+      const res = await fetch(`/api/admin/promotions/list?${params}`, {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      })
+      const d = await res.json()
+      setRows(d.rows || d.promotions || [])
+    } catch (e) { console.error('Failed to load promotions', e); setRows([]) }
     setLoading(false)
   }
 
   async function handleSave(id, form) {
     const { data: { session } } = await supabase.auth.getSession()
-    const res = await fetch('/api/admin/promotions/' + (id ? 'update' : 'create'), {
+    const res = await fetch('/api/admin/promotions/upsert', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
       body: JSON.stringify(id ? { promo_id: id, ...form } : form),

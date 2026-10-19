@@ -91,8 +91,15 @@ export default function AdminWallets() {
 
   async function load() {
     setLoading(true)
-    const { data } = await supabase.from('wallets').select('*, profiles!wallets_user_id_fkey(full_name,email,status)').order('balance_cents', { ascending: false }).limit(100)
-    setRows(data || [])
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const params = new URLSearchParams({ limit: '100' })
+      const res = await fetch(`/api/admin/wallets/list?${params}`, {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      })
+      const d = await res.json()
+      setRows(d.rows || [])
+    } catch (e) { console.error('Failed to load wallets', e); setRows([]) }
     setLoading(false)
   }
 

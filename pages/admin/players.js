@@ -61,10 +61,15 @@ export default function AdminPlayers() {
 
   async function load() {
     setLoading(true)
-    let q = supabase.from('profiles').select('*').order('created_at', { ascending: false }).limit(100)
-    if (filter !== 'all') q = q.eq('status', filter)
-    const { data } = await q
-    setRows(data || [])
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const params = new URLSearchParams({ status: filter !== 'all' ? filter : '', limit: '100' })
+      const res = await fetch(`/api/admin/players/list?${params}`, {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      })
+      const d = await res.json()
+      setRows(d.rows || [])
+    } catch (e) { console.error('Failed to load players', e); setRows([]) }
     setLoading(false)
   }
 

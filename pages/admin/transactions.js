@@ -34,10 +34,15 @@ export default function AdminTransactions() {
 
   async function load() {
     setLoading(true)
-    let q = supabase.from('ledger_entries').select('*, profiles!ledger_entries_user_id_fkey(full_name,email)').order('created_at', { ascending: false }).limit(200)
-    if (filter !== 'all') q = q.eq('entry_type', filter)
-    const { data } = await q
-    setRows(data || [])
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const params = new URLSearchParams({ type: filter !== 'all' ? filter : '', limit: '100' })
+      const res = await fetch(`/api/admin/transactions/list?${params}`, {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      })
+      const d = await res.json()
+      setRows(d.rows || [])
+    } catch (e) { console.error('Failed to load transactions', e); setRows([]) }
     setLoading(false)
   }
 

@@ -23,12 +23,15 @@ export default function AdminAuditLogs() {
 
   async function load() {
     setLoading(true)
-    let q = supabase.from('audit_logs')
-      .select('*, admin:profiles!audit_logs_admin_id_fkey(full_name,email), target:profiles!audit_logs_target_user_id_fkey(full_name)')
-      .order('created_at', { ascending: false }).limit(200)
-    if (filter !== 'all') q = q.eq('action', filter)
-    const { data } = await q
-    setRows(data || [])
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const params = new URLSearchParams({ action: filter !== 'all' ? filter : '', limit: '200' })
+      const res = await fetch(`/api/admin/audit-logs/list?${params}`, {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      })
+      const d = await res.json()
+      setRows(d.rows || d.logs || [])
+    } catch (e) { console.error('Failed to load audit logs', e); setRows([]) }
     setLoading(false)
   }
 
